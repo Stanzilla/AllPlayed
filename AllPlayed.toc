@@ -1,0 +1,31 @@
+## Interface: 11200
+## Author: LaoTseu
+## X-eMail: laotseu.ace@gmail.com
+## Title: AllPlayed |cff7fff7f -Ace2-|r
+## Notes: Track time played, rested XP and money for all characters
+## Version: 1.0.alpha.$Revision$
+## X-Category: Interface Enhancements
+## X-Date: $Date$
+## DefaultState: enabled
+## OptionalDeps: FuBar
+## SavedVariables: AllPlayedDB
+
+## Embeded ACE2 libraries
+libs\AceLibrary-2.0\AceLibrary.lua
+libs\AceOO-2.0\AceOO-2.0.lua
+libs\AceEvent-2.0\AceEvent-2.0.lua
+libs\AceHook-2.0\AceHook-2.0.lua
+libs\AceDB-2.0\AceDB-2.0.lua
+libs\AceDebug-2.0\AceDebug-2.0.lua
+libs\AceConsole-2.0\AceConsole-2.0.lua
+libs\AceAddon-2.0\AceAddon-2.0.lua
+libs\AceLocale-2.0\AceLocale-2.0.lua
+
+## Other embeded libraries
+libs\Abacus-2.0\Abacus-2.0.lua
+libs\Crayon-2.0\Crayon-2.0.lua
+libs\FuBarPlugin-2.0\FuBarPlugin-2.0.lua
+libs\Metrognome-2.0\Metrognome-2.0.lua
+
+AllPlayed-enUS.lua
+AllPlayed.lua
