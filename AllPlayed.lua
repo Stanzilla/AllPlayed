@@ -273,7 +273,7 @@ function AllPlayed:OnTooltipUpdate()
     local estimated_rested_xp = 0
 
     -- Set the title for the table
-    tablet:SetTitle(C:White("All Played Breakdown"))
+    tablet:SetTitle(C:White(L["All Played Breakdown"]))
     
   
     -- We group by factions, then by realm, then by PC
@@ -748,7 +748,7 @@ end
 -- Function that Send a request to the server to get an update of the time played.
 function AllPlayed:RequestTimePlayed()
     -- We only send the event if the message has not been seen for 10 seconds
-    if self.db.account.data[self.faction][self.realm][self.pc].seconds_played_last_update - time() > 10 then
+    if time() - self.db.account.data[self.faction][self.realm][self.pc].seconds_played_last_update > 10 then
         RequestTimePlayed()
     end
     

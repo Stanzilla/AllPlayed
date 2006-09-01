@@ -8,6 +8,9 @@ L:RegisterTranslations("enUS", function()
         ["Alliance"]                                            = "Alliance",
         ["Horde"]                                               = "Horde",
         
+        -- Tablet title
+        ["All Played Breakdown"]                                = "All Played Breakdown",
+        
         -- Menus
         ["Display"]                                             = "Display",
         ["Set the display options"]                             = "Set the display options",
