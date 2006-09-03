@@ -12,15 +12,15 @@
 
 ## Embedded ACE2 libraries
 libs\AceLibrary\AceLibrary.lua
-libs\AceOO\AceOO-2.0.lua
+libs\AceOO-2.0\AceOO-2.0.lua
 
-libs\AceEvent\AceEvent-2.0.lua
-libs\AceHook\AceHook-2.0.lua
-libs\AceDB\AceDB-2.0.lua
-libs\AceDebug\AceDebug-2.0.lua
-libs\AceLocale\AceLocale-2.0.lua
-libs\AceConsole\AceConsole-2.0.lua
-libs\AceAddon\AceAddon-2.0.lua
+libs\AceEvent-2.0\AceEvent-2.0.lua
+libs\AceHook-2.0\AceHook-2.0.lua
+libs\AceDB-2.0\AceDB-2.0.lua
+libs\AceDebug-2.0\AceDebug-2.0.lua
+libs\AceLocale-2.0\AceLocale-2.0.lua
+libs\AceConsole-2.0\AceConsole-2.0.lua
+libs\AceAddon-2.0\AceAddon-2.0.lua
 
 ## Other embeded libraries
 libs\Abacus-2.0\Abacus-2.0.lua
