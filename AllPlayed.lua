@@ -30,10 +30,10 @@ local tabletParent = "AllPlayedTabletParent"
 AllPlayed = {}
 if IsAddOnLoaded("Fubar") then
     AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.0","FuBarPlugin-2.0")
-    AllPlayed.is_fubar_loaded = TRUE
+    AllPlayed.is_fubar_loaded = true
 else
     AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.0")
-    AllPlayed.is_fubar_loaded = FALSE
+    AllPlayed.is_fubar_loaded = false
 end
 
 -- The data will be saved in WFT\{account name}\SaveVariables\AllPlayedDB.lua
@@ -54,8 +54,8 @@ AllPlayed:RegisterDefaults('account', {
                     rested_xp                   = 0, 
                     max_rested_xp               = 0, 
                     last_update                 = 0, 
-                    is_resting                  = FALSE, 
-                    is_ignored                  = FALSE,
+                    is_resting                  = false, 
+                    is_ignored                  = false,
                     seconds_played              = 0,  
                     seconds_played_last_update  = 0,
                 }
@@ -68,9 +68,9 @@ AllPlayed:RegisterDefaults('account', {
 AllPlayed:RegisterDefaults('profile', {
     -- Global Options
     options = {
-        all_factions    = TRUE,
-        all_realms      = TRUE,
-        show_seconds    = TRUE,
+        all_factions    = true,
+        all_realms      = true,
+        show_seconds    = true,
         percent_rest    = "100",
         refresh_rate    = 1,
     },
@@ -126,15 +126,27 @@ local command_options = {
             set     = "SetIsIgnored",
             order   = 4
         },
-        report = {
-            name    = L["Report"],
-            desc    = L["Print report"],
-            type    = 'execute',
-            func    = "PrintReport",
-            order   = 5
-        },
     }
 }
+
+-- If FuBar is not loaded, we need to add report and close options to the DewDrop menu
+if not AllPlayed.is_fubar_loaded then
+    command_options.args.report = {
+        name    = L["Report"],
+        desc    = L["Print report"],
+        type    = 'execute',
+        func    = "PrintReport",
+        order   = 5
+    }
+
+    command_options.args.close = {
+        name    = L["Close"],
+        desc    = L["Close the tooltip"],
+        type    = 'execute',
+        func    = "CloseReport",
+        order   = 6,
+    }
+end
 
 -- Register the chat commands
 -- :RegisterChatCommand takes the slash commands and an AceOptions data table
@@ -156,7 +168,7 @@ function AllPlayed:OnInitialize()
     self.total_realm        = { }
     self.total              = { time_played = 0, coin = 0 }
     
-    self.sort_table_done    = FALSE
+    self.sort_tables_done    = false
 
     -- If FuBar is not there, initialize the tablet
     --[[
@@ -227,7 +239,7 @@ function AllPlayed:OnEnable()
             -- Other PC sorts would go here
         end
         
-        self.sort_tables_done = TRUE
+        self.sort_tables_done = true
     end
 
     -- Request the time played so we can populate seconds_played
@@ -286,113 +298,6 @@ function AllPlayed:OnTooltipUpdate()
     self:Debug("=>self.total.time_played: ", self.total.time_played)
     
     self:FillTablet()
-    --[[
-    
-    local estimated_rested_xp = 0
-
-    -- Set the title for the table
-    tablet:SetTitle(C:White(L["All Played Breakdown"]))
-    
-  
-    -- We group by factions, then by realm, then by PC
-    for _, faction in ipairs (self.sort_faction) do
-        -- We do not print the faction if no option to select it is on
-        -- and if the time played for the faction = 0 since this means
-        -- all PC in the faction are ingored.
-        if ((self.db.profile.options.all_factions or self.faction == faction)
-            and self.total.time_played ~= 0
-        ) then
-            for _, realm in ipairs (self.sort_faction_realm[faction]) do
-                -- We do not print the repl if no option to select it is on
-                -- and if the time played for the relm = 0 since this means
-                -- all PC in the relm are ingored.
-                if ((self.db.profile.options.all_realms or self.realm == realm)
-                    and self.total_realm[realm].time_played ~= 0
-                ) then
-                    --self:Debug("self.total_realm[realm].time_played: ",self.total_realm[realm].time_played)
-                    local cat = tablet:AddCategory(
-                        'columns', 2,
-                        'child_indentation', 10
-                    )
-                    cat:AddLine(
-                       'columns', 1,
-                       'indentation', 0,
-                       'text', string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s: ") .. "%s" .. C:Green("]"),
-                                              realm,
-                                              self:FormatTime(self.total_realm[realm].time_played),
-                                              FormatMoney(self.total_realm[realm].coin)
-                               )
-                    )
-                
-                    for _, pc in ipairs(self.sort_realm_pc[realm]) do
-                        if (not self.db.account.data[faction][realm][pc].is_ignored) then
-                            -- Seconds played are still going up for the current PC
-                            local seconds_played = self:EstimateTimePlayed(
-                                                        pc, 
-                                                        realm, 
-                                                        self.db.account.data[faction][realm][pc].seconds_played,
-                                                        self.db.account.data[faction][realm][pc].seconds_played_last_update
-                                                   )
-                            if (self.db.account.data[faction][realm][pc].level == 60) then
-                                cat:AddLine(
-                                    'text', string.format( FactionColour( faction, "%s (%d): %s" ),
-                                                           pc,
-                                                           self.db.account.data[faction][realm][pc].level,
-                                                           self:FormatTime(seconds_played)
-                                            ),
-                                    'text2', FormatMoney(self.db.account.data[faction][realm][pc].coin)
-                                )
-                            else
-                                estimated_rested_xp = self:EstimateRestedXP( 
-                                                            pc, 
-                                                            realm, 
-                                                            self.db.account.data[faction][realm][pc].level, 
-                                                            self.db.account.data[faction][realm][pc].rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].max_rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].last_update, 
-                                                            self.db.account.data[faction][realm][pc].is_resting 
-                                                      )
-                                cat:AddLine(
-                                    'text', string.format( FactionColour( faction, "%s (%d): %s" ),
-                                                           pc,
-                                                           self.db.account.data[faction][realm][pc].level,
-                                                           self:FormatTime(seconds_played)
-                                            ),
-                                    'text2', string.format( FormatMoney(self.db.account.data[faction][realm][pc].coin)
-                                                            .. FactionColour( faction, L[": %d rested XP "] )
-                                                            .. PercentColour( (estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp), 
-                                                                              L["(%d%% rested)"] 
-                                                               ),
-                                                            estimated_rested_xp,
-                                                            -- The % rested XP is displayed on a 150% base since
-                                                            -- this is the maximum rested XP possible for a PC in
-                                                            -- respect of his level
-                                                            (self.db.profile.options.percent_rest * 
-                                                             estimated_rested_xp / 
-                                                             self.db.account.data[faction][realm][pc].max_rested_xp)
-                                             )
-                                )
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    -- Print the totals
-    local cat = tablet:AddCategory(
-        'columns', 2
-    )
-    cat:AddLine(
-        'text',  C:Orange( L["Total Time Played: "] ),
-        'text2', C:Yellow( self:FormatTime(self.total.time_played) )
-    )
-    cat:AddLine(
-        'text',  C:Orange( L["Total Cash Value: "] ),
-        'text2', FormatMoney(self.total.coin)
-    )
-    ]]--
     
     --tablet:SetHint("Click to do something")
     -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
@@ -475,110 +380,34 @@ function AllPlayed:PrintReport()
     -- Create table data if it doesn't exists
     self.db.profile.tabletData = self.db.profile.tabletData or {}
     
-    tablet:Register(tabletParent, 
-        'menu', function()
-            dewdrop:FeedAceOptionsTable(command_options)
-        end,
-        'cantAttach', true,
-        'detachedData', self.db.profile.tabletData,
-        'children', function() AllPlayed:FillTablet() end
-    )
+    -- Set and start the timer
+    metro:RegisterMetro(self.name, self.TimerUpdate, self.db.profile.options.refresh_rate, self)
+    metro:StartMetro(self.name)
+
+    -- Update the data
+    self:TimerUpdate()
     
     --tablet:Detach(Minimap)
     tablet:Open(tabletParent)
     tablet:Refresh(tabletParent)
+    
 end
 
--- Print the report in the main chat windows
---[[
-function AllPlayed:PrintReport()
-    self:Debug("PrintReport()")
-    
-    local estimated_rested_xp = 0
-    
-    -- We group by factions, then by realm, then by PC
-    for _, faction in ipairs(self.sort_faction) do
-        -- We do not print the faction if no option to select it is on
-        -- and if the time played for the faction = 0 since this means
-        -- all PC in the faction are ingored.
-        if ((self.db.profile.options.all_factions or self.faction == faction)
-            and self.total.time_played ~= 0
-        ) then
-            for _, realm in ipairs(self.sort_faction_realm[faction]) do
-                -- We do not print the repl if no option to select it is on
-                -- and if the time played for the relm = 0 since this means
-                -- all PC in the relm are ingored.
-                if ((self.db.profile.options.all_realms or self.realm == realm)
-                    and self.total_realm[realm].time_played ~= 0
-                ) then
-                    self:Print(C:Yellow(L["%s characters "]) .. C:Green("[%s: ") .. "%s" .. C:Green("]"),
-                               realm,
-                               self:FormatTime(self.total_realm[realm].time_played),
-                               FormatMoney(self.total_realm[realm].coin)
-                    )
-                    for _, pc in ipairs(self.sort_realm_pc[realm]) do
-                        -- Seconds played for the current player are going up
-                        local seconds_played = self:EstimateTimePlayed(
-                                                    pc, 
-                                                    realm, 
-                                                    self.db.account.data[faction][realm][pc].seconds_played,
-                                                    self.db.account.data[faction][realm][pc].seconds_played_last_update
-                                               )
-                        if (not self.db.account.data[faction][realm][pc].is_ignored) then
-                            if (self.db.account.data[faction][realm][pc].level == 60) then
-                                self:Print(FactionColour( faction, "  %s (%d): %s     " ) .. "%s",
-                                           pc,
-                                           self.db.account.data[faction][realm][pc].level,
-                                           self:FormatTime(seconds_played),
-                                           FormatMoney(self.db.account.data[faction][realm][pc].coin)
-                                )
-                            else
-                                estimated_rested_xp = self:EstimateRestedXP( 
-                                                            pc, 
-                                                            realm,
-                                                            self.db.account.data[faction][realm][pc].level, 
-                                                            self.db.account.data[faction][realm][pc].rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].max_rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].last_update, 
-                                                            self.db.account.data[faction][realm][pc].is_resting 
-                                                      )
-                                self:Print(FactionColour( faction, "  %s (%d): %s     " ) .. "%s" 
-                                             .. FactionColour( faction, L[": %d rested XP "] ) 
-                                             .. PercentColour( (estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp) , L["(%d%% rested)"] ),
-                                           pc,
-                                           self.db.account.data[faction][realm][pc].level,
-                                           self:FormatTime(seconds_played),
-                                           FormatMoney(self.db.account.data[faction][realm][pc].coin),
-                                           estimated_rested_xp,
-                                           -- The % rested XP is displayed on a 150% base since
-                                           -- this is the maximum rested XP possible for a PC
-                                           (self.db.profile.options.percent_rest * estimated_rested_xp / self.db.account.data[faction][realm][pc].max_rested_xp)
-                                )
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    
-    self:Print(" ") -- Skip a line
-    self:Print(C:Orange( L["Total Time Played: "] ) .. C:Yellow( "%s" ),
-               self:FormatTime(self.total.time_played)
-    )
-    self:Print(C:Orange( L["Total Cash Value: "] ) .. "%s",
-               FormatMoney(self.total.coin)
-    )
+-- Close the tooltip
+function AllPlayed:CloseReport()
+    self:Print("Trying to close...")
+    metro:UnregisterMetro(self.name)
+    tablet:Close(tableParent)
 end
-]]--
 
+-- Fill the tablet with the All Played information
 function AllPlayed:FillTablet()
     self:Debug("AllPlayed:FillTablet()")
     self:Debug("=>self.total.time_played: ", self.total.time_played)
     
     local estimated_rested_xp = 0
 
-    -- Set the title for the table
+    -- Set the title for the table (just when using FuBar
     tablet:SetTitle(C:White(L["All Played Breakdown"]))
     
   
@@ -709,6 +538,28 @@ function AllPlayed:EventHandler()
     self:ComputeTotal()
 end
 
+-- Function called from Metrognome when FuBar is not loaded
+function AllPlayed:TimerUpdate()
+    self:ComputeTotal()
+    --self:FillTablet()
+
+    -- We have to register the tabler for every update!!!!
+    tablet:Register(tabletParent, 
+        'menu', function()
+             dewdrop:FeedAceOptionsTable(command_options)
+        end,
+        'cantAttach', true,
+        'detachedData', self.db.profile.tabletData,
+        'children', function() 
+            AllPlayed:FillTablet() 
+        end,
+        'showTitleWhenDetached', true
+    )
+
+    tablet:Refresh(tabletParent)
+
+end
+
 --[[ ================================================================= ]]--
 --[[                  Store and retreive methods                       ]]--
 --[[ ================================================================= ]]--
@@ -826,9 +677,13 @@ function AllPlayed:SetShowSeconds( value )
     self:Debug("=> refresh rate:", self.db.profile.options.refresh_rate) 
     
     -- If there is a timer active, we change the rate
-    if self.is_fubar_loaded and metro:MetroStatus(self.name) then
+    if metro:MetroStatus(self.name) then
         metro:ChangeMetroRate( self.name, self.db.profile.options.refresh_rate )
-        self:Update()
+        if self.is_fubar_loaded then
+            self:Update()
+        else
+            self:TimerUpdate()
+        end
     end
 end
 
@@ -911,11 +766,11 @@ function AllPlayed:RequestTimePlayed()
 end
 
 function AllPlayed:FormatTime(seconds)
-    return A:FormatDurationFull( seconds, FALSE, not self.db.profile.options.show_seconds )
+    return A:FormatDurationFull( seconds, false, not self.db.profile.options.show_seconds )
 end
 
 function FormatMoney(coin)
-    return A:FormatMoneyFull( coin, TRUE, FALSE )
+    return A:FormatMoneyFull( coin, true, false )
 end
 
 
