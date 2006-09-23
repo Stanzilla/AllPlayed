@@ -26,10 +26,9 @@ L:RegisterTranslations("enUS", function()
         ["Ignore the current PC"]                               = "Ignore the current PC",
         ["Report"]                                              = "Report",
         ["Print report"]                                        = "Print report",
+        ["Close"]                                               = "Close",
+        ["Close the tooltip"]                                   = "Close the tooltip",
         
-        ["Save"]                                                = "Save",
-        ["Save all the values"]                                 = "Save all the values",
-        ["Variables were saved"]                                = "Variables were saved",
         ["v%s - %s (Type /ap for help)"]                        = "v%s - %s (Type /ap for help)",
         ["%s characters "]                                      = "%s characters ",
         [": %d rested XP "]                                     = ": %d rested XP ",
