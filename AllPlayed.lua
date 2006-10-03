@@ -418,8 +418,9 @@ function AllPlayed:FillTablet()
         -- all PC in the faction are ingored.
         if ((self.db.profile.options.all_factions or self.faction == faction)
             and self.total.time_played ~= 0
+            and self.sort_faction_realm[faction]
         ) then
-            for _, realm in ipairs (self.sort_faction_realm[faction]) do
+            for _, realm in ipairs(self.sort_faction_realm[faction]) do
                 -- We do not print the repl if no option to select it is on
                 -- and if the time played for the relm = 0 since this means
                 -- all PC in the relm are ingored.
