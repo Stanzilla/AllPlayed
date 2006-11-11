@@ -129,26 +129,6 @@ local command_options = {
     }
 }
 
--- If FuBar is not loaded, we need to add report and close options to the DewDrop menu
---[[
-if not AllPlayed.is_fubar_loaded then
-    command_options.args.report = {
-        name    = L["Report"],
-        desc    = L["Print report"],
-        type    = 'execute',
-        func    = "PrintReport",
-        order   = 5
-    }
-
-    command_options.args.close = {
-        name    = L["Close"],
-        desc    = L["Close the tooltip"],
-        type    = 'execute',
-        func    = "CloseReport",
-        order   = 6,
-    }
-end
-]]--
 
 -- Register the chat commands
 -- :RegisterChatCommand takes the slash commands and an AceOptions data table
@@ -317,9 +297,10 @@ function AllPlayed:ComputeTotal()
         for realm, realm_table in pairs(faction_table) do
             self:Debug("faction: %s realm: %s", faction, realm)
             
-            if not self.total_realm[realm] then self.total_realm[realm] = {} end
-            self.total_realm[realm].time_played = 0
-            self.total_realm[realm].coin = 0
+            if not self.total_realm[faction] then self.total_realm[faction] = {} end
+            if not self.total_realm[faction][realm] then self.total_realm[faction][realm] = {} end
+            self.total_realm[faction][realm].time_played = 0
+            self.total_realm[faction][realm].coin = 0
             for pc, pc_table in pairs(realm_table) do
                 if not pc_table.is_ignored then
                     -- Need to get the current seconds_played for the PC
@@ -328,10 +309,10 @@ function AllPlayed:ComputeTotal()
                                                                    pc_table.seconds_played,
                                                                    pc_table.seconds_played_last_update
                                            )
-                    self.total_faction[faction].time_played = self.total_faction[faction].time_played   + seconds_played
-                    self.total_faction[faction].coin        = self.total_faction[faction].coin          + pc_table.coin
-                    self.total_realm[realm].time_played     = self.total_realm[realm].time_played       + seconds_played
-                    self.total_realm[realm].coin            = self.total_realm[realm].coin              + pc_table.coin
+                    self.total_faction[faction].time_played         = self.total_faction[faction].time_played       + seconds_played
+                    self.total_faction[faction].coin                = self.total_faction[faction].coin              + pc_table.coin
+                    self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  + seconds_played
+                    self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         + pc_table.coin
                 end
             end
         end
@@ -354,39 +335,10 @@ function AllPlayed:ComputeTotal()
         end
     else
         -- Only the current realm count (all_factions is ignore)
-        self.total.time_played = self.total_realm[self.realm].time_played
-        self.total.coin        = self.total_realm[self.realm].coin
+        self.total.time_played = self.total_realm[self.faction][self.realm].time_played
+        self.total.coin        = self.total_realm[self.faction][self.realm].coin
     end
 end
-
--- Display the report in a big tooltip
---[[
-function AllPlayed:PrintReport()
-    self:Debug("PrintReport()")
-
-    -- Create table data if it doesn't exists
-    self.db.profile.tabletData = self.db.profile.tabletData or {}
-    
-    -- Set and start the timer
-    metro:RegisterMetro(self.name, self.TimerUpdate, self.db.profile.options.refresh_rate, self)
-    metro:StartMetro(self.name)
-
-    -- Update the data
-    self:TimerUpdate()
-    
-    --tablet:Detach(Minimap)
-    tablet:Open(tabletParent)
-    tablet:Refresh(tabletParent)
-    
-end
-
--- Close the tooltip
-function AllPlayed:CloseReport()
-    self:Print("Trying to close...")
-    metro:UnregisterMetro(self.name)
-    tablet:Close(tableParent)
-end
-]]--
 
 -- Fill the tablet with the All Played information
 function AllPlayed:FillTablet()
@@ -413,9 +365,9 @@ function AllPlayed:FillTablet()
                 -- and if the time played for the relm = 0 since this means
                 -- all PC in the relm are ingored.
                 if ((self.db.profile.options.all_realms or self.realm == realm)
-                    and self.total_realm[realm].time_played ~= 0
+                    and self.total_realm[faction][realm].time_played ~= 0
                 ) then
-                    --self:Debug("self.total_realm[realm].time_played: ",self.total_realm[realm].time_played)
+                    --self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
                     local cat = tablet:AddCategory(
                         'columns', 2,
                         'child_indentation', 10
@@ -425,8 +377,8 @@ function AllPlayed:FillTablet()
                        'indentation', 0,
                        'text', string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s: ") .. "%s" .. C:Green("]"),
                                               realm,
-                                              self:FormatTime(self.total_realm[realm].time_played),
-                                              FormatMoney(self.total_realm[realm].coin)
+                                              self:FormatTime(self.total_realm[faction][realm].time_played),
+                                              FormatMoney(self.total_realm[faction][realm].coin)
                                )
                     )
                 
