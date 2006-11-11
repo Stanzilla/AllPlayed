@@ -28,11 +28,11 @@ local tabletParent = "AllPlayedTabletParent"
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (used self:functions)
 -- If FuBar is present, we load the FuBarPlugin mixin
 AllPlayed = {}
+AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","FuBarPlugin-2.0")
+
 if IsAddOnLoaded("Fubar") then
-    AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.0","FuBarPlugin-2.0")
     AllPlayed.is_fubar_loaded = true
 else
-    AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.0","FuBarPlugin-2.0")
     AllPlayed.is_fubar_loaded = false
 end
 
@@ -651,14 +651,14 @@ function AllPlayed:Logout()
     self:Debug("Logout()")
 
     self:RequestTimePlayed()
-    return self.hooks.Logout.orig()
+    return self.hooks.Logout()
 end
 
 function AllPlayed:Quit()
     self:Debug("Quit()")
 
     RequestTimePlayed()
-    return self.hooks.Quit.orig()
+    return self.hooks.Quit()
 end
 
 --[[ ================================================================= ]]--
