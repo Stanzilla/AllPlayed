@@ -1,46 +1,47 @@
 -- AllPlayed-enUS.lua
-local L = AceLibrary("AceLocale-2.0"):new("AllPlayed")
+local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 
 -- This is only a place-holder for future possible localisation files
 L:RegisterTranslations("enUS", function()
     return {
-        -- Faction names
-        ["Alliance"]                                            = "Alliance",
-        ["Horde"]                                               = "Horde",
+        -- Faction names 
+        ["Alliance"]                                            = true,
+        ["Horde"]                                               = true, 
         
         -- Tablet title
-        ["All Played Breakdown"]                                = "All Played Breakdown",
+        ["All Played Breakdown"]                                = true, 
         
         -- Menus
-        ["Display"]                                             = "Display",
-        ["Set the display options"]                             = "Set the display options",
-        ["All Factions"]                                        = "All Factions",
-        ["All factions will be displayed"]                      = "All factions will be displayed",
-        ["All Realms"]                                          = "All Realms",
-        ["All realms will de displayed"]                        = "All realms will de displayed",
-        ["Show Seconds"]                                        = "Show Seconds",
-        ["Display the seconds in the time strings"]             = "Display the seconds in the time strings",
-        ["Percent Rest"]                                        = "Percent Rest",
-        ["Set the base for % display of rested XP"]             = "Set the base for % display of rested XP",
-        ["Ignore"]                                              = "Ignore",
-        ["Ignore the current PC"]                               = "Ignore the current PC",
-        ["Report"]                                              = "Report",
-        ["Print report"]                                        = "Print report",
-        ["Close"]                                               = "Close",
-        ["Close the tooltip"]                                   = "Close the tooltip",
+        ["Display"]                                             = true, 
+        ["Set the display options"]                             = true, 
+        ["All Factions"]                                        = true, 
+        ["All factions will be displayed"]                      = true, 
+        ["All Realms"]                                          = true, 
+        ["All realms will de displayed"]                        = true, 
+        ["Show Seconds"]                                        = true, 
+        ["Display the seconds in the time strings"]             = true, 
+        ["Percent Rest"]                                        = true, 
+        ["Set the base for % display of rested XP"]             = true, 
+        ["Ignore"]                                              = true, 
+        ["Ignore the current PC"]                               = true, 
+        ["Report"]                                              = true, 
+        ["Print report"]                                        = true, 
+        ["Close"]                                               = true, 
+        ["Close the tooltip"]                                   = true, 
         
-        ["v%s - %s (Type /ap for help)"]                        = "v%s - %s (Type /ap for help)",
-        ["%s characters "]                                      = "%s characters ",
-        [": %d rested XP "]                                     = ": %d rested XP ",
-        ["(%d%% rested)"]                                       = "(%d%% rested)",
-        ["Total %s Time Played: "]                              = "Total %s Time Played: ",
-        ["Total %s Cash Value: "]                               = "Total %s Cash Value: ",
-        ["Total Time Played: "]                                 = "Total Time Played: ",
-        ["Total Cash Value: "]                                  = "Total Cash Value: ",
+        -- Strings
+        ["v%s - %s (Type /ap for help)"]                        = true, 
+        ["%s characters "]                                      = true, 
+        [": %d rested XP "]                                     = true, 
+        ["(%d%% rested)"]                                       = true, 
+        ["Total %s Time Played: "]                              = true, 
+        ["Total %s Cash Value: "]                               = true, 
+        ["Total Time Played: "]                                 = true, 
+        ["Total Cash Value: "]                                  = true, 
         
         -- Console commands
-        ["/allplayed"]                                          = "/allplayed",
-        ["/ap"]                                                 = "/ap",
+        ["/allplayed"]                                          = true, 
+        ["/ap"]                                                 = true, 
         
     }
 end)

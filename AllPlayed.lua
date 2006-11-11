@@ -11,7 +11,7 @@ local TEN_DAYS  = 60 * 60 * 24 * 10
 -- Load external libraries 
 
 -- L is for localisation (to allow translation of the addon)
-local L = AceLibrary("AceLocale-2.0"):new("AllPlayed")
+local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 -- A is for time and money formating functions
 local A = AceLibrary("Abacus-2.0")
 -- C is for colour management functions
@@ -32,7 +32,7 @@ if IsAddOnLoaded("Fubar") then
     AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.0","FuBarPlugin-2.0")
     AllPlayed.is_fubar_loaded = true
 else
-    AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.0")
+    AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.0","FuBarPlugin-2.0")
     AllPlayed.is_fubar_loaded = false
 end
 
@@ -130,6 +130,7 @@ local command_options = {
 }
 
 -- If FuBar is not loaded, we need to add report and close options to the DewDrop menu
+--[[
 if not AllPlayed.is_fubar_loaded then
     command_options.args.report = {
         name    = L["Report"],
@@ -147,6 +148,7 @@ if not AllPlayed.is_fubar_loaded then
         order   = 6,
     }
 end
+]]--
 
 -- Register the chat commands
 -- :RegisterChatCommand takes the slash commands and an AceOptions data table
@@ -169,23 +171,6 @@ function AllPlayed:OnInitialize()
     self.total              = { time_played = 0, coin = 0 }
     
     self.sort_tables_done    = false
-
-    -- If FuBar is not there, initialize the tablet
-    --[[
-    if not self.is_fubar_loaded then
-        -- Create table data if it doesn't exists
-        self.db.profile.tabletData = self.db.profile.tabletData or {}
-        
-        tablet:Register(tabletParent, 
-            'menu', function()
-                dewdrop:FeedAceOptionsTable(options)
-            end,
-            'cantAttach', true,
-            'detachedData', self.db.profile.tabletData,
-            'children', self.FillTablet
-        )
-    end
-    ]]--
 end
 
 function AllPlayed:OnEnable()
@@ -230,10 +215,11 @@ function AllPlayed:OnEnable()
         
             -- Other Realm sorts would go here
             
+            self.sort_realm_pc[faction] = {}
             for realm, realm_table in pairs(faction_table) do
                 -- PC in each realm are alpha sorted by name
                 self:Debug("ST : Realm = ",realm)
-                self.sort_realm_pc[realm] = buildSortedTable( realm_table )
+                self.sort_realm_pc[faction][realm] = buildSortedTable( realm_table )
             end
         
             -- Other PC sorts would go here
@@ -374,6 +360,7 @@ function AllPlayed:ComputeTotal()
 end
 
 -- Display the report in a big tooltip
+--[[
 function AllPlayed:PrintReport()
     self:Debug("PrintReport()")
 
@@ -399,6 +386,7 @@ function AllPlayed:CloseReport()
     metro:UnregisterMetro(self.name)
     tablet:Close(tableParent)
 end
+]]--
 
 -- Fill the tablet with the All Played information
 function AllPlayed:FillTablet()
@@ -442,7 +430,7 @@ function AllPlayed:FillTablet()
                                )
                     )
                 
-                    for _, pc in ipairs(self.sort_realm_pc[realm]) do
+                    for _, pc in ipairs(self.sort_realm_pc[faction][realm]) do
                         if (not self.db.account.data[faction][realm][pc].is_ignored) then
                             -- Seconds played are still going up for the current PC
                             local seconds_played = self:EstimateTimePlayed(
