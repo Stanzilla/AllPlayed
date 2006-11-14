@@ -3,11 +3,13 @@
 ## X-eMail: laotseu.ace@gmail.com
 ## Title: AllPlayed |cff7fff7f -Ace2-|r
 ## Notes: Track time played, rested XP and money for all characters
-## Version: 1.0.alpha.$Revision$
+## Version: 11200-1.$Revision$
+## X-Website: http://www.wowace.com/wiki/AllPlayed
 ## X-Category: Interface Enhancements
 ## X-Date: $Date$
 ## DefaultState: enabled
-## OptionalDeps: Ace2, FuBar
+## OptionalDeps: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0, FuBar
+## X-Embeds: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0
 ## SavedVariables: AllPlayedDB
 
 ## Embedded ACE2 libraries
