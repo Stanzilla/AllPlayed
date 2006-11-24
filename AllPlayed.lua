@@ -8,6 +8,19 @@
 -- Ten days in second, needed to estimate the rested XP
 local TEN_DAYS  = 60 * 60 * 24 * 10
 
+-- Class colours
+local CLASS_COLOURS = {}
+CLASS_COLOURS['DRUID'] 	    =	"ff7d0a"
+CLASS_COLOURS['HUNTER'] 	=	"abd473"
+CLASS_COLOURS['MAGE'] 	    =	"69ccf0"
+CLASS_COLOURS['PALADIN']    =	"f58cba"
+CLASS_COLOURS['PRIEST'] 	=	"ffffff"
+CLASS_COLOURS['ROGUE'] 	    =	"fff569"
+CLASS_COLOURS['SHAMAN'] 	= 	"00dbba"
+CLASS_COLOURS['WARLOCK']    =	"9482ca"
+CLASS_COLOURS['WARRIOR']    =	"c79c6e"
+
+
 -- Load external libraries 
 
 -- L is for localisation (to allow translation of the addon)
@@ -49,6 +62,7 @@ AllPlayed:RegisterDefaults('account', {
             ['*'] = {
                 -- Name
                 ['*'] = {
+                	  class                       = "",
                     level                       = 0, 
                     coin                        = 0, 
                     rested_xp                   = 0, 
@@ -73,6 +87,7 @@ AllPlayed:RegisterDefaults('profile', {
         show_seconds    = true,
         percent_rest    = "100",
         refresh_rate    = 1,
+        colour_class    = false,
     },
 })
 
@@ -115,6 +130,14 @@ local command_options = {
                     set         = "SetPercentRest",
                     validate    = { ["100"] = "100%", ["150"] = "150%" },
                     order       = 4,
+                },
+                colorize_class = {
+                    name        = L["Colorize Class"],
+                    desc        = L["Colorize the character name based on class"],
+                    type        = 'toggle',
+                    get         = "GetColourClass",
+                    set         = "SetColourClass",
+                    order       = 5,
                 },
             }, order = 1
         },
@@ -391,13 +414,15 @@ function AllPlayed:FillTablet()
                                                         self.db.account.data[faction][realm][pc].seconds_played,
                                                         self.db.account.data[faction][realm][pc].seconds_played_last_update
                                                    )
+                            local class_text = string.format( ClassColour ( self.db.account.data[faction][realm][pc].class, faction, "%s" )
+                                                                .. FactionColour( faction, " (%d): %s" ),
+                                                                pc,
+                                                                self.db.account.data[faction][realm][pc].level,
+                                                                self:FormatTime(seconds_played)
+                                                            )
                             if (self.db.account.data[faction][realm][pc].level == 60) then
                                 cat:AddLine(
-                                    'text', string.format( FactionColour( faction, "%s (%d): %s" ),
-                                                           pc,
-                                                           self.db.account.data[faction][realm][pc].level,
-                                                           self:FormatTime(seconds_played)
-                                            ),
+                                    'text',  class_text,
                                     'text2', FormatMoney(self.db.account.data[faction][realm][pc].coin)
                                 )
                             else
@@ -411,16 +436,12 @@ function AllPlayed:FillTablet()
                                                             self.db.account.data[faction][realm][pc].is_resting 
                                                       )
                                 cat:AddLine(
-                                    'text', string.format( FactionColour( faction, "%s (%d): %s" ),
-                                                           pc,
-                                                           self.db.account.data[faction][realm][pc].level,
-                                                           self:FormatTime(seconds_played)
-                                            ),
+                                    'text',  class_text,
                                     'text2', string.format( FormatMoney(self.db.account.data[faction][realm][pc].coin)
                                                             .. FactionColour( faction, L[": %d rested XP "] )
                                                             .. PercentColour( (estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp), 
                                                                               L["(%d%% rested)"] 
-                                                               ),
+                                                            ),
                                                             estimated_rested_xp,
                                                             -- The % rested XP is displayed on a 150% base since
                                                             -- this is the maximum rested XP possible for a PC in
@@ -512,6 +533,7 @@ function AllPlayed:SaveVar()
     self:Debug("AllPlayed:SaveVar()")
 
     -- Fill some of the SaveVariables with values that do not change between 
+    _, self.db.account.data[self.faction][self.realm][self.pc].class        = UnitClass("player")
     self.db.account.data[self.faction][self.realm][self.pc].level           = UnitLevel("player")
     self.db.account.data[self.faction][self.realm][self.pc].max_rested_xp   = UnitXPMax("player") * 1.5
     self.db.account.data[self.faction][self.realm][self.pc].last_update     = time()
@@ -642,6 +664,22 @@ function AllPlayed:SetPercentRest( value )
     self.db.profile.options.percent_rest = value
 end
 
+-- Get the value of colour_class
+function AllPlayed:GetColourClass()
+    self:Debug("AllPlayed:GetColourClass: ", self.db.profile.options.colour_class)
+    
+    return self.db.profile.options.colour_class
+end
+
+-- Set the value of colour_class
+function AllPlayed:SetColourClass( value )
+    self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.colour_class, value )
+    
+    self.db.profile.options.colour_class = value
+end
+
+
+
 --[[ ================================================================= ]]--
 --[[                         Hook function                             ]]--
 --[[ ================================================================= ]]--
@@ -729,6 +767,16 @@ end
 -- percent must be a value in the range 0-1, not 0-100
 function PercentColour( percent, string )
     return C:Colorize( C:GetThresholdHexColor( percent ), string )
+end
+
+-- This function colorize the text based on the class
+-- If no class is defined, the text is colorized by faction
+function ClassColour( class, faction, string )
+    if class == "" or not AllPlayed:GetColourClass() then
+        return FactionColour( faction, string )
+    else
+        return C:Colorize( CLASS_COLOURS[class], string )
+    end
 end
 
 -- This build an iterator that sort by keys
