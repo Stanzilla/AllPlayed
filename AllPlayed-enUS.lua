@@ -22,6 +22,8 @@ L:RegisterTranslations("enUS", function()
         ["Display the seconds in the time strings"]             = true, 
         ["Percent Rest"]                                        = true, 
         ["Set the base for % display of rested XP"]             = true, 
+        ["Show Class Name"]                                     = true,
+        ["Show the character class beside the level"]           = true,
         ["Colorize Class"]                                      = true,
         ["Colorize the character name based on class"]          = true,
         ["Ignore"]                                              = true, 

@@ -3,7 +3,7 @@
 ## X-eMail: laotseu.ace@gmail.com
 ## Title: AllPlayed |cff7fff7f -Ace2-|r
 ## Notes: Track time played, rested XP and money for all characters
-## Version: 11200-1.$Revision$
+## Version: 11200-2.$Revision$
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
 ## X-Category: Interface Enhancements
 ## X-Date: $Date$

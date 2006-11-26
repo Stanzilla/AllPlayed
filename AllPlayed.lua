@@ -62,7 +62,8 @@ AllPlayed:RegisterDefaults('account', {
             ['*'] = {
                 -- Name
                 ['*'] = {
-                	  class                       = "",
+                    class                       = "",   -- English class name
+                    class_loc                   = "",   -- Localized class name
                     level                       = 0, 
                     coin                        = 0, 
                     rested_xp                   = 0, 
@@ -87,6 +88,7 @@ AllPlayed:RegisterDefaults('profile', {
         show_seconds    = true,
         percent_rest    = "100",
         refresh_rate    = 1,
+        show_class_name = false,
         colour_class    = false,
     },
 })
@@ -131,13 +133,21 @@ local command_options = {
                     validate    = { ["100"] = "100%", ["150"] = "150%" },
                     order       = 4,
                 },
+                show_class_name = {
+                    name        = L["Show Class Name"],
+                    desc        = L["Show the character class beside the level"],
+                    type        = 'toggle',
+                    get         = "GetShowClassName",
+                    set         = "SetShowClassName",
+                    order       = 5,
+                },
                 colorize_class = {
                     name        = L["Colorize Class"],
                     desc        = L["Colorize the character name based on class"],
                     type        = 'toggle',
                     get         = "GetColourClass",
                     set         = "SetColourClass",
-                    order       = 5,
+                    order       = 6,
                 },
             }, order = 1
         },
@@ -414,15 +424,15 @@ function AllPlayed:FillTablet()
                                                         self.db.account.data[faction][realm][pc].seconds_played,
                                                         self.db.account.data[faction][realm][pc].seconds_played_last_update
                                                    )
-                            local class_text = string.format( ClassColour ( self.db.account.data[faction][realm][pc].class, faction, "%s" )
-                                                                .. FactionColour( faction, " (%d): %s" ),
-                                                                pc,
-                                                                self.db.account.data[faction][realm][pc].level,
-                                                                self:FormatTime(seconds_played)
-                                                            )
                             if (self.db.account.data[faction][realm][pc].level == 60) then
                                 cat:AddLine(
-                                    'text',  class_text,
+                                    'text',  FormatCharacterName( pc, 
+                                                                  self.db.account.data[faction][realm][pc].level, 
+                                                                  seconds_played, 
+                                                                  self.db.account.data[faction][realm][pc].class, 
+                                                                  self.db.account.data[faction][realm][pc].class_loc, 
+                                                                  faction 
+                                             ),
                                     'text2', FormatMoney(self.db.account.data[faction][realm][pc].coin)
                                 )
                             else
@@ -436,7 +446,12 @@ function AllPlayed:FillTablet()
                                                             self.db.account.data[faction][realm][pc].is_resting 
                                                       )
                                 cat:AddLine(
-                                    'text',  class_text,
+                                    'text',  FormatCharacterName( pc, 
+                                                                  self.db.account.data[faction][realm][pc].level, 
+                                                                  seconds_played, 
+                                                                  self.db.account.data[faction][realm][pc].class, 
+                                                                  self.db.account.data[faction][realm][pc].class_loc, 
+                                                                  faction ),
                                     'text2', string.format( FormatMoney(self.db.account.data[faction][realm][pc].coin)
                                                             .. FactionColour( faction, L[": %d rested XP "] )
                                                             .. PercentColour( (estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp), 
@@ -533,7 +548,8 @@ function AllPlayed:SaveVar()
     self:Debug("AllPlayed:SaveVar()")
 
     -- Fill some of the SaveVariables with values that do not change between 
-    _, self.db.account.data[self.faction][self.realm][self.pc].class        = UnitClass("player")
+    self.db.account.data[self.faction][self.realm][self.pc].class_loc, 
+        self.db.account.data[self.faction][self.realm][self.pc].class        = UnitClass("player")
     self.db.account.data[self.faction][self.realm][self.pc].level           = UnitLevel("player")
     self.db.account.data[self.faction][self.realm][self.pc].max_rested_xp   = UnitXPMax("player") * 1.5
     self.db.account.data[self.faction][self.realm][self.pc].last_update     = time()
@@ -664,6 +680,20 @@ function AllPlayed:SetPercentRest( value )
     self.db.profile.options.percent_rest = value
 end
 
+-- Get the value of show_class_name
+function AllPlayed:GetShowClassName()
+    self:Debug("AllPlayed:GetShowClassName: ", self.db.profile.options.show_class_name)
+    
+    return self.db.profile.options.show_class_name
+end
+
+-- Set the value of show_class_name
+function AllPlayed:SetShowClassName( value )
+    self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.show_class_name, value )
+    
+    self.db.profile.options.show_class_name = value
+end
+
 -- Get the value of colour_class
 function AllPlayed:GetColourClass()
     self:Debug("AllPlayed:GetColourClass: ", self.db.profile.options.colour_class)
@@ -778,6 +808,30 @@ function ClassColour( class, faction, string )
         return C:Colorize( CLASS_COLOURS[class], string )
     end
 end
+
+-- This function format and colorize the Character name and level 
+-- based on the options selected by the user
+function FormatCharacterName( pc, level, seconds_played, class, class_loc, faction )
+    local level_string      = ""
+    
+    -- Created use the all cap english name if the localized name is not present
+    -- This should never happen but I like to code defensively
+    local class_display = class_loc 
+    if class_display == "" then class_display = class end
+    
+    if class == "" or not AllPlayed:GetShowClassName() then
+        level_string = string.format( "%d", level )
+    else
+        level_string = string.format( "%s %d", class_display, level )
+    end
+    
+    return string.format( ClassColour( class, faction, "%s (%s)" ) .. FactionColour( faction, ": %s" ),
+                          pc,
+                          level_string,
+                          AllPlayed:FormatTime(seconds_played)
+           )
+end
+
 
 -- This build an iterator that sort by keys
 -- See <http://www.lua.org/pil/19.3.html> for full explanation
