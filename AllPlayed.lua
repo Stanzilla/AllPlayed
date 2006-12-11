@@ -203,8 +203,8 @@ function AllPlayed:OnEnable()
     
     -- Hook the functions that need hooking
     -- (hook removal is done automagicaly by ACE)
-    self:Secure("Logout", true)
-    self:Secure("Quit",   true)
+    self:Hook("Logout", true)
+    self:Hook("Quit",   true)
   
     -- Initialize values that don't change between reloads
     self.faction    = UnitFactionGroup("player")
