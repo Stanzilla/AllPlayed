@@ -11,12 +11,12 @@ local TEN_DAYS  = 60 * 60 * 24 * 10
 -- Class colours
 local CLASS_COLOURS = {}
 CLASS_COLOURS['DRUID'] 	    =	"ff7d0a"
-CLASS_COLOURS['HUNTER'] 	=	"abd473"
+CLASS_COLOURS['HUNTER'] 	 =	"abd473"
 CLASS_COLOURS['MAGE'] 	    =	"69ccf0"
 CLASS_COLOURS['PALADIN']    =	"f58cba"
-CLASS_COLOURS['PRIEST'] 	=	"ffffff"
+CLASS_COLOURS['PRIEST'] 	 =	"ffffff"
 CLASS_COLOURS['ROGUE'] 	    =	"fff569"
-CLASS_COLOURS['SHAMAN'] 	= 	"00dbba"
+CLASS_COLOURS['SHAMAN'] 	 =	"00dbba"
 CLASS_COLOURS['WARLOCK']    =	"9482ca"
 CLASS_COLOURS['WARRIOR']    =	"c79c6e"
 
@@ -38,11 +38,11 @@ local dewdrop = AceLibrary("Dewdrop-2.0")
 
 local tabletParent = "AllPlayedTabletParent"
 
--- Creation fo the main "object" with librairies (mixins) directly attach to the object (used self:functions)
--- If FuBar is present, we load the FuBarPlugin mixin
+-- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
 AllPlayed = {}
 AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","FuBarPlugin-2.0")
 
+-- Keep track if FuBar is present
 if IsAddOnLoaded("Fubar") then
     AllPlayed.is_fubar_loaded = true
 else
@@ -66,7 +66,8 @@ AllPlayed:RegisterDefaults('account', {
                     class_loc                   = "",   -- Localized class name
                     level                       = 0, 
                     coin                        = 0, 
-                    rested_xp                   = 0, 
+                    rested_xp                   = 0,
+                    xp									= -1,
                     max_rested_xp               = 0, 
                     last_update                 = 0, 
                     is_resting                  = false, 
@@ -200,6 +201,10 @@ function AllPlayed:OnEnable()
     self:RegisterEvent("PLAYER_LEVEL_UP",   "EventHandler")
     self:RegisterEvent("PLAYER_XP_UPDATE",  "EventHandler")
     self:RegisterEvent("PLAYER_MONEY",      "EventHandler")
+--    self:RegisterEvent("ADDON_ACTION_FORBIDDEN", "BadAddonHandler")
+--    self:RegisterEvent("MACRO_ACTION_FORBIDDEN", "BadMacroHandler")
+--    self:RegisterEvent("ADDON_ACTION_BLOCKED", "BlockedAddonHandler")
+--    self:RegisterEvent("MACRO_ACTION_BLOCKED", "BlockedMacroHandler")
     
     -- Hook the functions that need hooking
     -- (hook removal is done automagicaly by ACE)
@@ -271,7 +276,7 @@ function AllPlayed:SetDebugging(debugging) self.db.profile.debugging = debugging
 
 -- FuBar configuration
 -- Defining there even if FuBar is not present doesn't cause any problem se I don't
--- check self.is_fubar_loaded where
+-- check self.is_fubar_loaded
 AllPlayed.OnMenuRequest = command_options
 AllPlayed.hasIcon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp"
 AllPlayed.defaultPosition = "LEFT"
@@ -320,10 +325,13 @@ function AllPlayed:ComputeTotal()
     -- Let's start from scratch
     self.total_faction[L["Horde"]].time_played      = 0
     self.total_faction[L["Horde"]].coin             = 0 
+    self.total_faction[L["Horde"]].xp               = 0 
     self.total_faction[L["Alliance"]].time_played   = 0
     self.total_faction[L["Alliance"]].coin          = 0 
+    self.total_faction[L["Alliance"]].xp            = 0 
     self.total.time_played                          = 0
     self.total.coin                                 = 0 
+    self.total.xp												 = 0
     
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.account.data) do
@@ -334,6 +342,7 @@ function AllPlayed:ComputeTotal()
             if not self.total_realm[faction][realm] then self.total_realm[faction][realm] = {} end
             self.total_realm[faction][realm].time_played = 0
             self.total_realm[faction][realm].coin = 0
+            self.total_realm[faction][realm].xp = 0
             for pc, pc_table in pairs(realm_table) do
                 if not pc_table.is_ignored then
                     -- Need to get the current seconds_played for the PC
@@ -342,10 +351,16 @@ function AllPlayed:ComputeTotal()
                                                                    pc_table.seconds_played,
                                                                    pc_table.seconds_played_last_update
                                            )
+
+						  local pc_xp = pc_table.xp
+						  if (pc_xp ==-1) then pc_xp = 0 end
+
                     self.total_faction[faction].time_played         = self.total_faction[faction].time_played       + seconds_played
                     self.total_faction[faction].coin                = self.total_faction[faction].coin              + pc_table.coin
+                    self.total_faction[faction].xp                  = self.total_faction[faction].xp                + pc_xp
                     self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  + seconds_played
                     self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         + pc_table.coin
+                    self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           + pc_table.xp
                 end
             end
         end
@@ -361,15 +376,20 @@ function AllPlayed:ComputeTotal()
             self.total.coin
                 =   self.total_faction[L["Horde"]].coin
                   + self.total_faction[L["Alliance"]].coin
+            self.total.xp
+                =   self.total_faction[L["Horde"]].xp
+                  + self.total_faction[L["Alliance"]].xp
         else
             -- Only the current faction count
             self.total.time_played = self.total_faction[self.faction].time_played
             self.total.coin        = self.total_faction[self.faction].coin
+            self.total.xp          = self.total_faction[self.faction].xp
         end
     else
         -- Only the current realm count (all_factions is ignore)
         self.total.time_played = self.total_realm[self.faction][self.realm].time_played
         self.total.coin        = self.total_realm[self.faction][self.realm].coin
+        self.total.xp          = self.total_realm[self.faction][self.realm].xp
     end
 end
 
@@ -549,8 +569,9 @@ function AllPlayed:SaveVar()
 
     -- Fill some of the SaveVariables with values that do not change between 
     self.db.account.data[self.faction][self.realm][self.pc].class_loc, 
-        self.db.account.data[self.faction][self.realm][self.pc].class        = UnitClass("player")
+        self.db.account.data[self.faction][self.realm][self.pc].class       = UnitClass("player")
     self.db.account.data[self.faction][self.realm][self.pc].level           = UnitLevel("player")
+    self.db.account.data[self.faction][self.realm][self.pc].xp              = UnitXP("player")
     self.db.account.data[self.faction][self.realm][self.pc].max_rested_xp   = UnitXPMax("player") * 1.5
     self.db.account.data[self.faction][self.realm][self.pc].last_update     = time()
     self.db.account.data[self.faction][self.realm][self.pc].is_resting      = IsResting()
@@ -865,3 +886,18 @@ function buildSortedTable( unsorted_table, sort_function )
     return sorted_key_table
 end
 
+function AllPlayed:BadAddonHandler( AddonName, FunctionName )
+	AllPlayed:Print("Addon forbiden: %s -- Function: %s", AddonName, FunctionName)
+end
+
+function AllPlayed:BadMacroHandler( FunctionName )
+	AllPlayed:Print("Macro function forbiden: %s", FunctionName )
+end
+
+function AllPlayed:BlockedAddonHandler( AddonName, FunctionName )
+	AllPlayed:Print("Addon blocked: %s -- Function: %s", AddonName, FunctionName)
+end
+
+function AllPlayed:BlockedMacroHandler( FunctionName )
+	AllPlayed:Print("Macro function blocked: %s", FunctionName )
+end
