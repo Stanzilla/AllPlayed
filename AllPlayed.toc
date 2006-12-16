@@ -6,7 +6,7 @@
 ## Version: 20000-2.$Revision$
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
 ## X-RelSite-WoWI: 6158
-## X-RelSite-Curse: 184097
+## X-RelSite-Curse: 4814
 ## X-RelSite-UI.WoW: 3485
 ## X-Category: Interface Enhancements
 ## X-Date: $Date$
