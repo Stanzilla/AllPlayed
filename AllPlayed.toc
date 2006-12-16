@@ -5,11 +5,16 @@
 ## Notes: Track time played, rested XP and money for all characters
 ## Version: 20000-2.$Revision$
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
+## X-RelSite-WoWI: 6158
+## X-RelSite-Curse: 184097
+## X-RelSite-UI.WoW: 3485
 ## X-Category: Interface Enhancements
 ## X-Date: $Date$
 ## DefaultState: enabled
+
 ## OptionalDeps: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0, FuBar
 ## X-Embeds: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0
+
 ## SavedVariables: AllPlayedDB
 
 ## Embedded ACE2 libraries
