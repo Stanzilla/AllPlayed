@@ -87,6 +87,7 @@ AllPlayed:RegisterDefaults('profile', {
         all_factions    = true,
         all_realms      = true,
         show_seconds    = true,
+        show_progress   = true,
         percent_rest    = "100",
         refresh_rate    = 1,
         show_class_name = false,
@@ -125,6 +126,15 @@ local command_options = {
                     set     = "SetShowSeconds",
                     order   = 3,
                 },
+
+                show_progress = {
+                    name    = L["Show XP Progress"],
+                    desc    = L["Display the level fraction based on curent XP"],
+                    type    = 'toggle',
+                    get     = "GetShowProgress",
+                    set     = "SetShowProgress",
+                    order   = 4,
+                },
                 percent_rest = {
                     name        = L["Percent Rest"],
                     desc        = L["Set the base for % display of rested XP"],
@@ -132,7 +142,7 @@ local command_options = {
                     get         = "GetPercentRest",
                     set         = "SetPercentRest",
                     validate    = { ["100"] = "100%", ["150"] = "150%" },
-                    order       = 4,
+                    order       = 5,
                 },
                 show_class_name = {
                     name        = L["Show Class Name"],
@@ -140,7 +150,7 @@ local command_options = {
                     type        = 'toggle',
                     get         = "GetShowClassName",
                     set         = "SetShowClassName",
-                    order       = 5,
+                    order       = 6,
                 },
                 colorize_class = {
                     name        = L["Colorize Class"],
@@ -148,7 +158,7 @@ local command_options = {
                     type        = 'toggle',
                     get         = "GetColourClass",
                     set         = "SetColourClass",
-                    order       = 6,
+                    order       = 7,
                 },
             }, order = 1
         },
@@ -331,7 +341,7 @@ function AllPlayed:ComputeTotal()
     self.total_faction[L["Alliance"]].xp            = 0 
     self.total.time_played                          = 0
     self.total.coin                                 = 0 
-    self.total.xp												 = 0
+    self.total.xp									= 0
     
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.account.data) do
@@ -414,9 +424,9 @@ function AllPlayed:FillTablet()
             and self.sort_faction_realm[faction]
         ) then
             for _, realm in ipairs(self.sort_faction_realm[faction]) do
-                -- We do not print the repl if no option to select it is on
-                -- and if the time played for the relm = 0 since this means
-                -- all PC in the relm are ingored.
+                -- We do not print the realm if no option to select it is on
+                -- and if the time played for the realm = 0 since this means
+                -- all PC in the realm are ingored.
                 if ((self.db.profile.options.all_realms or self.realm == realm)
                     and self.total_realm[faction][realm].time_played ~= 0
                 ) then
@@ -448,6 +458,7 @@ function AllPlayed:FillTablet()
                                 cat:AddLine(
                                     'text',  FormatCharacterName( pc, 
                                                                   self.db.account.data[faction][realm][pc].level, 
+                                                                  self.db.account.data[faction][realm][pc].xp,
                                                                   seconds_played, 
                                                                   self.db.account.data[faction][realm][pc].class, 
                                                                   self.db.account.data[faction][realm][pc].class_loc, 
@@ -467,11 +478,13 @@ function AllPlayed:FillTablet()
                                                       )
                                 cat:AddLine(
                                     'text',  FormatCharacterName( pc, 
-                                                                  self.db.account.data[faction][realm][pc].level, 
+                                                                  self.db.account.data[faction][realm][pc].level,
+                                                                  self.db.account.data[faction][realm][pc].xp,
                                                                   seconds_played, 
                                                                   self.db.account.data[faction][realm][pc].class, 
                                                                   self.db.account.data[faction][realm][pc].class_loc, 
-                                                                  faction ),
+                                                                  faction 
+                                             ),
                                     'text2', string.format( FormatMoney(self.db.account.data[faction][realm][pc].coin)
                                                             .. FactionColour( faction, L[": %d rested XP "] )
                                                             .. PercentColour( (estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp), 
@@ -687,6 +700,20 @@ function AllPlayed:SetShowSeconds( value )
     end
 end
 
+-- Get the value of show_progress
+function AllPlayed:GetShowProgress()
+    self:Debug("AllPlayed:GetShowProgress: ", self.db.profile.options.show_progress)
+    
+    return self.db.profile.options.show_progress
+end
+
+-- Set the value of show_progress
+function AllPlayed:SetShowProgress( value )
+    self:Debug("AllPlayed:SetShowProgress: old %s, new %s", self.db.profile.options.show_progress, value )
+    
+    self.db.profile.options.show_progress = value
+end
+
 -- Get the value of percent_rest
 function AllPlayed:GetPercentRest()
     self:Debug("AllPlayed:GetAllRealms: ", self.db.profile.options.percent_rest)
@@ -817,7 +844,7 @@ end
 -- This function colorize the text based on the percent value
 -- percent must be a value in the range 0-1, not 0-100
 function PercentColour( percent, string )
-    return C:Colorize( C:GetThresholdHexColor( percent ), string )
+    return C:Colorize( C:GetThresholdHexColor( percent, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ), string )
 end
 
 -- This function colorize the text based on the class
@@ -832,18 +859,26 @@ end
 
 -- This function format and colorize the Character name and level 
 -- based on the options selected by the user
-function FormatCharacterName( pc, level, seconds_played, class, class_loc, faction )
+function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, faction )
+    AllPlayed:Debug("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
+
     local level_string      = ""
+    
+    -- Format the level string according to the show_progress option
+    if AllPlayed:GetShowProgress() and xp ~= -1 then
+        local progress = min( xp / AllPlayed:XPToNextLevel(level), .99 )
+        level_string = string.format( "%.2f" , level + progress )
+    else
+        level_string = string.format( "%d" , level )
+   end
     
     -- Created use the all cap english name if the localized name is not present
     -- This should never happen but I like to code defensively
     local class_display = class_loc 
     if class_display == "" then class_display = class end
     
-    if class == "" or not AllPlayed:GetShowClassName() then
-        level_string = string.format( "%d", level )
-    else
-        level_string = string.format( "%s %d", class_display, level )
+    if class_display ~= "" and AllPlayed:GetShowClassName() then
+        level_string = string.format( "%s %s", class_display, level_string )
     end
     
     return string.format( ClassColour( class, faction, "%s (%s)" ) .. FactionColour( faction, ": %s" ),
@@ -885,6 +920,45 @@ function buildSortedTable( unsorted_table, sort_function )
     
     return sorted_key_table
 end
+
+-- This function caculate the number of XP to reach a particular level.
+local XPToLevelCache  = {}
+XPToLevelCache[0]     = 0
+function AllPlayed:XPToLevel( level )
+    if XPToLevelCache[level] == nil then
+        XPToLevelCache[level] = XPToNextLevel( level )
+        if level > 1 then
+            XPToLevelCache[level] = XPToLevelCache[level] + AllPlayed:XPToLevel( level - 1 )
+        end
+    end
+
+    return XPToLevelCache[level]
+end
+
+-- This function caculate the number of XP that you need at a particular level to reach
+-- next level. Will need to to review this when BC becomes live.
+local XPToNextLevelCache = {}
+function AllPlayed:XPToNextLevel( level )
+    if XPToNextLevelCache[level] == nil then
+        XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * AllPlayed:XPDiff(level) + 360 * level
+    end
+    
+    return XPToNextLevelCache[level]
+end
+
+
+-- This is a special function that is used to had difficulty (more XP) requirement after
+-- level 28
+function AllPlayed:XPDiff( level )
+	local x = max( level - 28, 0 )
+	
+	if ( x < 4 ) then
+		return ( x * (x + 1) ) / 2
+	else
+		return 5 * (x - 2)
+	end
+end
+
 
 function AllPlayed:BadAddonHandler( AddonName, FunctionName )
 	AllPlayed:Print("Addon forbiden: %s -- Function: %s", AddonName, FunctionName)
