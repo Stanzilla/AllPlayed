@@ -20,6 +20,8 @@ L:RegisterTranslations("enUS", function()
         ["All realms will de displayed"]                        = true, 
         ["Show Seconds"]                                        = true, 
         ["Display the seconds in the time strings"]             = true, 
+        ["Show XP Progress"]                                    = true,
+        ["Display the level fraction based on curent XP"]       = true,
         ["Percent Rest"]                                        = true, 
         ["Set the base for % display of rested XP"]             = true, 
         ["Show Class Name"]                                     = true,
