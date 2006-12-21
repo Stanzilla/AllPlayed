@@ -10,15 +10,15 @@ local TEN_DAYS  = 60 * 60 * 24 * 10
 
 -- Class colours
 local CLASS_COLOURS = {}
-CLASS_COLOURS['DRUID'] 	    =	"ff7d0a"
-CLASS_COLOURS['HUNTER'] 	 =	"abd473"
-CLASS_COLOURS['MAGE'] 	    =	"69ccf0"
-CLASS_COLOURS['PALADIN']    =	"f58cba"
-CLASS_COLOURS['PRIEST'] 	 =	"ffffff"
-CLASS_COLOURS['ROGUE'] 	    =	"fff569"
-CLASS_COLOURS['SHAMAN'] 	 =	"00dbba"
-CLASS_COLOURS['WARLOCK']    =	"9482ca"
-CLASS_COLOURS['WARRIOR']    =	"c79c6e"
+CLASS_COLOURS['DRUID']      = "ff7d0a"
+CLASS_COLOURS['HUNTER']     = "abd473"
+CLASS_COLOURS['MAGE']       = "69ccf0"
+CLASS_COLOURS['PALADIN']    = "f58cba"
+CLASS_COLOURS['PRIEST']     = "ffffff"
+CLASS_COLOURS['ROGUE']      = "fff569"
+CLASS_COLOURS['SHAMAN']     = "00dbba"
+CLASS_COLOURS['WARLOCK']    = "9482ca"
+CLASS_COLOURS['WARRIOR']    = "c79c6e"
 
 
 -- Load external libraries 
@@ -67,13 +67,15 @@ AllPlayed:RegisterDefaults('account', {
                     level                       = 0, 
                     coin                        = 0, 
                     rested_xp                   = 0,
-                    xp									= -1,
+                    xp                          = -1,
                     max_rested_xp               = 0, 
                     last_update                 = 0, 
                     is_resting                  = false, 
                     is_ignored                  = false,
                     seconds_played              = 0,  
                     seconds_played_last_update  = 0,
+                    zone_text                   = L["Unknown"],
+                    subzone_text                = "",
                 }
             }
         }
@@ -92,6 +94,8 @@ AllPlayed:RegisterDefaults('profile', {
         refresh_rate    = 1,
         show_class_name = false,
         colour_class    = false,
+        show_location   = "none",
+        show_xp_total   = false,
     },
 })
 
@@ -103,62 +107,83 @@ local command_options = {
         display = {
             type = 'group', name = L["Display"], desc = L["Set the display options"], args = {
                 all_factions = {
-                    name    = L["All Factions"],
-                    desc    = L["All factions will be displayed"],
-                    type    = 'toggle',
-                    get     = "GetAllFactions",
-                    set     = "SetAllFactions",
-                    order   = 1,
+                    name      = L["All Factions"],
+                    desc      = L["All factions will be displayed"],
+                    type      = 'toggle',
+                    get       = "GetAllFactions",
+                    set       = "SetAllFactions",
+                    order     = 1,
                 },
                 all_realms = {
-                    name    = L["All Realms"],
-                    desc    = L["All realms will de displayed"],
-                    type    = 'toggle',
-                    get     = "GetAllRealms",
-                    set     = "SetAllRealms",
-                    order   = 2,
+                    name      = L["All Realms"],
+                    desc      = L["All realms will de displayed"],
+                    type      = 'toggle',
+                    get       = "GetAllRealms",
+                    set       = "SetAllRealms",
+                    order     = 2,
                 },
                 show_seconds = {
-                    name    = L["Show Seconds"],
-                    desc    = L["Display the seconds in the time strings"],
-                    type    = 'toggle',
-                    get     = "GetShowSeconds",
-                    set     = "SetShowSeconds",
-                    order   = 3,
+                    name      = L["Show Seconds"],
+                    desc      = L["Display the seconds in the time strings"],
+                    type      = 'toggle',
+                    get       = "GetShowSeconds",
+                    set       = "SetShowSeconds",
+                    order     = 3,
                 },
 
                 show_progress = {
-                    name    = L["Show XP Progress"],
-                    desc    = L["Display the level fraction based on curent XP"],
-                    type    = 'toggle',
-                    get     = "GetShowProgress",
-                    set     = "SetShowProgress",
-                    order   = 4,
+                    name      = L["Show XP Progress"],
+                    desc      = L["Display the level fraction based on curent XP"],
+                    type      = 'toggle',
+                    get       = "GetShowProgress",
+                    set       = "SetShowProgress",
+                    order     = 4,
+                },
+                show_xp_total = {
+                    name      = L["Show XP total"],
+                    desc      = L["Show the total XP for all characters"],
+                    type      = 'toggle',
+                    get       = "GetShowXPTotal",
+                    set       = "SetShowXPTotal",
+                    order     = 5,
+                },
+                show_location = {
+                    name      = L["Show Location"],
+                    desc      = L["Show the character location"],
+                    type      = 'text',
+                    get       = "GetShowLocation",
+                    set       = "SetShowLocation",
+                    validate  = { ["none"]      = L["Don't show location"],
+                                  ["loc"]       = L["Show zone"], 
+                                  ["sub"]       = L["Show subzone"], 
+                                  ["loc/sub"]   = L["Show zone/subzone"] 
+                    },
+                    order     = 6,
                 },
                 percent_rest = {
-                    name        = L["Percent Rest"],
-                    desc        = L["Set the base for % display of rested XP"],
-                    type        = 'text',
-                    get         = "GetPercentRest",
-                    set         = "SetPercentRest",
-                    validate    = { ["100"] = "100%", ["150"] = "150%" },
-                    order       = 5,
+                    name      = L["Percent Rest"],
+                    desc      = L["Set the base for % display of rested XP"],
+                    type      = 'text',
+                    get       = "GetPercentRest",
+                    set       = "SetPercentRest",
+                    validate  = { ["100"] = "100%", ["150"] = "150%" },
+                    order     = 7,
                 },
                 show_class_name = {
-                    name        = L["Show Class Name"],
-                    desc        = L["Show the character class beside the level"],
-                    type        = 'toggle',
-                    get         = "GetShowClassName",
-                    set         = "SetShowClassName",
-                    order       = 6,
+                    name      = L["Show Class Name"],
+                    desc      = L["Show the character class beside the level"],
+                    type      = 'toggle',
+                    get       = "GetShowClassName",
+                    set       = "SetShowClassName",
+                    order     = 8,
                 },
                 colorize_class = {
-                    name        = L["Colorize Class"],
-                    desc        = L["Colorize the character name based on class"],
-                    type        = 'toggle',
-                    get         = "GetColourClass",
-                    set         = "SetColourClass",
-                    order       = 7,
+                    name      = L["Colorize Class"],
+                    desc      = L["Colorize the character name based on class"],
+                    type      = 'toggle',
+                    get       = "GetColourClass",
+                    set       = "SetColourClass",
+                    order     = 9,
                 },
             }, order = 1
         },
@@ -341,7 +366,7 @@ function AllPlayed:ComputeTotal()
     self.total_faction[L["Alliance"]].xp            = 0 
     self.total.time_played                          = 0
     self.total.coin                                 = 0 
-    self.total.xp									= 0
+    self.total.xp                                   = 0
     
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.account.data) do
@@ -362,15 +387,17 @@ function AllPlayed:ComputeTotal()
                                                                    pc_table.seconds_played_last_update
                                            )
 
-						  local pc_xp = pc_table.xp
-						  if (pc_xp ==-1) then pc_xp = 0 end
+                    local pc_xp = pc_table.xp
+                    if (pc_xp ==-1) then pc_xp = 0 end
+                    
+                    pc_xp = pc_xp + XPToLevel(pc_table.level)
 
                     self.total_faction[faction].time_played         = self.total_faction[faction].time_played       + seconds_played
                     self.total_faction[faction].coin                = self.total_faction[faction].coin              + pc_table.coin
                     self.total_faction[faction].xp                  = self.total_faction[faction].xp                + pc_xp
                     self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  + seconds_played
                     self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         + pc_table.coin
-                    self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           + pc_table.xp
+                    self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           + pc_xp
                 end
             end
         end
@@ -435,14 +462,27 @@ function AllPlayed:FillTablet()
                         'columns', 2,
                         'child_indentation', 10
                     )
+                    
+                    -- Build the Realm aggregated line
+                    local text_realm = string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s : ") .. "%s" ,
+                                                      realm,
+                                                      self:FormatTime(self.total_realm[faction][realm].time_played),
+                                                      FormatMoney(self.total_realm[faction][realm].coin)
+                                      )
+                                      
+                    if self.db.profile.options.show_xp_total then
+                        text_realm = string.format( "%s " .. C:Green(": %s"),
+                                                    text_realm,
+                                                    FormatXP(self.total_realm[faction][realm].xp)
+                                     )
+                    end
+                    
+                    text_realm = text_realm .. C:Green("]")
+                    
                     cat:AddLine(
                        'columns', 1,
                        'indentation', 0,
-                       'text', string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s: ") .. "%s" .. C:Green("]"),
-                                              realm,
-                                              self:FormatTime(self.total_realm[faction][realm].time_played),
-                                              FormatMoney(self.total_realm[faction][realm].coin)
-                               )
+                       'text', text_realm
                     )
                 
                     for _, pc in ipairs(self.sort_realm_pc[faction][realm]) do
@@ -520,6 +560,13 @@ function AllPlayed:FillTablet()
         'text2', FormatMoney(self.total.coin)
     )
     
+    if self.db.profile.options.show_xp_total then
+       cat:AddLine(
+           'text',  C:Orange( L["Total XP: "] ),
+           'text2', C:Yellow( FormatXP(self.total.xp) )
+       )
+    end
+    
     --tablet:SetHint("Click to do something")
     -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
 end
@@ -588,6 +635,8 @@ function AllPlayed:SaveVar()
     self.db.account.data[self.faction][self.realm][self.pc].max_rested_xp   = UnitXPMax("player") * 1.5
     self.db.account.data[self.faction][self.realm][self.pc].last_update     = time()
     self.db.account.data[self.faction][self.realm][self.pc].is_resting      = IsResting()
+    self.db.account.data[self.faction][self.realm][self.pc].zone_text       = GetZoneText()
+    self.db.account.data[self.faction][self.realm][self.pc].subzone_text    = GetSubZoneText()
     
     -- Make sure that coin is not nil
     if GetMoney() == nil then
@@ -756,6 +805,33 @@ function AllPlayed:SetColourClass( value )
     self.db.profile.options.colour_class = value
 end
 
+-- Get the value of show_xp_total
+function AllPlayed:GetShowXPTotal()
+    self:Debug("AllPlayed:GetShowXPTotal: ", self.db.profile.options.show_xp_total)
+    
+    return self.db.profile.options.show_xp_total
+end
+
+-- Set the value of show_xp_total
+function AllPlayed:SetShowXPTotal( value )
+    self:Debug("AllPlayed:SetShowXPTotal: old %s, new %s", self.db.profile.options.show_xp_total, value )
+    
+    self.db.profile.options.show_xp_total = value
+end
+
+-- Get the value of show_location
+function AllPlayed:GetShowLocation()
+    self:Debug("AllPlayed:GetShowLocation: ", self.db.profile.options.show_location)
+    
+    return self.db.profile.options.show_location
+end
+
+-- Set the value of show_location
+function AllPlayed:SetShowLocation( value )
+    self:Debug("AllPlayed:SetShowLocation: old %s, new %s", self.db.profile.options.show_location, value )
+    
+    self.db.profile.options.show_location = value
+end
 
 
 --[[ ================================================================= ]]--
@@ -826,6 +902,23 @@ function AllPlayed:FormatTime(seconds)
     return A:FormatDurationFull( seconds, false, not self.db.profile.options.show_seconds )
 end
 
+function FormatXP(xp)
+   local display_xp = ""
+   
+   if xp > 1000000 then
+      -- Millions of XP
+      display_xp = string.format( "%.1f M XP", xp / 1000000 )
+   elseif xp > 1000 then
+      -- Thousands of XP
+      display_xp = string.format( "%.1f K XP", xp / 1000 )
+   else
+      -- Very few XP
+      display_xp = string.format( "%d XP" , xp )
+   end
+   
+   return display_xp
+end
+
 function FormatMoney(coin)
     return A:FormatMoneyFull( coin, true, false )
 end
@@ -866,7 +959,7 @@ function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, f
     
     -- Format the level string according to the show_progress option
     if AllPlayed:GetShowProgress() and xp ~= -1 then
-        local progress = min( xp / AllPlayed:XPToNextLevel(level), .99 )
+        local progress = min( xp / XPToNextLevel(level), .99 )
         level_string = string.format( "%.2f" , level + progress )
     else
         level_string = string.format( "%d" , level )
@@ -924,11 +1017,11 @@ end
 -- This function caculate the number of XP to reach a particular level.
 local XPToLevelCache  = {}
 XPToLevelCache[0]     = 0
-function AllPlayed:XPToLevel( level )
+function XPToLevel( level )
     if XPToLevelCache[level] == nil then
         XPToLevelCache[level] = XPToNextLevel( level )
         if level > 1 then
-            XPToLevelCache[level] = XPToLevelCache[level] + AllPlayed:XPToLevel( level - 1 )
+            XPToLevelCache[level] = XPToLevelCache[level] + XPToLevel( level - 1 )
         end
     end
 
@@ -938,9 +1031,9 @@ end
 -- This function caculate the number of XP that you need at a particular level to reach
 -- next level. Will need to to review this when BC becomes live.
 local XPToNextLevelCache = {}
-function AllPlayed:XPToNextLevel( level )
+function XPToNextLevel( level )
     if XPToNextLevelCache[level] == nil then
-        XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * AllPlayed:XPDiff(level) + 360 * level
+        XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * XPDiff(level) + 360 * level
     end
     
     return XPToNextLevelCache[level]
@@ -949,29 +1042,29 @@ end
 
 -- This is a special function that is used to had difficulty (more XP) requirement after
 -- level 28
-function AllPlayed:XPDiff( level )
-	local x = max( level - 28, 0 )
-	
-	if ( x < 4 ) then
-		return ( x * (x + 1) ) / 2
-	else
-		return 5 * (x - 2)
-	end
+function XPDiff( level )
+   local x = max( level - 28, 0 )
+   
+   if ( x < 4 ) then
+      return ( x * (x + 1) ) / 2
+   else
+      return 5 * (x - 2)
+   end
 end
 
 
 function AllPlayed:BadAddonHandler( AddonName, FunctionName )
-	AllPlayed:Print("Addon forbiden: %s -- Function: %s", AddonName, FunctionName)
+   AllPlayed:Print("Addon forbiden: %s -- Function: %s", AddonName, FunctionName)
 end
 
 function AllPlayed:BadMacroHandler( FunctionName )
-	AllPlayed:Print("Macro function forbiden: %s", FunctionName )
+   AllPlayed:Print("Macro function forbiden: %s", FunctionName )
 end
 
 function AllPlayed:BlockedAddonHandler( AddonName, FunctionName )
-	AllPlayed:Print("Addon blocked: %s -- Function: %s", AddonName, FunctionName)
+   AllPlayed:Print("Addon blocked: %s -- Function: %s", AddonName, FunctionName)
 end
 
 function AllPlayed:BlockedMacroHandler( FunctionName )
-	AllPlayed:Print("Macro function blocked: %s", FunctionName )
+   AllPlayed:Print("Macro function blocked: %s", FunctionName )
 end
