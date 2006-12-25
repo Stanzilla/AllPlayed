@@ -232,10 +232,13 @@ function AllPlayed:OnEnable()
     
     -- Register the events we need
     -- (event unregistering is done automagicaly by ACE)
-    self:RegisterEvent("TIME_PLAYED_MSG",   "OnTimePlayedMsg")
-    self:RegisterEvent("PLAYER_LEVEL_UP",   "EventHandler")
-    self:RegisterEvent("PLAYER_XP_UPDATE",  "EventHandler")
-    self:RegisterEvent("PLAYER_MONEY",      "EventHandler")
+    self:RegisterEvent("TIME_PLAYED_MSG",       "OnTimePlayedMsg")
+    self:RegisterEvent("PLAYER_LEVEL_UP",       "EventHandler")
+    self:RegisterEvent("PLAYER_XP_UPDATE",      "EventHandler")
+    self:RegisterEvent("PLAYER_MONEY",          "EventHandler")
+    self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "EventHandler")
+    self:RegisterEvent("ZONE_CHANGED",          "EventHandler")
+    self:RegisterEvent("MINIMAP_ZONE_CHANGED",  "EventHandler")
 --    self:RegisterEvent("ADDON_ACTION_FORBIDDEN", "BadAddonHandler")
 --    self:RegisterEvent("MACRO_ACTION_FORBIDDEN", "BadMacroHandler")
 --    self:RegisterEvent("ADDON_ACTION_BLOCKED", "BlockedAddonHandler")
@@ -435,12 +438,26 @@ function AllPlayed:FillTablet()
     self:Debug("AllPlayed:FillTablet()")
     self:Debug("=>self.total.time_played: ", self.total.time_played)
     
-    local estimated_rested_xp = 0
+    local estimated_rested_xp 	= 0
+    local first_category 		= true
+    local nb_columns = 2
+    
+    if self:GetShowLocation() ~= "none" then
+        nb_columns = 3
+    end
 
     -- Set the title for the table (just when using FuBar
     tablet:SetTitle(C:White(L["All Played Breakdown"]))
     
-  
+	local cat = tablet:AddCategory(
+		'id', 'Normal Line',
+		'columns', nb_columns,
+		'child_indentation', 10,
+		'hideBlankLine', false,
+		'wrap', true
+
+	)
+	
     -- We group by factions, then by realm, then by PC
     for _, faction in ipairs (self.sort_faction) do
         -- We do not print the faction if no option to select it is on
@@ -458,10 +475,13 @@ function AllPlayed:FillTablet()
                     and self.total_realm[faction][realm].time_played ~= 0
                 ) then
                     --self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
+                    --[[
                     local cat = tablet:AddCategory(
-                        'columns', 2,
+                        'columns', 3,
                         'child_indentation', 10
+                        
                     )
+                    ]]--
                     
                     -- Build the Realm aggregated line
                     local text_realm = string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s : ") .. "%s" ,
@@ -479,6 +499,16 @@ function AllPlayed:FillTablet()
                     
                     text_realm = text_realm .. C:Green("]")
                     
+                    if first_category then
+                    	first_category = false
+                    else
+						cat:AddLine(
+						   'columns', 1,
+						   'indentation', 0,
+						   'text', " "
+						)
+                    end
+                    
                     cat:AddLine(
                        'columns', 1,
                        'indentation', 0,
@@ -494,6 +524,85 @@ function AllPlayed:FillTablet()
                                                         self.db.account.data[faction][realm][pc].seconds_played,
                                                         self.db.account.data[faction][realm][pc].seconds_played_last_update
                                                    )
+                            
+                            local text_pc = FormatCharacterName( pc, 
+                                                                 self.db.account.data[faction][realm][pc].level, 
+                                                                 self.db.account.data[faction][realm][pc].xp,
+                                                                 seconds_played, 
+                                                                 self.db.account.data[faction][realm][pc].class, 
+                                                                 self.db.account.data[faction][realm][pc].class_loc, 
+                                                                 faction 
+                                            )
+                                            
+							local text_location = ""
+							if self:GetShowLocation() ~= "none" then
+								 if self:GetShowLocation() == "loc"
+                                    or 
+                                    self.db.account.data[faction][realm][pc].zone_text == L["Unknown"]
+                                    or 
+                                    (self:GetShowLocation() == "loc/sub" and 
+                                     self.db.account.data[faction][realm][pc].subzone_text == "")
+                                 then
+								 	text_location = FactionColour(
+								 						faction,
+								 						self.db.account.data[faction][realm][pc].zone_text
+								 					)
+								 elseif self:GetShowLocation() == "sub" then
+								 	text_location = FactionColour(
+								 						faction,
+								 						self.db.account.data[faction][realm][pc].subzone_text
+								 					)
+								 else
+								 	text_location = FactionColour(
+								 						faction,
+								 						self.db.account.data[faction][realm][pc].zone_text 
+								 						.. '/' .. self.db.account.data[faction][realm][pc].subzone_text
+								 					)							 
+								 end
+							end
+							
+                            
+                            local text_coin 
+                            if self.db.account.data[faction][realm][pc].level == 60 then
+                            	text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
+                            else
+                                estimated_rested_xp = self:EstimateRestedXP( 
+                                                            pc, 
+                                                            realm, 
+                                                            self.db.account.data[faction][realm][pc].level, 
+                                                            self.db.account.data[faction][realm][pc].rested_xp, 
+                                                            self.db.account.data[faction][realm][pc].max_rested_xp, 
+                                                            self.db.account.data[faction][realm][pc].last_update, 
+                                                            self.db.account.data[faction][realm][pc].is_resting 
+                                                      )
+                            	text_coin = string.format( FormatMoney(self.db.account.data[faction][realm][pc].coin)
+                                                            .. FactionColour( faction, L[": %d rested XP "] )
+                                                            .. PercentColour( (estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp), 
+                                                                              L["(%d%% rested)"] 
+                                                           ),
+                                                           estimated_rested_xp,
+                                                           -- The % rested XP is displayed on a 150% base since
+                                                           -- this is the maximum rested XP possible for a PC in
+                                                           -- respect of his level
+                                                           (self:GetPercentRest() * 
+                                                            estimated_rested_xp / 
+                                                            self.db.account.data[faction][realm][pc].max_rested_xp)
+                                            )
+                            end
+                            
+                            if text_location ~= "" then
+                            	cat:AddLine( 'text',  text_pc,
+                            				 'text2', text_location,
+                            				 'text3', text_coin
+                        		)
+                            else
+                            	cat:AddLine( 'text',  text_pc,
+                            	             'text2', text_coin
+                            	)
+                            end
+                          
+                                         
+--[[                            
                             if (self.db.account.data[faction][realm][pc].level == 60) then
                                 cat:AddLine(
                                     'text',  FormatCharacterName( pc, 
@@ -537,9 +646,11 @@ function AllPlayed:FillTablet()
                                                             (self.db.profile.options.percent_rest * 
                                                              estimated_rested_xp / 
                                                              self.db.account.data[faction][realm][pc].max_rested_xp)
-                                             )
+                                             ),
+                                    'text3', "Text for XP"
                                 )
                             end
+]]--                            
                         end
                     end
                 end
@@ -637,6 +748,8 @@ function AllPlayed:SaveVar()
     self.db.account.data[self.faction][self.realm][self.pc].is_resting      = IsResting()
     self.db.account.data[self.faction][self.realm][self.pc].zone_text       = GetZoneText()
     self.db.account.data[self.faction][self.realm][self.pc].subzone_text    = GetSubZoneText()
+    
+    --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.account.data[self.faction][self.realm][self.pc].zone_text)
     
     -- Make sure that coin is not nil
     if GetMoney() == nil then
