@@ -239,10 +239,6 @@ function AllPlayed:OnEnable()
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "EventHandler")
     self:RegisterEvent("ZONE_CHANGED",          "EventHandler")
     self:RegisterEvent("MINIMAP_ZONE_CHANGED",  "EventHandler")
---    self:RegisterEvent("ADDON_ACTION_FORBIDDEN", "BadAddonHandler")
---    self:RegisterEvent("MACRO_ACTION_FORBIDDEN", "BadMacroHandler")
---    self:RegisterEvent("ADDON_ACTION_BLOCKED", "BlockedAddonHandler")
---    self:RegisterEvent("MACRO_ACTION_BLOCKED", "BlockedMacroHandler")
     
     -- Hook the functions that need hooking
     -- (hook removal is done automagicaly by ACE)
@@ -1043,7 +1039,12 @@ end
 -- based on the options selected by the user
 function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, faction )
     AllPlayed:Debug("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
+    
+    if xp == nil then
+        AllPlayed:Print("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
+    end
 
+    local result_string     = ""
     local level_string      = ""
     
     -- Format the level string according to the show_progress option
@@ -1063,11 +1064,19 @@ function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, f
         level_string = string.format( "%s %s", class_display, level_string )
     end
     
-    return string.format( ClassColour( class, faction, "%s (%s)" ) .. FactionColour( faction, ": %s" ),
+    result_string =  string.format( ClassColour( class, faction, "%s (%s)" ) .. FactionColour( faction, " : %s" ),
                           pc,
                           level_string,
                           AllPlayed:FormatTime(seconds_played)
-           )
+                    )
+                    
+    -- Do we need to show the total XP
+    if AllPlayed:GetShowXPTotal() and xp ~= -1 then
+        local pc_xp = xp + XPToLevel(level)
+        result_string = result_string .. FactionColour( faction, " : " .. FormatXP(pc_xp) )
+    end
+    
+    return result_string
 end
 
 
@@ -1139,21 +1148,4 @@ function XPDiff( level )
    else
       return 5 * (x - 2)
    end
-end
-
-
-function AllPlayed:BadAddonHandler( AddonName, FunctionName )
-   AllPlayed:Print("Addon forbiden: %s -- Function: %s", AddonName, FunctionName)
-end
-
-function AllPlayed:BadMacroHandler( FunctionName )
-   AllPlayed:Print("Macro function forbiden: %s", FunctionName )
-end
-
-function AllPlayed:BlockedAddonHandler( AddonName, FunctionName )
-   AllPlayed:Print("Addon blocked: %s -- Function: %s", AddonName, FunctionName)
-end
-
-function AllPlayed:BlockedMacroHandler( FunctionName )
-   AllPlayed:Print("Macro function blocked: %s", FunctionName )
 end
