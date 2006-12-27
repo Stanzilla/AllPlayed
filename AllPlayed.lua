@@ -289,17 +289,18 @@ function AllPlayed:OnEnable()
     
     -- Start the Metrognome event to get an OnUpdateData, OnUpdateText and OnUpdateTooltip every second
     -- If FuBar is not loaded, we do not start Metrognome
-    if self.is_fubar_loaded then
+    --if self.is_fubar_loaded then
         metro:RegisterMetro(self.name, self.Update, self.db.profile.options.refresh_rate, self)
         metro:StartMetro(self.name)
-    end
+    --end
 end
 
 function AllPlayed:OnDisable()
     -- Stop the Metrognome event
-    if self.is_fubar_loaded then
+--    if self.is_fubar_loaded then
         metro:UnregisterMetro(self.name)
-    else
+--    else
+    if not self.is_fubar_loaded then
         tablet:Close(tabletParent)
     end
 end
@@ -475,13 +476,6 @@ function AllPlayed:FillTablet()
                     and self.total_realm[faction][realm].time_played ~= 0
                 ) then
                     --self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
-                    --[[
-                    local cat = tablet:AddCategory(
-                        'columns', 3,
-                        'child_indentation', 10
-                        
-                    )
-                    ]]--
                     
                     -- Build the Realm aggregated line
                     local text_realm = string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s : ") .. "%s" ,
@@ -600,57 +594,6 @@ function AllPlayed:FillTablet()
                             	             'text2', text_coin
                             	)
                             end
-                          
-                                         
---[[                            
-                            if (self.db.account.data[faction][realm][pc].level == 60) then
-                                cat:AddLine(
-                                    'text',  FormatCharacterName( pc, 
-                                                                  self.db.account.data[faction][realm][pc].level, 
-                                                                  self.db.account.data[faction][realm][pc].xp,
-                                                                  seconds_played, 
-                                                                  self.db.account.data[faction][realm][pc].class, 
-                                                                  self.db.account.data[faction][realm][pc].class_loc, 
-                                                                  faction 
-                                             ),
-                                    'text2', FormatMoney(self.db.account.data[faction][realm][pc].coin)
-                                )
-                            else
-                                estimated_rested_xp = self:EstimateRestedXP( 
-                                                            pc, 
-                                                            realm, 
-                                                            self.db.account.data[faction][realm][pc].level, 
-                                                            self.db.account.data[faction][realm][pc].rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].max_rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].last_update, 
-                                                            self.db.account.data[faction][realm][pc].is_resting 
-                                                      )
-                                cat:AddLine(
-                                    'text',  FormatCharacterName( pc, 
-                                                                  self.db.account.data[faction][realm][pc].level,
-                                                                  self.db.account.data[faction][realm][pc].xp,
-                                                                  seconds_played, 
-                                                                  self.db.account.data[faction][realm][pc].class, 
-                                                                  self.db.account.data[faction][realm][pc].class_loc, 
-                                                                  faction 
-                                             ),
-                                    'text2', string.format( FormatMoney(self.db.account.data[faction][realm][pc].coin)
-                                                            .. FactionColour( faction, L[": %d rested XP "] )
-                                                            .. PercentColour( (estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp), 
-                                                                              L["(%d%% rested)"] 
-                                                            ),
-                                                            estimated_rested_xp,
-                                                            -- The % rested XP is displayed on a 150% base since
-                                                            -- this is the maximum rested XP possible for a PC in
-                                                            -- respect of his level
-                                                            (self.db.profile.options.percent_rest * 
-                                                             estimated_rested_xp / 
-                                                             self.db.account.data[faction][realm][pc].max_rested_xp)
-                                             ),
-                                    'text3', "Text for XP"
-                                )
-                            end
-]]--                            
                         end
                     end
                 end
@@ -775,6 +718,8 @@ function AllPlayed:SetSecondsPlayed(seconds_played)
     self.db.account.data[self.faction][self.realm][self.pc].seconds_played_last_update  = time()
 end
 
+--[[ Methods used for the option menu ]]--
+
 -- Get the current is_ignored value
 function AllPlayed:GetIsIgnored()
     self:Debug("AllPlayed:getIsIgnored: ",
@@ -792,6 +737,9 @@ function AllPlayed:SetIsIgnored(value)
     
     -- Compute the totals
     self:ComputeTotal()
+
+    -- Refesh
+    self:Update()
 end
 
 -- Get the current all_factions value
@@ -809,6 +757,9 @@ function AllPlayed:SetAllFactions( value )
     
     -- Compute the totals
     self:ComputeTotal()
+    
+    -- Refesh
+    self:Update()
 end
 
 -- Get the current all_realms value
@@ -826,6 +777,9 @@ function AllPlayed:SetAllRealms( value )
     
     -- Compute the totals
     self:ComputeTotal()
+
+    -- Refesh
+    self:Update()
 end
 
 -- Get the value for show_seconds
@@ -854,12 +808,16 @@ function AllPlayed:SetShowSeconds( value )
     -- If there is a timer active, we change the rate
     if metro:MetroStatus(self.name) then
         metro:ChangeMetroRate( self.name, self.db.profile.options.refresh_rate )
-        if self.is_fubar_loaded then
-            self:Update()
-        else
-            self:TimerUpdate()
-        end
+--        if self.is_fubar_loaded then
+--            self:Update()
+--        else
+--            self:TimerUpdate()
+--        end
     end
+    
+    -- Refesh
+    self:Update()
+   
 end
 
 -- Get the value of show_progress
@@ -874,6 +832,9 @@ function AllPlayed:SetShowProgress( value )
     self:Debug("AllPlayed:SetShowProgress: old %s, new %s", self.db.profile.options.show_progress, value )
     
     self.db.profile.options.show_progress = value
+
+    -- Refesh
+    self:Update()
 end
 
 -- Get the value of percent_rest
@@ -888,6 +849,9 @@ function AllPlayed:SetPercentRest( value )
     self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.percent_rest, value )
     
     self.db.profile.options.percent_rest = value
+
+    -- Refesh
+    self:Update()
 end
 
 -- Get the value of show_class_name
@@ -902,6 +866,9 @@ function AllPlayed:SetShowClassName( value )
     self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.show_class_name, value )
     
     self.db.profile.options.show_class_name = value
+
+    -- Refesh
+    self:Update()
 end
 
 -- Get the value of colour_class
@@ -916,6 +883,9 @@ function AllPlayed:SetColourClass( value )
     self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.colour_class, value )
     
     self.db.profile.options.colour_class = value
+
+    -- Refesh
+    self:Update()
 end
 
 -- Get the value of show_xp_total
@@ -930,6 +900,9 @@ function AllPlayed:SetShowXPTotal( value )
     self:Debug("AllPlayed:SetShowXPTotal: old %s, new %s", self.db.profile.options.show_xp_total, value )
     
     self.db.profile.options.show_xp_total = value
+
+    -- Refesh
+    self:Update()
 end
 
 -- Get the value of show_location
@@ -944,6 +917,9 @@ function AllPlayed:SetShowLocation( value )
     self:Debug("AllPlayed:SetShowLocation: old %s, new %s", self.db.profile.options.show_location, value )
     
     self.db.profile.options.show_location = value
+
+    -- Refesh
+    self:Update()
 end
 
 
