@@ -1,4 +1,5 @@
 -- AllPlayed-enUS.lua
+-- $Id$
 local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 
 -- This is only a place-holder for future possible localisation files
@@ -22,18 +23,18 @@ L:RegisterTranslations("enUS", function()
         ["Display the seconds in the time strings"]             = true, 
         ["Show XP Progress"]                                    = true,
         ["Display the level fraction based on curent XP"]       = true,
-        ["Show XP total"]													 = true,
-        ["Show the total XP for all characters"]					 = true,
+        ["Show XP total"]										= true,
+        ["Show the total XP for all characters"]				= true,
         ["Percent Rest"]                                        = true, 
         ["Set the base for % display of rested XP"]             = true, 
         ["Show Class Name"]                                     = true,
         ["Show the character class beside the level"]           = true,
-        ["Show Location"]													 = true,
-        ["Show the character location"]								 = true,
-        ["Don't show location"]											 = true,
-        ["Show zone"]														 = true,
-        ["Show subzone"]													 = true,
-        ["Show zone/subzone"]												 = true,
+        ["Show Location"]										= true,
+        ["Show the character location"]							= true,
+        ["Don't show location"]									= true,
+        ["Show zone"]											= true,
+        ["Show subzone"]										= true,
+        ["Show zone/subzone"]									= true,
         ["Colorize Class"]                                      = true,
         ["Colorize the character name based on class"]          = true,
         ["Ignore"]                                              = true, 
@@ -52,8 +53,8 @@ L:RegisterTranslations("enUS", function()
         ["Total %s Cash Value: "]                               = true, 
         ["Total Time Played: "]                                 = true, 
         ["Total Cash Value: "]                                  = true, 
-        ["Total XP: "]														 = true,
-        ["Unknown"]															 = true,
+        ["Total XP: "]											= true,
+        ["Unknown"]												= true,
         
         -- Console commands
         ["/allplayed"]                                          = true, 

@@ -12,6 +12,8 @@
 ## X-Date: $Date$
 ## DefaultState: enabled
 
+## $Id$
+
 ## OptionalDeps: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0, FuBar
 ## X-Embeds: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0
 
