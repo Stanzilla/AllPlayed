@@ -87,16 +87,18 @@ AllPlayed:RegisterDefaults('account', {
 AllPlayed:RegisterDefaults('profile', {
     -- Global Options
     options = {
-        all_factions    = true,
-        all_realms      = true,
-        show_seconds    = true,
-        show_progress   = true,
-        percent_rest    = "100",
-        refresh_rate    = 1,
-        show_class_name = false,
-        colour_class    = false,
-        show_location   = "none",
-        show_xp_total   = false,
+        all_factions                = true,
+        all_realms                  = true,
+        show_seconds                = true,
+        show_progress               = true,
+        show_rested_xp              = true,
+        percent_rest                = "100",
+        show_rested_xp_countdown    = false,
+        refresh_rate                = 1,
+        show_class_name             = false,
+        colour_class                = false,
+        show_location               = "none",
+        show_xp_total               = false,
     },
 })
 
@@ -161,13 +163,34 @@ local command_options = {
                     },
                     order     = 6,
                 },
-                percent_rest = {
-                    name      = L["Percent Rest"],
-                    desc      = L["Set the base for % display of rested XP"],
-                    type      = 'text',
-                    get       = "GetPercentRest",
-                    set       = "SetPercentRest",
-                    validate  = { ["100"] = "100%", ["150"] = "150%" },
+                rested_xp = {
+                    type = 'group', name = L["Rested XP"], desc = L["Set the rested XP options"], args = {
+                         show_rested_xp = {
+                            name        = L["Rested XP Total"],
+                            desc        = L["Show the character rested XP"],
+                            type        = 'toggle',
+                            get         = "GetShowRestedXP",
+                            set         = "SetShowRestedXP",
+                            order = 1,
+                         },
+                         percent_rest = {
+                            name        = L["Percent Rest"],
+                            desc        = L["Set the base for % display of rested XP"],
+                            type        = 'text',
+                            get         = "GetPercentRest",
+                            set         = "SetPercentRest",
+                            validate    = { ["0"] = L["None"], ["100"] = "100%", ["150"] = "150%" },
+                            order       = 2,
+                        },
+                         show_rested_xp_countdown = {
+                            name        = L["Rested XP Countdown"],
+                            desc        = L["Show the time remaining before the character is 100% rested"],
+                            type        = 'toggle',
+                            get         = "GetShowRestedXPCountdown",
+                            set         = "SetShowRestedXPCountdown",
+                            order = 3,
+                         },
+                    },
                     order     = 7,
                 },
                 show_class_name = {
@@ -218,7 +241,7 @@ function AllPlayed:OnInitialize()
                                 [L["Alliance"]] = { time_played = 0, coin = 0 },
     }
     self.total_realm        = { }
-    self.total              = { time_played = 0, coin = 0 }
+    self.total              = { time_played = 0, coin = 0, xp = 0 }
     
     self.sort_tables_done    = false
 end
@@ -436,7 +459,7 @@ function AllPlayed:FillTablet()
     self:Debug("AllPlayed:FillTablet()")
     self:Debug("=>self.total.time_played: ", self.total.time_played)
     
-    local estimated_rested_xp 	= 0
+--    local estimated_rested_xp 	= 0
     local first_category 		= true
     local nb_columns = 2
     
@@ -480,7 +503,6 @@ function AllPlayed:FillTablet()
                                                       self:FormatTime(self.total_realm[faction][realm].time_played),
                                                       FormatMoney(self.total_realm[faction][realm].coin)
                                       )
-                                      
                     if self.db.profile.options.show_xp_total then
                         text_realm = string.format( "%s " .. C:Green(": %s"),
                                                     text_realm,
@@ -553,7 +575,63 @@ function AllPlayed:FillTablet()
 							end
 							
                             
-                            local text_coin 
+                            local text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
+                            
+                            if self.db.account.data[faction][realm][pc].level < 60 and 
+                               (self.db.account.data[faction][realm][pc].level > 1 or
+                                self.db.account.data[faction][realm][pc].xp > 0)
+                            then
+                                -- How must rested XP do we have?
+                                local estimated_rested_xp = self:EstimateRestedXP( 
+                                                            pc, 
+                                                            realm, 
+                                                            self.db.account.data[faction][realm][pc].level, 
+                                                            self.db.account.data[faction][realm][pc].rested_xp, 
+                                                            self.db.account.data[faction][realm][pc].max_rested_xp, 
+                                                            self.db.account.data[faction][realm][pc].last_update, 
+                                                            self.db.account.data[faction][realm][pc].is_resting 
+                                                      )
+                            
+                                -- Do we need to show the rested XP for the character?
+                                if self:GetShowRestedXP() then
+                                    text_coin = text_coin .. string.format( FactionColour( faction, L[" : %d rested XP"] ),
+                                                                            estimated_rested_xp
+                                                             )
+                                end
+                                
+                                local percent_for_colour = estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp
+                                local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
+                                
+                                -- The time to rest is way more if not in an inn or a major city
+                                if not self.db.account.data[faction][realm][pc].is_resting then
+                                    countdown_seconds = countdown_seconds * 4
+                                end
+                                
+                                local text_countdown = ""
+                                if percent_for_colour < 1 and ( self.db.account.data[faction][realm][pc].is_resting or
+                                                                pc ~= self.pc or realm ~= self.realm
+                                                              )
+                                then
+                                    text_countdown = self:FormatTime(countdown_seconds)
+                                end
+                                
+                                -- Do we show the percent XP rested and/or the countdown until 100% rested?
+                                if self:GetPercentRest() ~= "0" and self:GetShowRestedXPCountdown() and text_countdown ~= "" then
+                                    text_coin = text_coin .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
+                                                                            self:GetPercentRest() * percent_for_colour,
+                                                                            L["rested"],
+                                                                            text_countdown
+                                                             )
+                                elseif self:GetPercentRest() ~= "0" then
+                                    text_coin = text_coin .. string.format( PercentColour(percent_for_colour, " (%d%% %s)"),
+                                                                            self:GetPercentRest() * percent_for_colour,
+                                                                            L["rested"]
+                                                             )
+                                elseif self:GetShowRestedXPCountdown() and text_countdown ~= "" then
+                                    text_coin = text_coin .. PercentColour( percent_for_colour, " (-" .. text_countdown .. ")" )
+                                end
+                            end
+--[[                            
                             if self.db.account.data[faction][realm][pc].level == 60 then
                             	text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
                             else
@@ -567,7 +645,7 @@ function AllPlayed:FillTablet()
                                                             self.db.account.data[faction][realm][pc].is_resting 
                                                       )
                             	text_coin = string.format( FormatMoney(self.db.account.data[faction][realm][pc].coin)
-                                                            .. FactionColour( faction, L[": %d rested XP "] )
+                                                            .. FactionColour( faction, L[" : %d rested XP "] )
                                                             .. PercentColour( (estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp), 
                                                                               L["(%d%% rested)"] 
                                                            ),
@@ -580,6 +658,7 @@ function AllPlayed:FillTablet()
                                                             self.db.account.data[faction][realm][pc].max_rested_xp)
                                             )
                             end
+]]--                            
                             
                             if text_location ~= "" then
                             	cat:AddLine( 'text',  text_pc,
@@ -834,6 +913,23 @@ function AllPlayed:SetShowProgress( value )
     self:Update()
 end
 
+-- Get the value of show_rested_xp
+function AllPlayed:GetShowRestedXP()
+    self:Debug("AllPlayed:GetShowRestedXP: ", self.db.profile.options.show_rested_xp)
+    
+    return self.db.profile.options.show_rested_xp
+end
+
+-- Set the value of show_rested_xp
+function AllPlayed:SetShowRestedXP( value )
+    self:Debug("AllPlayed:SetShowRestedXP: old %s, new %s", self.db.profile.options.show_rested_xp, value )
+    
+    self.db.profile.options.show_rested_xp = value
+
+    -- Refesh
+    self:Update()
+end
+
 -- Get the value of percent_rest
 function AllPlayed:GetPercentRest()
     self:Debug("AllPlayed:GetAllRealms: ", self.db.profile.options.percent_rest)
@@ -846,6 +942,23 @@ function AllPlayed:SetPercentRest( value )
     self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.percent_rest, value )
     
     self.db.profile.options.percent_rest = value
+
+    -- Refesh
+    self:Update()
+end
+
+-- Get the value of show_rested_xp_countdown
+function AllPlayed:GetShowRestedXPCountdown()
+    self:Debug("AllPlayed:GetShowRestedXPCountdown: ", self.db.profile.options.show_rested_xp_countdown)
+    
+    return self.db.profile.options.show_rested_xp_countdown
+end
+
+-- Set the value of show_rested_xp_countdown
+function AllPlayed:SetShowRestedXPCountdown( value )
+    self:Debug("AllPlayed:SetShowRestedXPCountdown: old %s, new %s", self.db.profile.options.show_rested_xp_countdown, value )
+    
+    self.db.profile.options.show_rested_xp_countdown = value
 
     -- Refesh
     self:Update()
@@ -985,7 +1098,7 @@ function AllPlayed:RequestTimePlayed()
 end
 
 function AllPlayed:FormatTime(seconds)
-    return A:FormatDurationFull( seconds, false, not self.db.profile.options.show_seconds )
+    return A:FormatDurationFull( seconds, false, not self:GetShowSeconds() )
 end
 
 function FormatXP(xp)
@@ -1023,7 +1136,7 @@ end
 -- This function colorize the text based on the percent value
 -- percent must be a value in the range 0-1, not 0-100
 function PercentColour( percent, string )
-    return C:Colorize( C:GetThresholdHexColor( percent, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ), string )
+    return C:Colorize( C:GetThresholdHexColor( percent, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1 ), string )
 end
 
 -- This function colorize the text based on the class
@@ -1116,6 +1229,7 @@ end
 -- This function caculate the number of XP to reach a particular level.
 local XPToLevelCache  = {}
 XPToLevelCache[0]     = 0
+XPToLevelCache[1]     = 0
 function XPToLevel( level )
     if XPToLevelCache[level] == nil then
         XPToLevelCache[level] = XPToNextLevel( level )
