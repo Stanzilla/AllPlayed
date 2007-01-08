@@ -307,12 +307,10 @@ function AllPlayed:OnEnable()
     -- Request the time played so we can populate seconds_played
     self:RequestTimePlayed()
     
-    -- Start the Metrognome event to get an OnUpdateData, OnUpdateText and OnUpdateTooltip every second
-    -- If FuBar is not loaded, we do not start Metrognome
-    --if self.is_fubar_loaded then
-        metro:RegisterMetro(self.name, self.Update, self.db.profile.options.refresh_rate, self)
-        metro:StartMetro(self.name)
-    --end
+    -- Start the Metrognome event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
+    -- or 20 seconds depending on the refresh_rate setting
+	metro:RegisterMetro(self.name, self.Update, self.db.profile.options.refresh_rate, self)
+	metro:StartMetro(self.name)
 end
 
 function AllPlayed:OnDisable()
@@ -347,6 +345,10 @@ AllPlayed.clickableTooltip = false
 function AllPlayed:OnDataUpdate()
     self:Debug("AllPlayed:OnDataUpdate()")
     
+    -- Update the data that may have changed but are not tracked by an event
+    self.db.account.data[self.faction][self.realm][self.pc].is_resting = IsResting()
+    
+    -- Recompute the totals
     self:ComputeTotal()
 end
 
@@ -404,24 +406,24 @@ function AllPlayed:ComputeTotal()
             self.total_realm[faction][realm].xp = 0
             for pc, pc_table in pairs(realm_table) do
                 if not pc_table.is_ignored then
-                    -- Need to get the current seconds_played for the PC
-                    local seconds_played = self:EstimateTimePlayed(pc, 
-                                                                   realm, 
-                                                                   pc_table.seconds_played,
-                                                                   pc_table.seconds_played_last_update
-                                           )
+					-- Need to get the current seconds_played for the PC
+					local seconds_played = self:EstimateTimePlayed(pc, 
+																   realm, 
+																   pc_table.seconds_played,
+																   pc_table.seconds_played_last_update
+										   )
 
-                    local pc_xp = pc_table.xp
-                    if (pc_xp ==-1) then pc_xp = 0 end
-                    
-                    pc_xp = pc_xp + XPToLevel(pc_table.level)
+					local pc_xp = pc_table.xp
+					if (pc_xp ==-1) then pc_xp = 0 end
 
-                    self.total_faction[faction].time_played         = self.total_faction[faction].time_played       + seconds_played
-                    self.total_faction[faction].coin                = self.total_faction[faction].coin              + pc_table.coin
-                    self.total_faction[faction].xp                  = self.total_faction[faction].xp                + pc_xp
-                    self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  + seconds_played
-                    self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         + pc_table.coin
-                    self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           + pc_xp
+					pc_xp = pc_xp + XPToLevel(pc_table.level)
+
+					self.total_faction[faction].time_played         = self.total_faction[faction].time_played       + seconds_played
+					self.total_faction[faction].coin                = self.total_faction[faction].coin              + pc_table.coin
+					self.total_faction[faction].xp                  = self.total_faction[faction].xp                + pc_xp
+					self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  + seconds_played
+					self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         + pc_table.coin
+					self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           + pc_xp
                 end
             end
         end
@@ -792,6 +794,7 @@ function AllPlayed:SetSecondsPlayed(seconds_played)
 
     self.db.account.data[self.faction][self.realm][self.pc].seconds_played              = seconds_played
     self.db.account.data[self.faction][self.realm][self.pc].seconds_played_last_update  = time()
+    
 end
 
 --[[ Methods used for the option menu ]]--
