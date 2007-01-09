@@ -579,7 +579,7 @@ function AllPlayed:FillTablet()
                             
                             local text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
                             
-                            if self.db.account.data[faction][realm][pc].level < 60 and 
+                            if self.db.account.data[faction][realm][pc].level < 70 and 
                                (self.db.account.data[faction][realm][pc].level > 1 or
                                 self.db.account.data[faction][realm][pc].xp > 0)
                             then
@@ -633,34 +633,6 @@ function AllPlayed:FillTablet()
                                     text_coin = text_coin .. PercentColour( percent_for_colour, " (-" .. text_countdown .. ")" )
                                 end
                             end
---[[                            
-                            if self.db.account.data[faction][realm][pc].level == 60 then
-                            	text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
-                            else
-                                estimated_rested_xp = self:EstimateRestedXP( 
-                                                            pc, 
-                                                            realm, 
-                                                            self.db.account.data[faction][realm][pc].level, 
-                                                            self.db.account.data[faction][realm][pc].rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].max_rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].last_update, 
-                                                            self.db.account.data[faction][realm][pc].is_resting 
-                                                      )
-                            	text_coin = string.format( FormatMoney(self.db.account.data[faction][realm][pc].coin)
-                                                            .. FactionColour( faction, L[" : %d rested XP "] )
-                                                            .. PercentColour( (estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp), 
-                                                                              L["(%d%% rested)"] 
-                                                           ),
-                                                           estimated_rested_xp,
-                                                           -- The % rested XP is displayed on a 150% base since
-                                                           -- this is the maximum rested XP possible for a PC in
-                                                           -- respect of his level
-                                                           (self:GetPercentRest() * 
-                                                            estimated_rested_xp / 
-                                                            self.db.account.data[faction][realm][pc].max_rested_xp)
-                                            )
-                            end
-]]--                            
                             
                             if text_location ~= "" then
                             	cat:AddLine( 'text',  text_pc,
@@ -1235,10 +1207,10 @@ XPToLevelCache[0]     = 0
 XPToLevelCache[1]     = 0
 function XPToLevel( level )
     if XPToLevelCache[level] == nil then
-        XPToLevelCache[level] = XPToNextLevel( level )
-        if level > 1 then
-            XPToLevelCache[level] = XPToLevelCache[level] + XPToLevel( level - 1 )
-        end
+        XPToLevelCache[level] = XPToNextLevel( level ) + XPToLevel( level - 1 )
+--        if level > 1 then
+--            XPToLevelCache[level] = XPToLevelCache[level] + XPToLevel( level - 1 )
+--        end
     end
 
     return XPToLevelCache[level]
@@ -1247,6 +1219,17 @@ end
 -- This function caculate the number of XP that you need at a particular level to reach
 -- next level. Will need to to review this when BC becomes live.
 local XPToNextLevelCache = {}
+-- Until there is a new formula for BC, I use the published XP values
+XPToLevelCache[60]    = 581700
+XPToLevelCache[61]    = 663460 
+XPToLevelCache[62]    = 703640  
+XPToLevelCache[63]    = 744380  
+XPToLevelCache[64]    = 785820  
+XPToLevelCache[65]    = 827820  
+XPToLevelCache[66]    = 870380  
+XPToLevelCache[67]    = 913640  
+XPToLevelCache[68]    = 957600  
+XPToLevelCache[69]    = 1002120  
 function XPToNextLevel( level )
     if XPToNextLevelCache[level] == nil then
         XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * XPDiff(level) + 360 * level

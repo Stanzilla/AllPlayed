@@ -1,9 +1,9 @@
-## Interface: 20000
+## Interface: 20003
 ## Author: LaoTseu
 ## X-eMail: laotseu.ace@gmail.com
 ## Title: AllPlayed |cff7fff7f -Ace2-|r
 ## Notes: Track time played, rested XP and money for all characters
-## Version: 20000-3.$Revision$
+## Version: 20003-1.$Revision$
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
 ## X-RelSite-WoWI: 6158
 ## X-RelSite-Curse: 4814
