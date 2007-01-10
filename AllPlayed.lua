@@ -579,7 +579,7 @@ function AllPlayed:FillTablet()
                             
                             local text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
                             
-                            if self.db.account.data[faction][realm][pc].level < 70 and 
+                            if self.db.account.data[faction][realm][pc].level < 60 and 
                                (self.db.account.data[faction][realm][pc].level > 1 or
                                 self.db.account.data[faction][realm][pc].xp > 0)
                             then
@@ -1207,7 +1207,7 @@ XPToLevelCache[0]     = 0
 XPToLevelCache[1]     = 0
 function XPToLevel( level )
     if XPToLevelCache[level] == nil then
-        XPToLevelCache[level] = XPToNextLevel( level ) + XPToLevel( level - 1 )
+        XPToLevelCache[level] = XPToNextLevel( level - 1 ) + XPToLevel( level - 1 )
 --        if level > 1 then
 --            XPToLevelCache[level] = XPToLevelCache[level] + XPToLevel( level - 1 )
 --        end
@@ -1217,19 +1217,19 @@ function XPToLevel( level )
 end
 
 -- This function caculate the number of XP that you need at a particular level to reach
--- next level. Will need to to review this when BC becomes live.
+-- next level. Will need to review this when BC becomes live.
 local XPToNextLevelCache = {}
 -- Until there is a new formula for BC, I use the published XP values
-XPToLevelCache[60]    = 581700
-XPToLevelCache[61]    = 663460 
-XPToLevelCache[62]    = 703640  
-XPToLevelCache[63]    = 744380  
-XPToLevelCache[64]    = 785820  
-XPToLevelCache[65]    = 827820  
-XPToLevelCache[66]    = 870380  
-XPToLevelCache[67]    = 913640  
-XPToLevelCache[68]    = 957600  
-XPToLevelCache[69]    = 1002120  
+XPToNextLevelCache[60]    = 581700
+XPToNextLevelCache[61]    = 663460 
+XPToNextLevelCache[62]    = 703640  
+XPToNextLevelCache[63]    = 744380  
+XPToNextLevelCache[64]    = 785820  
+XPToNextLevelCache[65]    = 827820  
+XPToNextLevelCache[66]    = 870380  
+XPToNextLevelCache[67]    = 913640  
+XPToNextLevelCache[68]    = 957600  
+XPToNextLevelCache[69]    = 1002120  
 function XPToNextLevel( level )
     if XPToNextLevelCache[level] == nil then
         XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * XPDiff(level) + 360 * level
