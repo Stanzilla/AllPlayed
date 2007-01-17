@@ -579,7 +579,7 @@ function AllPlayed:FillTablet()
                             
                             local text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
                             
-                            if self.db.account.data[faction][realm][pc].level < 60 and 
+                            if self.db.account.data[faction][realm][pc].level < 70 and 
                                (self.db.account.data[faction][realm][pc].level > 1 or
                                 self.db.account.data[faction][realm][pc].xp > 0)
                             then
@@ -1220,16 +1220,16 @@ end
 -- next level. Will need to review this when BC becomes live.
 local XPToNextLevelCache = {}
 -- Until there is a new formula for BC, I use the published XP values
-XPToNextLevelCache[60]    = 581700
-XPToNextLevelCache[61]    = 663460 
-XPToNextLevelCache[62]    = 703640  
-XPToNextLevelCache[63]    = 744380  
-XPToNextLevelCache[64]    = 785820  
-XPToNextLevelCache[65]    = 827820  
-XPToNextLevelCache[66]    = 870380  
-XPToNextLevelCache[67]    = 913640  
-XPToNextLevelCache[68]    = 957600  
-XPToNextLevelCache[69]    = 1002120  
+XPToNextLevelCache[60]    = 494000
+--XPToNextLevelCache[61]    = 663460 
+--XPToNextLevelCache[62]    = 703640  
+--XPToNextLevelCache[63]    = 744380  
+--XPToNextLevelCache[64]    = 785820  
+--XPToNextLevelCache[65]    = 827820  
+--XPToNextLevelCache[66]    = 870380  
+--XPToNextLevelCache[67]    = 913640  
+--XPToNextLevelCache[68]    = 957600  
+--XPToNextLevelCache[69]    = 1002120  
 function XPToNextLevel( level )
     if XPToNextLevelCache[level] == nil then
         XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * XPDiff(level) + 360 * level
