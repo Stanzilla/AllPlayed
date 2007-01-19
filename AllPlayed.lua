@@ -1221,11 +1221,11 @@ end
 local XPToNextLevelCache = {}
 -- Until there is a new formula for BC, I use the published XP values
 XPToNextLevelCache[60]    = 494000
---XPToNextLevelCache[61]    = 663460 
---XPToNextLevelCache[62]    = 703640  
---XPToNextLevelCache[63]    = 744380  
---XPToNextLevelCache[64]    = 785820  
---XPToNextLevelCache[65]    = 827820  
+XPToNextLevelCache[61]    = 574700  
+XPToNextLevelCache[62]    = 614400   
+XPToNextLevelCache[63]    = 650300   
+XPToNextLevelCache[64]    = 682300   
+XPToNextLevelCache[65]    = 710200   
 --XPToNextLevelCache[66]    = 870380  
 --XPToNextLevelCache[67]    = 913640  
 --XPToNextLevelCache[68]    = 957600  
