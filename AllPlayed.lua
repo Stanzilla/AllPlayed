@@ -1226,8 +1226,8 @@ XPToNextLevelCache[62]    = 614400
 XPToNextLevelCache[63]    = 650300   
 XPToNextLevelCache[64]    = 682300   
 XPToNextLevelCache[65]    = 710200   
---XPToNextLevelCache[66]    = 870380  
---XPToNextLevelCache[67]    = 913640  
+XPToNextLevelCache[66]    = 734100   
+XPToNextLevelCache[67]    = 753700   
 --XPToNextLevelCache[68]    = 957600  
 --XPToNextLevelCache[69]    = 1002120  
 function XPToNextLevel( level )
