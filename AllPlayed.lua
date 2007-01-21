@@ -1228,8 +1228,8 @@ XPToNextLevelCache[64]    = 682300
 XPToNextLevelCache[65]    = 710200   
 XPToNextLevelCache[66]    = 734100   
 XPToNextLevelCache[67]    = 753700   
---XPToNextLevelCache[68]    = 957600  
---XPToNextLevelCache[69]    = 1002120  
+XPToNextLevelCache[68]    = 768900   
+XPToNextLevelCache[69]    = 779700   
 function XPToNextLevel( level )
     if XPToNextLevelCache[level] == nil then
         XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * XPDiff(level) + 360 * level
