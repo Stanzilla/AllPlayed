@@ -99,6 +99,9 @@ AllPlayed:RegisterDefaults('profile', {
         colour_class                = false,
         show_location               = "none",
         show_xp_total               = false,
+        bc_installed				= true,
+        font_size					= 12,
+        transparency				= nil,
     },
 })
 
@@ -209,6 +212,17 @@ local command_options = {
                     set       = "SetColourClass",
                     order     = 9,
                 },
+                font_size = {
+                    name      = L["Font Size"],
+                    desc      = L["Select the font size"],
+                    type      = 'range',
+                    min		  = 8,
+                    max       = 20,
+                    step      = 1,
+                    get       = "GetFontSize",
+                    set       = "SetFontSize",
+                    order     = 10,
+                },
             }, order = 1
         },
         ignore = {
@@ -217,7 +231,15 @@ local command_options = {
             type    = 'toggle',
             get     = "GetIsIgnored",
             set     = "SetIsIgnored",
-            order   = 4
+            order   = 2
+        },
+        bc_installed = {
+            name    = L["BC Installed?"],
+            desc    = L["Is the Burning Crusade expansion installed?"],
+            type    = 'toggle',
+            get     = "GetIsBCInstalled",
+            set     = "SetIsBCInstalled",
+            order   = 3
         },
     }
 }
@@ -275,6 +297,15 @@ function AllPlayed:OnEnable()
     self.pc         = UnitName("player")
     
     -- Initial update of values
+    
+    -- Is BC installed
+    if(self.db.profile.options.bc_installed) then
+    	self.max_pc_level = 70
+    else
+    	self.max_pc_level = 60
+    end
+    
+    -- Get the values for the current character
     self:SaveVar()
     
     -- Build the sorting tables once in order not to generate memory garbage
@@ -477,7 +508,10 @@ function AllPlayed:FillTablet()
 		'columns', nb_columns,
 		'child_indentation', 10,
 		'hideBlankLine', false,
-		'wrap', true
+		'wrap', true,
+		'child_size',  self:GetFontSize(),
+		'child_size2', self:GetFontSize(),
+		'child_size3', self:GetFontSize()
 
 	)
 	
@@ -579,7 +613,7 @@ function AllPlayed:FillTablet()
                             
                             local text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
                             
-                            if self.db.account.data[faction][realm][pc].level < 70 and 
+                            if self.db.account.data[faction][realm][pc].level < self.max_pc_level and 
                                (self.db.account.data[faction][realm][pc].level > 1 or
                                 self.db.account.data[faction][realm][pc].xp > 0)
                             then
@@ -653,7 +687,9 @@ function AllPlayed:FillTablet()
 
     -- Print the totals
     local cat = tablet:AddCategory(
-        'columns', 2
+        'columns',     2,
+		'child_size',  self:GetFontSize(),
+		'child_size2', self:GetFontSize()
     )
     cat:AddLine(
         'text',  C:Orange( L["Total Time Played: "] ),
@@ -1002,6 +1038,52 @@ function AllPlayed:SetShowLocation( value )
     self:Debug("AllPlayed:SetShowLocation: old %s, new %s", self.db.profile.options.show_location, value )
     
     self.db.profile.options.show_location = value
+
+    -- Refesh
+    self:Update()
+end
+
+-- Get the current bc_installed value
+function AllPlayed:GetIsBCInstalled()
+    self:Debug("AllPlayed:GetIsBCInstalled: ",
+               self.db.profile.options.bc_installed
+    )
+
+    return self.db.profile.options.bc_installed
+end
+
+-- Set the value for bc_installed
+function AllPlayed:SetIsBCInstalled(value)
+    self:Debug("AllPlayed:SetIsBCInstalled: ",value)
+    
+    self.db.profile.options.bc_installed = value
+
+	-- The only difference is the maximum level that a PC can get to    
+	if(value) then
+		self.max_pc_level = 70
+	else
+		self.max_pc_level = 60
+	end
+    
+    -- Compute the totals
+    self:ComputeTotal()
+
+    -- Refesh
+    self:Update()
+end
+
+-- Get the value of font_size
+function AllPlayed:GetFontSize()
+    self:Debug("AllPlayed:GetFontSize: ", self.db.profile.options.font_size)
+    
+    return self.db.profile.options.font_size
+end
+
+-- Set the value of font_size
+function AllPlayed:SetFontSize( value )
+    self:Debug("AllPlayed:SetFontSize: old %s, new %s", self.db.profile.options.font_size, value )
+    
+    self.db.profile.options.font_size = value
 
     -- Refesh
     self:Update()
