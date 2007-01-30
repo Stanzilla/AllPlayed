@@ -101,7 +101,7 @@ AllPlayed:RegisterDefaults('profile', {
         show_xp_total               = false,
         bc_installed				= true,
         font_size					= 12,
-        transparency				= nil,
+        opacity						= .8,
     },
 })
 
@@ -223,6 +223,18 @@ local command_options = {
                     set       = "SetFontSize",
                     order     = 10,
                 },
+                opacity = {
+                    name      = L["Opacity"],
+                    desc      = L["% opacity of the tooltip background"],
+                    type      = 'range',
+                    min		  = 0,
+                    max       = 1,
+                    step      = .05,
+                    isPercent = true,
+                    get       = "GetOpacity",
+                    set       = "SetOpacity",
+                    order     = 11,
+                },
             }, order = 1
         },
         ignore = {
@@ -304,6 +316,9 @@ function AllPlayed:OnEnable()
     else
     	self.max_pc_level = 60
     end
+    
+    -- Set the initial table transparency
+    tablet:SetTransparency(self:GetFrame(), self:GetOpacity())
     
     -- Get the values for the current character
     self:SaveVar()
@@ -1089,6 +1104,26 @@ function AllPlayed:SetFontSize( value )
     self:Update()
 end
 
+-- Get the value of opacity
+function AllPlayed:GetOpacity()
+    self:Debug("AllPlayed:GetOpacity: ", self.db.profile.options.opacity)
+    
+    return self.db.profile.options.opacity
+end
+
+-- Set the value of opacity
+function AllPlayed:SetOpacity( value )
+    self:Debug("AllPlayed:SetOpacity: old %s, new %s", self.db.profile.options.opacity, value )
+    
+    self.db.profile.options.opacity = value
+    
+    -- Update the tablet transparency
+    tablet:SetTransparency(self:GetFrame(), value)
+
+    -- Refesh
+    self:Update()
+end
+
 
 --[[ ================================================================= ]]--
 --[[                         Hook function                             ]]--
@@ -1290,9 +1325,6 @@ XPToLevelCache[1]     = 0
 function XPToLevel( level )
     if XPToLevelCache[level] == nil then
         XPToLevelCache[level] = XPToNextLevel( level - 1 ) + XPToLevel( level - 1 )
---        if level > 1 then
---            XPToLevelCache[level] = XPToLevelCache[level] + XPToLevel( level - 1 )
---        end
     end
 
     return XPToLevelCache[level]

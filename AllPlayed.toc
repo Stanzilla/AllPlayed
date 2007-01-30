@@ -5,6 +5,7 @@
 ## Notes: Track time played, rested XP and money for all characters
 ## Version: 20003-3.$Revision$
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
+## X-Beta-Download: http://files.wowace.com/AllPlayed/
 ## X-RelSite-WoWI: 6158
 ## X-RelSite-Curse: 4814
 ## X-RelSite-UI.WoW: 3485

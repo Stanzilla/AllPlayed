@@ -45,6 +45,8 @@ L:RegisterTranslations("enUS", function()
         ["Colorize the character name based on class"]          		= true,
         ["Font Size"]													= true,
         ["Select the font size"]										= true,
+        ["Opacity"]      												= true,
+        ["% opacity of the tooltip background"]							= true,
         ["Ignore"]                                              		= true, 
         ["Ignore the current PC"]                               		= true, 
         ["BC Installed?"]                                          		= true, 
