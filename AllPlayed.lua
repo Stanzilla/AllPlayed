@@ -102,6 +102,7 @@ AllPlayed:RegisterDefaults('profile', {
         bc_installed				= true,
         font_size					= 12,
         opacity						= .8,
+        sort_type					= "alpha",
     },
 })
 
@@ -212,6 +213,21 @@ local command_options = {
                     set       = "SetColourClass",
                     order     = 9,
                 },
+                sort_type = {
+					name      = L["Sort Type"],
+					desc      = L["Select the sort type"],
+					type      = 'text',
+					get       = "GetSortType",
+					set       = "SetSortType",
+					validate  = { 
+								  ["alpha"] 		= L["By name"], 
+								  ["level"] 		= L["By level"], 
+								  ["rev-level"] 	= L["By reverse level"],
+								  ["xp"]			= L["By experience"],
+								  ["rev-xp"]		= L["By reverse experience"]
+					},
+					order     = 10,
+                },
                 font_size = {
                     name      = L["Font Size"],
                     desc      = L["Select the font size"],
@@ -221,7 +237,7 @@ local command_options = {
                     step      = 1,
                     get       = "GetFontSize",
                     set       = "SetFontSize",
-                    order     = 10,
+                    order     = 11,
                 },
                 opacity = {
                     name      = L["Opacity"],
@@ -233,7 +249,7 @@ local command_options = {
                     isPercent = true,
                     get       = "GetOpacity",
                     set       = "SetOpacity",
-                    order     = 11,
+                    order     = 12,
                 },
             }, order = 1
         },
@@ -291,8 +307,8 @@ function AllPlayed:OnEnable()
     -- Register the events we need
     -- (event unregistering is done automagicaly by ACE)
     self:RegisterEvent("TIME_PLAYED_MSG",       "OnTimePlayedMsg")
-    self:RegisterEvent("PLAYER_LEVEL_UP",       "EventHandler")
-    self:RegisterEvent("PLAYER_XP_UPDATE",      "EventHandler")
+    self:RegisterEvent("PLAYER_LEVEL_UP",       "EventHandlerWithSort")
+    self:RegisterEvent("PLAYER_XP_UPDATE",      "EventHandlerWithSort")
     self:RegisterEvent("PLAYER_MONEY",          "EventHandler")
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "EventHandler")
     self:RegisterEvent("ZONE_CHANGED",          "EventHandler")
@@ -323,32 +339,8 @@ function AllPlayed:OnEnable()
     -- Get the values for the current character
     self:SaveVar()
     
-    -- Build the sorting tables once in order not to generate memory garbage
-    if not self.sort_tables_done then
-        -- Static sort for the factions
-        self.sort_faction = { L["Horde"], L["Alliance"] }
-        
-        self.sort_faction_realm = {}
-        self.sort_realm_pc = {}
-        for faction, faction_table in pairs(self.db.account.data) do
-            -- Realms in each faction are alpha sorted
-            self:Debug("ST : Faction = ",faction)
-            self.sort_faction_realm[faction] =  buildSortedTable( faction_table )
-        
-            -- Other Realm sorts would go here
-            
-            self.sort_realm_pc[faction] = {}
-            for realm, realm_table in pairs(faction_table) do
-                -- PC in each realm are alpha sorted by name
-                self:Debug("ST : Realm = ",realm)
-                self.sort_realm_pc[faction][realm] = buildSortedTable( realm_table )
-            end
-        
-            -- Other PC sorts would go here
-        end
-        
-        self.sort_tables_done = true
-    end
+    -- Build the sorting tables 
+  	self:BuildSortTables()
 
     -- Request the time played so we can populate seconds_played
     self:RequestTimePlayed()
@@ -507,6 +499,9 @@ function AllPlayed:FillTablet()
     self:Debug("AllPlayed:FillTablet()")
     self:Debug("=>self.total.time_played: ", self.total.time_played)
     
+    -- Update the sort tables
+	self:BuildSortTables()    
+    
 --    local estimated_rested_xp 	= 0
     local first_category 		= true
     local nb_columns = 2
@@ -537,9 +532,9 @@ function AllPlayed:FillTablet()
         -- all PC in the faction are ingored.
         if ((self.db.profile.options.all_factions or self.faction == faction)
             and self.total.time_played ~= 0
-            and self.sort_faction_realm[faction]
+            and self.sort_faction_realm[self:GetSortType()][faction]
         ) then
-            for _, realm in ipairs(self.sort_faction_realm[faction]) do
+            for _, realm in ipairs(self.sort_faction_realm[self:GetSortType()][faction]) do
                 -- We do not print the realm if no option to select it is on
                 -- and if the time played for the realm = 0 since this means
                 -- all PC in the realm are ingored.
@@ -579,7 +574,7 @@ function AllPlayed:FillTablet()
                        'text', text_realm
                     )
                 
-                    for _, pc in ipairs(self.sort_realm_pc[faction][realm]) do
+                    for _, pc in ipairs(self.sort_realm_pc[self:GetSortType()][faction][realm]) do
                         if (not self.db.account.data[faction][realm][pc].is_ignored) then
                             -- Seconds played are still going up for the current PC
                             local seconds_played = self:EstimateTimePlayed(
@@ -737,6 +732,17 @@ function AllPlayed:OnTimePlayedMsg(seconds_played)
 
     -- Compute the totals
     self:ComputeTotal()
+end
+
+-- Event handler for the events that trigger a sort
+function AllPlayed:EventHandlerWithSort()
+    self:Debug("EventHandlerWithSort(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
+    
+    -- Trigger the sort
+	self.sort_tables_done = false
+	
+	-- Call the global event handler
+	self:EventHandler()
 end
 
 -- Event handler for the other events registered
@@ -1087,6 +1093,23 @@ function AllPlayed:SetIsBCInstalled(value)
     self:Update()
 end
 
+-- Get the value of sort_type
+function AllPlayed:GetSortType()
+    self:Debug("AllPlayed:GetSortType: ", self.db.profile.options.sort_type)
+    
+    return self.db.profile.options.sort_type
+end
+
+-- Set the value of sort_type
+function AllPlayed:SetSortType( value )
+    self:Debug("AllPlayed:SetSortType: old %s, new %s", self.db.profile.options.sort_type, value )
+    
+    self.db.profile.options.sort_type = value
+
+    -- Refesh
+    self:Update()
+end
+
 -- Get the value of font_size
 function AllPlayed:GetFontSize()
     self:Debug("AllPlayed:GetFontSize: ", self.db.profile.options.font_size)
@@ -1303,20 +1326,122 @@ function pairsByKeys (t, f)
     return iter
 end
 
+
+-- Build the static sort table needed
+function AllPlayed:BuildSortTables()
+	-- If the sort is already done, we don't redo it.
+	if self.sort_tables_done then return end
+	
+	-- Static sort for the factions
+	self.sort_faction = { L["Horde"], L["Alliance"] }
+
+	self.sort_faction_realm = { ["alpha"] = {}, ["level"] = {}, ["rev-level"] ={}, ["xp"] = {}, ["rev-xp"] = {} }
+	self.sort_realm_pc = { ["alpha"] = {}, ["level"] = {}, ["rev-level"] ={}, ["xp"] = {}, ["rev-xp"] = {} }
+	for faction, faction_table in pairs(self.db.account.data) do
+		-- Realms in each faction are alpha sorted
+		self:Debug("ST : Faction = ",faction)
+		self.sort_faction_realm["alpha"][faction] 
+			= buildSortedTable( faction_table )
+		self.sort_faction_realm["level"][faction]
+			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["rev-level"][faction]
+			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["xp"][faction]
+			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["rev-xp"][faction]
+			= self.sort_faction_realm["alpha"][faction]
+
+
+		self.sort_realm_pc["alpha"][faction]        = {}
+		self.sort_realm_pc["level"][faction]        = {}
+		self.sort_realm_pc["rev-level"][faction]    = {}
+		self.sort_realm_pc["xp"][faction]           = {}
+		self.sort_realm_pc["rev-xp"][faction]       = {}
+		for realm, realm_table in pairs(faction_table) do
+			-- PC in each realm are alpha sorted by name
+			self:Debug("ST : Realm = ",realm)
+			self.sort_realm_pc["alpha"][faction][realm] = buildSortedTable( realm_table )
+			self.sort_realm_pc["level"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByLevel )
+			self.sort_realm_pc["rev-level"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByRevLevel )
+			self.sort_realm_pc["xp"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByXP )
+			self.sort_realm_pc["rev-xp"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByRevXP )
+		end
+	end
+	
+	self.sort_tables_done = true
+end        
+
 -- This function build a table of sorted keys that will latter
 -- be used with ipairs in order to get the value of a hash in order
 -- By doing it this way, the temporary tables are droped only once so
 -- it reduce the LUA garbage collection.
+local table_to_sort = {}
 function buildSortedTable( unsorted_table, sort_function )
     AllPlayed:Debug("buildSortedTable:")
     
+    table_to_sort = unsorted_table
     local sorted_key_table = {}
     
     for key in pairs(unsorted_table) do table.insert(sorted_key_table, key) end
     table.sort(sorted_key_table, sort_function)
     
+    --table_to_sort = nil
     return sorted_key_table
 end
+
+-- Sort function to sort per level, then per name
+function PCSortByLevel(a,b)
+	-- First per level
+	if table_to_sort[a]["level"] < table_to_sort[b]["level"] then
+		return 0 < 1
+	elseif table_to_sort[a]["level"] > table_to_sort[b]["level"] then
+		return 1 < 0
+	else
+		return a < b
+	end
+end
+
+-- Sort function to sort per reverse level, then per name
+function PCSortByRevLevel(a,b)
+	-- First per level
+	if table_to_sort[b]["level"] < table_to_sort[a]["level"] then
+		return 0 < 1
+	elseif table_to_sort[b]["level"] > table_to_sort[a]["level"] then
+		return 1 < 0
+	else
+		return a < b
+	end
+end
+
+-- Sort function to sort per total XP
+function PCSortByXP(a,b)
+	-- First per level
+	if table_to_sort[a]["level"] < table_to_sort[b]["level"] then
+		return 0 < 1
+	elseif table_to_sort[a]["level"] > table_to_sort[b]["level"] then
+		return 1 < 0
+	else
+		return table_to_sort[a]["xp"] < table_to_sort[b]["xp"]
+	end
+end
+
+-- Sort function to sort per reverse total XP
+function PCSortByRevXP(a,b)
+	-- First per level
+	if table_to_sort[b]["level"] < table_to_sort[a]["level"] then
+		return 0 < 1
+	elseif table_to_sort[b]["level"] > table_to_sort[a]["level"] then
+		return 1 < 0
+	else
+		return table_to_sort[b]["xp"] < table_to_sort[a]["xp"]
+	end
+end
+
+
 
 -- This function caculate the number of XP to reach a particular level.
 local XPToLevelCache  = {}
