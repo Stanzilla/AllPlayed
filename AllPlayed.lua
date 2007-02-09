@@ -213,24 +213,6 @@ local command_options = {
                     set       = "SetColourClass",
                     order     = 9,
                 },
-                sort_type = {
-					name      = L["Sort Type"],
-					desc      = L["Select the sort type"],
-					type      = 'text',
-					get       = "GetSortType",
-					set       = "SetSortType",
-					validate  = { 
-								  ["alpha"] 		= L["By name"],
-								  ["rev-alpha"]		= L["By reverse name"],
-								  ["level"] 		= L["By level"], 
-								  ["rev-level"] 	= L["By reverse level"],
-								  ["xp"]			= L["By experience"],
-								  ["rev-xp"]		= L["By reverse experience"],
-								  ["rested_xp"]		= L["By rested XP"],
-								  ["rev-rested_xp"]	= L["By reverse rested XP"]
-					},
-					order     = 10,
-                },
                 font_size = {
                     name      = L["Font Size"],
                     desc      = L["Select the font size"],
@@ -240,7 +222,7 @@ local command_options = {
                     step      = 1,
                     get       = "GetFontSize",
                     set       = "SetFontSize",
-                    order     = 11,
+                    order     = 10,
                 },
                 opacity = {
                     name      = L["Opacity"],
@@ -252,17 +234,41 @@ local command_options = {
                     isPercent = true,
                     get       = "GetOpacity",
                     set       = "SetOpacity",
-                    order     = 12,
+                    order     = 11,
                 },
             }, order = 1
         },
+        sort = {
+			type = 'group', name = L["Sort"], desc = L["Set the sort options"], args = {
+				sort_type = {
+					name      = L["Sort Type"],
+					desc      = L["Select the sort type"],
+					type      = 'text',
+					get       = "GetSortType",
+					set       = "SetSortType",
+					validate  = { 
+								  ["alpha"] 			= L["By name"],
+								  ["rev-alpha"]			= L["By reverse name"],
+								  ["level"] 			= L["By level"], 
+								  ["rev-level"] 		= L["By reverse level"],
+								  ["xp"]				= L["By experience"],
+								  ["rev-xp"]			= L["By reverse experience"],
+								  ["rested_xp"]			= L["By rested XP"],
+								  ["rev-rested_xp"]		= L["By reverse rested XP"],
+								  ["percent_rest"]		= L["By % rested"],
+								  ["rev-percent_rest"]	= L["By reverse % rested"]
+					},
+					order     = 1,
+				},
+			}, order = 2
+		},
         ignore = {
             name    = L["Ignore"],
             desc    = L["Ignore the current PC"],
             type    = 'toggle',
             get     = "GetIsIgnored",
             set     = "SetIsIgnored",
-            order   = 2
+            order   = 3
         },
         bc_installed = {
             name    = L["BC Installed?"],
@@ -270,7 +276,7 @@ local command_options = {
             type    = 'toggle',
             get     = "GetIsBCInstalled",
             set     = "SetIsBCInstalled",
-            order   = 3
+            order   = 4
         },
     }
 }
@@ -1345,16 +1351,30 @@ function AllPlayed:BuildSortTables()
 								["xp"] = {}, 
 								["rev-xp"] = {},
                                 ["rested_xp"] = {},
-                                ["rev-rested_xp"] = {}
+                                ["rev-rested_xp"] = {},
+                                ["percent_rest"] = {},
+                                ["rev-percent_rest"] = {}
 	}
-	self.sort_realm_pc = self.sort_faction_realm
+	self.sort_realm_pc = {  ["alpha"] = {}, 
+							["rev-alpha"] = {}, 
+							["level"] = {}, 
+							["rev-level"] ={}, 
+							["xp"] = {}, 
+							["rev-xp"] = {},
+							["rested_xp"] = {},
+							["rev-rested_xp"] = {},
+							["percent_rest"] = {},
+							["rev-percent_rest"] = {}
+	}
+
 	for faction, faction_table in pairs(self.db.account.data) do
+
 		-- Realms in each faction are alpha sorted
 		self:Debug("ST : Faction = ",faction)
 		self.sort_faction_realm["alpha"][faction] 
 			= buildSortedTable( faction_table )
-		self.sort_faction_realm["alpha"][faction]
-			= buildSortedTable( faction_table, function(a,b) return a>b end )
+		self.sort_faction_realm["rev-alpha"][faction]
+			= self.sort_faction_realm["alpha"][faction]
 		self.sort_faction_realm["level"][faction]
 			= self.sort_faction_realm["alpha"][faction]
 		self.sort_faction_realm["rev-level"][faction]
@@ -1367,14 +1387,23 @@ function AllPlayed:BuildSortTables()
 			= self.sort_faction_realm["alpha"][faction]
 		self.sort_faction_realm["rev-rested_xp"][faction]
 			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["percent_rest"][faction]
+			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["rev-percent_rest"][faction]
+			= self.sort_faction_realm["alpha"][faction]
 
+		-- Reset the pc tables
+		self.sort_realm_pc["alpha"][faction]        	= {}
+		self.sort_realm_pc["rev-alpha"][faction]    	= {}
+		self.sort_realm_pc["level"][faction]        	= {}
+		self.sort_realm_pc["rev-level"][faction]    	= {}
+		self.sort_realm_pc["xp"][faction]           	= {}
+		self.sort_realm_pc["rev-xp"][faction]       	= {}
+		self.sort_realm_pc["rested_xp"][faction]       	= {}
+		self.sort_realm_pc["rev-rested_xp"][faction]   	= {}
+		self.sort_realm_pc["percent_rest"][faction]     = {}
+		self.sort_realm_pc["rev-percent_rest"][faction] = {}
 
-		self.sort_realm_pc["alpha"][faction]        = {}
-		self.sort_realm_pc["rev-alpha"][faction]    = {}
-		self.sort_realm_pc["level"][faction]        = {}
-		self.sort_realm_pc["rev-level"][faction]    = {}
-		self.sort_realm_pc["xp"][faction]           = {}
-		self.sort_realm_pc["rev-xp"][faction]       = {}
 		for realm, realm_table in pairs(faction_table) do
 			-- PC in each realm are alpha sorted by name
 			self:Debug("ST : Realm = ",realm)
@@ -1393,8 +1422,13 @@ function AllPlayed:BuildSortTables()
 				= buildSortedTable( realm_table, PCSortByRestedXP, realm )
 			self.sort_realm_pc["rev-rested_xp"][faction][realm]
 				= buildSortedTable( realm_table, PCSortByRevRestedXP, realm )
+			self.sort_realm_pc["percent_rest"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByPercentRest, realm )
+			self.sort_realm_pc["rev-percent_rest"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByRevPercentRest, realm )
 				
 		end
+
 	end
 	
 	self.sort_tables_done = true
@@ -1545,6 +1579,94 @@ function PCSortByRevRestedXP(a,b)
         return 0 < 1
     elseif estimated_rested_xp_b > estimated_rested_xp_a then
         return 1 < 0
+    else
+        return a < b
+    end
+end
+
+-- Sort function to sort per % rest
+function PCSortByPercentRest(a,b)
+    local estimated_rested_xp_a = 0
+    local estimated_rested_xp_b = 0
+    
+    if a and table_to_sort[a] then
+        estimated_rested_xp_a = AllPlayed:EstimateRestedXP( 
+										a, 
+										realm_for_sort, 
+										table_to_sort[a].level, 
+										table_to_sort[a].rested_xp, 
+										table_to_sort[a].max_rested_xp, 
+										table_to_sort[a].last_update, 
+										table_to_sort[a].is_resting 
+        )
+    end
+
+    if b and table_to_sort[b] then
+        estimated_rested_xp_b = AllPlayed:EstimateRestedXP( 
+										b, 
+										realm_for_sort, 
+										table_to_sort[b].level, 
+										table_to_sort[b].rested_xp, 
+										table_to_sort[b].max_rested_xp, 
+										table_to_sort[b].last_update, 
+										table_to_sort[b].is_resting 
+        )
+    end
+    
+    AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
+
+    if estimated_rested_xp_a / table_to_sort[a].max_rested_xp
+       < estimated_rested_xp_b / table_to_sort[b].max_rested_xp then
+        return 0 < 1
+    elseif estimated_rested_xp_a / table_to_sort[a].max_rested_xp
+           > estimated_rested_xp_b / table_to_sort[b].max_rested_xp then
+        return 1 < 0
+    elseif estimated_rested_xp_a ~= estimated_rested_xp_b then
+    	return estimated_rested_xp_a < estimated_rested_xp_b
+    else
+        return a < b
+    end
+end
+
+-- Sort function to sort per reverse % rest
+function PCSortByRevPercentRest(a,b)
+    local estimated_rested_xp_a = 0
+    local estimated_rested_xp_b = 0
+    
+    if a and table_to_sort[a] then
+        estimated_rested_xp_a = AllPlayed:EstimateRestedXP( 
+										a, 
+										realm_for_sort, 
+										table_to_sort[a].level, 
+										table_to_sort[a].rested_xp, 
+										table_to_sort[a].max_rested_xp, 
+										table_to_sort[a].last_update, 
+										table_to_sort[a].is_resting 
+        )
+    end
+
+    if b and table_to_sort[b] then
+        estimated_rested_xp_b = AllPlayed:EstimateRestedXP( 
+										b, 
+										realm_for_sort, 
+										table_to_sort[b].level, 
+										table_to_sort[b].rested_xp, 
+										table_to_sort[b].max_rested_xp, 
+										table_to_sort[b].last_update, 
+										table_to_sort[b].is_resting 
+        )
+    end
+    
+    AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
+
+    if estimated_rested_xp_b / table_to_sort[b].max_rested_xp
+       < estimated_rested_xp_a / table_to_sort[a].max_rested_xp then
+        return 0 < 1
+    elseif estimated_rested_xp_b / table_to_sort[b].max_rested_xp
+           > estimated_rested_xp_a / table_to_sort[a].max_rested_xp then
+        return 1 < 0
+    elseif estimated_rested_xp_a ~= estimated_rested_xp_b then
+    	return estimated_rested_xp_b < estimated_rested_xp_a
     else
         return a < b
     end
