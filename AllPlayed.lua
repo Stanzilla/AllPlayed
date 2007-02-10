@@ -256,7 +256,9 @@ local command_options = {
 								  ["rested_xp"]			= L["By rested XP"],
 								  ["rev-rested_xp"]		= L["By reverse rested XP"],
 								  ["percent_rest"]		= L["By % rested"],
-								  ["rev-percent_rest"]	= L["By reverse % rested"]
+								  ["rev-percent_rest"]	= L["By reverse % rested"],
+								  ["coin"]				= L["By money"],
+								  ["rev-coin"]			= L["By reverse money"]
 					},
 					order     = 1,
 				},
@@ -1350,10 +1352,12 @@ function AllPlayed:BuildSortTables()
 								["rev-level"] ={}, 
 								["xp"] = {}, 
 								["rev-xp"] = {},
-                                ["rested_xp"] = {},
-                                ["rev-rested_xp"] = {},
-                                ["percent_rest"] = {},
-                                ["rev-percent_rest"] = {}
+								["rested_xp"] = {},
+								["rev-rested_xp"] = {},
+								["percent_rest"] = {},
+								["rev-percent_rest"] = {},
+								["coin"] = {},
+								["rev-coin"] = {}
 	}
 	self.sort_realm_pc = {  ["alpha"] = {}, 
 							["rev-alpha"] = {}, 
@@ -1364,7 +1368,9 @@ function AllPlayed:BuildSortTables()
 							["rested_xp"] = {},
 							["rev-rested_xp"] = {},
 							["percent_rest"] = {},
-							["rev-percent_rest"] = {}
+							["rev-percent_rest"] = {},
+							["coin"] = {},
+							["rev-coin"] = {}
 	}
 
 	for faction, faction_table in pairs(self.db.account.data) do
@@ -1391,6 +1397,10 @@ function AllPlayed:BuildSortTables()
 			= self.sort_faction_realm["alpha"][faction]
 		self.sort_faction_realm["rev-percent_rest"][faction]
 			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["coin"][faction]
+			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["rev-coin"][faction]
+			= self.sort_faction_realm["alpha"][faction]
 
 		-- Reset the pc tables
 		self.sort_realm_pc["alpha"][faction]        	= {}
@@ -1403,6 +1413,8 @@ function AllPlayed:BuildSortTables()
 		self.sort_realm_pc["rev-rested_xp"][faction]   	= {}
 		self.sort_realm_pc["percent_rest"][faction]     = {}
 		self.sort_realm_pc["rev-percent_rest"][faction] = {}
+		self.sort_realm_pc["coin"][faction]     		= {}
+		self.sort_realm_pc["rev-coin"][faction] 		= {}
 
 		for realm, realm_table in pairs(faction_table) do
 			-- PC in each realm are alpha sorted by name
@@ -1426,6 +1438,10 @@ function AllPlayed:BuildSortTables()
 				= buildSortedTable( realm_table, PCSortByPercentRest, realm )
 			self.sort_realm_pc["rev-percent_rest"][faction][realm]
 				= buildSortedTable( realm_table, PCSortByRevPercentRest, realm )
+			self.sort_realm_pc["coin"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByCoin )
+			self.sort_realm_pc["rev-coin"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByRevCoin )
 				
 		end
 
@@ -1459,10 +1475,8 @@ end
 -- Sort function to sort per level, then per name
 function PCSortByLevel(a,b)
 	-- First per level
-	if table_to_sort[a]["level"] < table_to_sort[b]["level"] then
-		return 0 < 1
-	elseif table_to_sort[a]["level"] > table_to_sort[b]["level"] then
-		return 1 < 0
+	if table_to_sort[a].level ~= table_to_sort[b].level then
+		return table_to_sort[a].level < table_to_sort[b].level
 	else
 		return a < b
 	end
@@ -1471,10 +1485,8 @@ end
 -- Sort function to sort per reverse level, then per name
 function PCSortByRevLevel(a,b)
 	-- First per level
-	if table_to_sort[b]["level"] < table_to_sort[a]["level"] then
-		return 0 < 1
-	elseif table_to_sort[b]["level"] > table_to_sort[a]["level"] then
-		return 1 < 0
+	if table_to_sort[b].level ~= table_to_sort[a].level then
+		return table_to_sort[b].level < table_to_sort[a].level
 	else
 		return a < b
 	end
@@ -1483,24 +1495,20 @@ end
 -- Sort function to sort per total XP
 function PCSortByXP(a,b)
 	-- First per level
-	if table_to_sort[a]["level"] < table_to_sort[b]["level"] then
-		return 0 < 1
-	elseif table_to_sort[a]["level"] > table_to_sort[b]["level"] then
-		return 1 < 0
+	if table_to_sort[a].level ~= table_to_sort[b].level then
+		return table_to_sort[a].level < table_to_sort[b].level
 	else
-		return table_to_sort[a]["xp"] < table_to_sort[b]["xp"]
+		return table_to_sort[a].xp < table_to_sort[b].xp
 	end
 end
 
 -- Sort function to sort per reverse total XP
 function PCSortByRevXP(a,b)
 	-- First per level
-	if table_to_sort[b]["level"] < table_to_sort[a]["level"] then
-		return 0 < 1
-	elseif table_to_sort[b]["level"] > table_to_sort[a]["level"] then
-		return 1 < 0
+	if table_to_sort[b].level ~= table_to_sort[a].level then
+		return table_to_sort[b].level < table_to_sort[a].level
 	else
-		return table_to_sort[b]["xp"] < table_to_sort[a]["xp"]
+		return table_to_sort[b].xp < table_to_sort[a].xp
 	end
 end
 
@@ -1535,10 +1543,8 @@ function PCSortByRestedXP(a,b)
     
     AllPlayed:Debug("PCSortByRestedXP: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
-    if estimated_rested_xp_a < estimated_rested_xp_b then
-        return 0 < 1
-    elseif estimated_rested_xp_a > estimated_rested_xp_b then
-        return 1 < 0
+    if estimated_rested_xp_a ~= estimated_rested_xp_b then
+        return estimated_rested_xp_a < estimated_rested_xp_b
     else
         return a < b
     end
@@ -1575,10 +1581,8 @@ function PCSortByRevRestedXP(a,b)
     
     AllPlayed:Debug("PCSortByRestedXP: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
-    if estimated_rested_xp_b < estimated_rested_xp_a then
-        return 0 < 1
-    elseif estimated_rested_xp_b > estimated_rested_xp_a then
-        return 1 < 0
+    if estimated_rested_xp_b ~= estimated_rested_xp_a then
+        return estimated_rested_xp_b < estimated_rested_xp_a
     else
         return a < b
     end
@@ -1616,11 +1620,9 @@ function PCSortByPercentRest(a,b)
     AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
     if estimated_rested_xp_a / table_to_sort[a].max_rested_xp
-       < estimated_rested_xp_b / table_to_sort[b].max_rested_xp then
-        return 0 < 1
-    elseif estimated_rested_xp_a / table_to_sort[a].max_rested_xp
-           > estimated_rested_xp_b / table_to_sort[b].max_rested_xp then
-        return 1 < 0
+       ~= estimated_rested_xp_b / table_to_sort[b].max_rested_xp then
+        return estimated_rested_xp_a / table_to_sort[a].max_rested_xp
+       			< estimated_rested_xp_b / table_to_sort[b].max_rested_xp
     elseif estimated_rested_xp_a ~= estimated_rested_xp_b then
     	return estimated_rested_xp_a < estimated_rested_xp_b
     else
@@ -1660,16 +1662,32 @@ function PCSortByRevPercentRest(a,b)
     AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
     if estimated_rested_xp_b / table_to_sort[b].max_rested_xp
-       < estimated_rested_xp_a / table_to_sort[a].max_rested_xp then
-        return 0 < 1
-    elseif estimated_rested_xp_b / table_to_sort[b].max_rested_xp
-           > estimated_rested_xp_a / table_to_sort[a].max_rested_xp then
-        return 1 < 0
-    elseif estimated_rested_xp_a ~= estimated_rested_xp_b then
+       ~= estimated_rested_xp_a / table_to_sort[a].max_rested_xp then
+        return estimated_rested_xp_b / table_to_sort[b].max_rested_xp
+       			< estimated_rested_xp_a / table_to_sort[a].max_rested_xp
+    elseif estimated_rested_xp_b ~= estimated_rested_xp_a then
     	return estimated_rested_xp_b < estimated_rested_xp_a
     else
         return a < b
     end
+end
+
+-- Sort funciton to sort per money
+function PCSortByCoin(a,b)
+	if table_to_sort[a].coin ~= table_to_sort[b].coin then
+		return table_to_sort[a].coin < table_to_sort[b].coin
+	else
+		return a < b
+	end
+end
+
+-- Sort funciton to sort per reverse money
+function PCSortByRevCoin(a,b)
+	if table_to_sort[a].coin ~= table_to_sort[b].coin then
+		return table_to_sort[a].coin < table_to_sort[b].coin
+	else
+		return a < b
+	end
 end
 
 

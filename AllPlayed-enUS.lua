@@ -55,6 +55,8 @@ L:RegisterTranslations("enUS", function()
         ["By reverse rested XP"]										= true,
         ["By % rested"]													= true,
         ["By reverse % rested"]											= true,
+        ["By money"]													= true,
+        ["By reverse money"]											= true,
         ["Font Size"]													= true,
         ["Select the font size"]										= true,
         ["Opacity"]      												= true,
