@@ -248,20 +248,28 @@ local command_options = {
 					set       = "SetSortType",
 					validate  = { 
 								  ["alpha"] 			= L["By name"],
-								  ["rev-alpha"]			= L["By reverse name"],
+--								  ["rev-alpha"]			= L["By reverse name"],
 								  ["level"] 			= L["By level"], 
-								  ["rev-level"] 		= L["By reverse level"],
+--								  ["rev-level"] 		= L["By reverse level"],
 								  ["xp"]				= L["By experience"],
-								  ["rev-xp"]			= L["By reverse experience"],
+--								  ["rev-xp"]			= L["By reverse experience"],
 								  ["rested_xp"]			= L["By rested XP"],
-								  ["rev-rested_xp"]		= L["By reverse rested XP"],
+--								  ["rev-rested_xp"]		= L["By reverse rested XP"],
 								  ["percent_rest"]		= L["By % rested"],
-								  ["rev-percent_rest"]	= L["By reverse % rested"],
+--								  ["rev-percent_rest"]	= L["By reverse % rested"],
 								  ["coin"]				= L["By money"],
-								  ["rev-coin"]			= L["By reverse money"]
+--								  ["rev-coin"]			= L["By reverse money"]
 					},
 					order     = 1,
 				},
+                reverse_sort = {
+                    name      = L["Sort in reverse order"],
+                    desc      = L["Use the curent sort type in reverse order"],
+                    type      = 'toggle',
+                    get       = "GetIsSortReverse",
+                    set       = "SetIsSortReverse",
+                    order     = 2,
+                },
 			}, order = 2
 		},
         ignore = {
@@ -543,9 +551,9 @@ function AllPlayed:FillTablet()
         -- all PC in the faction are ingored.
         if ((self.db.profile.options.all_factions or self.faction == faction)
             and self.total.time_played ~= 0
-            and self.sort_faction_realm[self:GetSortType()][faction]
+            and self.sort_faction_realm[self.db.profile.options.sort_type][faction]
         ) then
-            for _, realm in ipairs(self.sort_faction_realm[self:GetSortType()][faction]) do
+            for _, realm in ipairs(self.sort_faction_realm[self.db.profile.options.sort_type][faction]) do
                 -- We do not print the realm if no option to select it is on
                 -- and if the time played for the realm = 0 since this means
                 -- all PC in the realm are ingored.
@@ -585,7 +593,7 @@ function AllPlayed:FillTablet()
                        'text', text_realm
                     )
                 
-                    for _, pc in ipairs(self.sort_realm_pc[self:GetSortType()][faction][realm]) do
+                    for _, pc in ipairs(self.sort_realm_pc[self.db.profile.options.sort_type][faction][realm]) do
                         if (not self.db.account.data[faction][realm][pc].is_ignored) then
                             -- Seconds played are still going up for the current PC
                             local seconds_played = self:EstimateTimePlayed(
@@ -1108,18 +1116,60 @@ end
 function AllPlayed:GetSortType()
     self:Debug("AllPlayed:GetSortType: ", self.db.profile.options.sort_type)
     
-    return self.db.profile.options.sort_type
+    if self:GetIsSortReverse() then
+    	return string.sub(self.db.profile.options.sort_type, 5)
+    else
+		return self.db.profile.options.sort_type
+    end
+    
 end
 
 -- Set the value of sort_type
 function AllPlayed:SetSortType( value )
     self:Debug("AllPlayed:SetSortType: old %s, new %s", self.db.profile.options.sort_type, value )
     
-    self.db.profile.options.sort_type = value
+    if self:GetIsSortReverse() then
+    	self.db.profile.options.sort_type = "rev-" .. value
+    else
+    	self.db.profile.options.sort_type = value
+    end
 
     -- Refesh
     self:Update()
 end
+
+-- Get the value of "rev-" in sort_type
+function AllPlayed:GetIsSortReverse()
+    self:Debug("AllPlayed:GetSortType: ", self.db.profile.options.sort_type)
+    
+    if string.find(self.db.profile.options.sort_type, "rev-") == 1 then
+    	return true
+    else
+    	return false
+    end
+end
+
+-- Set the value of "rev-" in sort_type
+function AllPlayed:SetIsSortReverse( value )
+    self:Debug("AllPlayed:SetSortType: old %s, new %s", self.db.profile.options.sort_type, value )
+    
+    local sort_type
+    if self:GetIsSortReverse() then
+        sort_type = string.sub(self.db.profile.options.sort_type,5)
+    else
+    	sort_type = self.db.profile.options.sort_type
+    end
+    
+    if value then
+    	self.db.profile.options.sort_type = "rev-" .. sort_type
+    else
+    	self.db.profile.options.sort_type = sort_type
+    end
+
+    -- Refesh
+    self:Update()
+end
+
 
 -- Get the value of font_size
 function AllPlayed:GetFontSize()
@@ -1683,8 +1733,8 @@ end
 
 -- Sort funciton to sort per reverse money
 function PCSortByRevCoin(a,b)
-	if table_to_sort[a].coin ~= table_to_sort[b].coin then
-		return table_to_sort[a].coin < table_to_sort[b].coin
+	if table_to_sort[b].coin ~= table_to_sort[a].coin then
+		return table_to_sort[b].coin < table_to_sort[a].coin
 	else
 		return a < b
 	end

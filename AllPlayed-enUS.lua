@@ -57,6 +57,8 @@ L:RegisterTranslations("enUS", function()
         ["By reverse % rested"]											= true,
         ["By money"]													= true,
         ["By reverse money"]											= true,
+        ["Sort in reverse order"]										= true,
+        ["Use the curent sort type in reverse order"]					= true,
         ["Font Size"]													= true,
         ["Select the font size"]										= true,
         ["Opacity"]      												= true,
