@@ -248,17 +248,12 @@ local command_options = {
 					set       = "SetSortType",
 					validate  = { 
 								  ["alpha"] 			= L["By name"],
---								  ["rev-alpha"]			= L["By reverse name"],
 								  ["level"] 			= L["By level"], 
---								  ["rev-level"] 		= L["By reverse level"],
 								  ["xp"]				= L["By experience"],
---								  ["rev-xp"]			= L["By reverse experience"],
 								  ["rested_xp"]			= L["By rested XP"],
---								  ["rev-rested_xp"]		= L["By reverse rested XP"],
 								  ["percent_rest"]		= L["By % rested"],
---								  ["rev-percent_rest"]	= L["By reverse % rested"],
 								  ["coin"]				= L["By money"],
---								  ["rev-coin"]			= L["By reverse money"]
+								  ["time_played"]		= L["By time played"],
 					},
 					order     = 1,
 				},
@@ -1407,7 +1402,9 @@ function AllPlayed:BuildSortTables()
 								["percent_rest"] = {},
 								["rev-percent_rest"] = {},
 								["coin"] = {},
-								["rev-coin"] = {}
+								["rev-coin"] = {},
+								["time_played"] = {},
+								["rev-time_played"] = {}
 	}
 	self.sort_realm_pc = {  ["alpha"] = {}, 
 							["rev-alpha"] = {}, 
@@ -1420,7 +1417,9 @@ function AllPlayed:BuildSortTables()
 							["percent_rest"] = {},
 							["rev-percent_rest"] = {},
 							["coin"] = {},
-							["rev-coin"] = {}
+							["rev-coin"] = {},
+							["time_played"] = {},
+							["rev-time_played"] = {}
 	}
 
 	for faction, faction_table in pairs(self.db.account.data) do
@@ -1451,6 +1450,10 @@ function AllPlayed:BuildSortTables()
 			= self.sort_faction_realm["alpha"][faction]
 		self.sort_faction_realm["rev-coin"][faction]
 			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["time_played"][faction]
+			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["rev-time_played"][faction]
+			= self.sort_faction_realm["alpha"][faction]
 
 		-- Reset the pc tables
 		self.sort_realm_pc["alpha"][faction]        	= {}
@@ -1465,6 +1468,8 @@ function AllPlayed:BuildSortTables()
 		self.sort_realm_pc["rev-percent_rest"][faction] = {}
 		self.sort_realm_pc["coin"][faction]     		= {}
 		self.sort_realm_pc["rev-coin"][faction] 		= {}
+		self.sort_realm_pc["time_played"][faction]     	= {}
+		self.sort_realm_pc["rev-time_played"][faction] 	= {}
 
 		for realm, realm_table in pairs(faction_table) do
 			-- PC in each realm are alpha sorted by name
@@ -1492,6 +1497,10 @@ function AllPlayed:BuildSortTables()
 				= buildSortedTable( realm_table, PCSortByCoin )
 			self.sort_realm_pc["rev-coin"][faction][realm]
 				= buildSortedTable( realm_table, PCSortByRevCoin )
+			self.sort_realm_pc["time_played"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByTimePlayed )
+			self.sort_realm_pc["rev-time_played"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByRevTimePlayed )
 				
 		end
 
@@ -1735,6 +1744,24 @@ end
 function PCSortByRevCoin(a,b)
 	if table_to_sort[b].coin ~= table_to_sort[a].coin then
 		return table_to_sort[b].coin < table_to_sort[a].coin
+	else
+		return a < b
+	end
+end
+
+-- Sort funciton to sort per time played
+function PCSortByTimePlayed(a,b)
+	if table_to_sort[a].seconds_played ~= table_to_sort[b].seconds_played then
+		return table_to_sort[a].seconds_played < table_to_sort[b].seconds_played
+	else
+		return a < b
+	end
+end
+
+-- Sort funciton to sort per reverse time played
+function PCSortByRevTimePlayed(a,b)
+	if table_to_sort[b].seconds_played ~= table_to_sort[a].seconds_played then
+		return table_to_sort[b].seconds_played < table_to_sort[a].seconds_played
 	else
 		return a < b
 	end
