@@ -21,6 +21,8 @@ L:RegisterTranslations("enUS", function()
         ["All realms will de displayed"]                        		= true, 
         ["Show Seconds"]                                        		= true, 
         ["Display the seconds in the time strings"]             		= true, 
+        ["Show Gold"]                                    				= true,
+        ["Display the gold each character pocess"]     					= true,
         ["Show XP Progress"]                                    		= true,
         ["Display the level fraction based on curent XP"]       		= true,
         ["Show XP total"]												= true,
@@ -71,7 +73,7 @@ L:RegisterTranslations("enUS", function()
         -- Strings
         ["v%s - %s (Type /ap for help)"]                        		= true, 
         ["%s characters "]                                      		= true, 
-        [" : %d rested XP"]                                     		= true, 
+        ["%d rested XP"]                                     			= true, 
         ["rested"]                                       		        = true, 
         ["Total %s Time Played: "]                              		= true, 
         ["Total %s Cash Value: "]                               		= true, 

@@ -89,6 +89,7 @@ AllPlayed:RegisterDefaults('profile', {
     options = {
         all_factions                = true,
         all_realms                  = true,
+        show_coins					= true,
         show_seconds                = true,
         show_progress               = true,
         show_rested_xp              = true,
@@ -137,6 +138,14 @@ local command_options = {
                     set       = "SetShowSeconds",
                     order     = 3,
                 },
+                show_coins = {
+                    name      = L["Show Gold"],
+                    desc      = L["Display the gold each character pocess"],
+                    type      = 'toggle',
+                    get       = "GetShowCoins",
+                    set       = "SetShowCoins",
+                    order     = 4,
+                },
 
                 show_progress = {
                     name      = L["Show XP Progress"],
@@ -144,7 +153,7 @@ local command_options = {
                     type      = 'toggle',
                     get       = "GetShowProgress",
                     set       = "SetShowProgress",
-                    order     = 4,
+                    order     = 5,
                 },
                 show_xp_total = {
                     name      = L["Show XP total"],
@@ -152,7 +161,7 @@ local command_options = {
                     type      = 'toggle',
                     get       = "GetShowXPTotal",
                     set       = "SetShowXPTotal",
-                    order     = 5,
+                    order     = 6,
                 },
                 show_location = {
                     name      = L["Show Location"],
@@ -165,7 +174,7 @@ local command_options = {
                                   ["sub"]       = L["Show subzone"], 
                                   ["loc/sub"]   = L["Show zone/subzone"] 
                     },
-                    order     = 6,
+                    order     = 7,
                 },
                 rested_xp = {
                     type = 'group', name = L["Rested XP"], desc = L["Set the rested XP options"], args = {
@@ -195,7 +204,7 @@ local command_options = {
                             order = 3,
                          },
                     },
-                    order     = 7,
+                    order     = 8,
                 },
                 show_class_name = {
                     name      = L["Show Class Name"],
@@ -203,7 +212,7 @@ local command_options = {
                     type      = 'toggle',
                     get       = "GetShowClassName",
                     set       = "SetShowClassName",
-                    order     = 8,
+                    order     = 9,
                 },
                 colorize_class = {
                     name      = L["Colorize Class"],
@@ -211,7 +220,7 @@ local command_options = {
                     type      = 'toggle',
                     get       = "GetColourClass",
                     set       = "SetColourClass",
-                    order     = 9,
+                    order     = 10,
                 },
                 font_size = {
                     name      = L["Font Size"],
@@ -222,7 +231,7 @@ local command_options = {
                     step      = 1,
                     get       = "GetFontSize",
                     set       = "SetFontSize",
-                    order     = 10,
+                    order     = 11,
                 },
                 opacity = {
                     name      = L["Opacity"],
@@ -234,7 +243,7 @@ local command_options = {
                     isPercent = true,
                     get       = "GetOpacity",
                     set       = "SetOpacity",
-                    order     = 11,
+                    order     = 12,
                 },
             }, order = 1
         },
@@ -323,10 +332,12 @@ function AllPlayed:OnEnable()
     self:RegisterEvent("TIME_PLAYED_MSG",       "OnTimePlayedMsg")
     self:RegisterEvent("PLAYER_LEVEL_UP",       "EventHandlerWithSort")
     self:RegisterEvent("PLAYER_XP_UPDATE",      "EventHandlerWithSort")
-    self:RegisterEvent("PLAYER_MONEY",          "EventHandler")
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "EventHandler")
     self:RegisterEvent("ZONE_CHANGED",          "EventHandler")
     self:RegisterEvent("MINIMAP_ZONE_CHANGED",  "EventHandler")
+    if(self:GetShowCoins()) then
+    	self:RegisterEvent("PLAYER_MONEY",      "EventHandler")
+    end
     
     -- Hook the functions that need hooking
     -- (hook removal is done automagicaly by ACE)
@@ -341,7 +352,7 @@ function AllPlayed:OnEnable()
     -- Initial update of values
     
     -- Is BC installed
-    if(self.db.profile.options.bc_installed) then
+    if(self:GetIsBCInstalled()) then
     	self.max_pc_level = 70
     else
     	self.max_pc_level = 60
@@ -518,10 +529,20 @@ function AllPlayed:FillTablet()
     
 --    local estimated_rested_xp 	= 0
     local first_category 		= true
-    local nb_columns = 2
+    local nb_columns = 1
     
+    -- Is the Location column needed?
     if self:GetShowLocation() ~= "none" then
-        nb_columns = 3
+        nb_columns = nb_columns + 1
+    end
+    
+    -- Is the gold/rested XP column needed?
+    if self:GetShowCoins() 
+       	or self:GetShowXPTotal() 
+       	or self:GetShowRestedXP()
+       	or self:GetShowRestedXPCountdown() 
+       	or self:GetPercentRest() ~= "0" then
+        nb_columns = nb_columns + 1
     end
 
     -- Set the title for the table (just when using FuBar
@@ -558,13 +579,18 @@ function AllPlayed:FillTablet()
                     --self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
                     
                     -- Build the Realm aggregated line
-                    local text_realm = string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s : ") .. "%s" ,
+                    local text_realm = string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s"),
                                                       realm,
-                                                      self:FormatTime(self.total_realm[faction][realm].time_played),
-                                                      FormatMoney(self.total_realm[faction][realm].coin)
+                                                      self:FormatTime(self.total_realm[faction][realm].time_played)
                                       )
-                    if self.db.profile.options.show_xp_total then
-                        text_realm = string.format( "%s " .. C:Green(": %s"),
+                    if self:GetShowCoins() then
+                    	text_realm = string.format( "%s " .. C:Green(" : ") .. "%s",
+                    								text_realm,
+                    								FormatMoney(self.total_realm[faction][realm].coin)
+                    				 )
+                    end
+                    if self:GetShowXPTotal() then
+                        text_realm = string.format( "%s " .. C:Green(" : %s"),
                                                     text_realm,
                                                     FormatXP(self.total_realm[faction][realm].xp)
                                      )
@@ -635,7 +661,10 @@ function AllPlayed:FillTablet()
 							end
 							
                             
-                            local text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
+                            local text_coin = ""
+                            if self:GetShowCoins() then
+                            	text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
+                            end
                             
                             if self.db.account.data[faction][realm][pc].level < self.max_pc_level and 
                                (self.db.account.data[faction][realm][pc].level > 1 or
@@ -654,7 +683,8 @@ function AllPlayed:FillTablet()
                             
                                 -- Do we need to show the rested XP for the character?
                                 if self:GetShowRestedXP() then
-                                    text_coin = text_coin .. string.format( FactionColour( faction, L[" : %d rested XP"] ),
+                                	if text_coin ~= "" then text_coin = text_coin .. FactionColour( faction, " : " ) end
+                                    text_coin = text_coin .. string.format( FactionColour( faction, L["%d rested XP"] ),
                                                                             estimated_rested_xp
                                                              )
                                 end
@@ -692,14 +722,22 @@ function AllPlayed:FillTablet()
                                 end
                             end
                             
-                            if text_location ~= "" then
+                            if text_location ~= "" and text_coin ~= "" then
                             	cat:AddLine( 'text',  text_pc,
                             				 'text2', text_location,
                             				 'text3', text_coin
                         		)
-                            else
+                        	elseif text_location ~= "" and text_coin == "" then
+                            	cat:AddLine( 'text',  text_pc,
+                            				 'text2', text_location
+                                )
+                            elseif text_location == "" and text_coin ~= "" then
                             	cat:AddLine( 'text',  text_pc,
                             	             'text2', text_coin
+                            	)
+                            else
+                            	cat:AddLine( 'text',  text_pc
+--                            	             'text2', ''
                             	)
                             end
                         end
@@ -719,12 +757,15 @@ function AllPlayed:FillTablet()
         'text',  C:Orange( L["Total Time Played: "] ),
         'text2', C:Yellow( self:FormatTime(self.total.time_played) )
     )
-    cat:AddLine(
-        'text',  C:Orange( L["Total Cash Value: "] ),
-        'text2', FormatMoney(self.total.coin)
-    )
     
-    if self.db.profile.options.show_xp_total then
+    if self:GetShowCoins() then
+		cat:AddLine(
+			'text',  C:Orange( L["Total Cash Value: "] ),
+			'text2', FormatMoney(self.total.coin)
+		)
+    end
+    
+    if self:GetShowXPTotal() then
        cat:AddLine(
            'text',  C:Orange( L["Total XP: "] ),
            'text2', C:Yellow( FormatXP(self.total.xp) )
@@ -904,6 +945,30 @@ function AllPlayed:SetAllRealms( value )
     self:Update()
 end
 
+-- Get the value of show_coins
+function AllPlayed:GetShowCoins()
+    self:Debug("AllPlayed:GetShowCoins: ", self.db.profile.options.show_coins)
+    
+    return self.db.profile.options.show_coins
+end
+
+-- Set the value of show_coins
+function AllPlayed:SetShowCoins( value )
+    self:Debug("AllPlayed:SetShowCoins: old %s, new %s", self.db.profile.options.show_coins, value )
+    
+    self.db.profile.options.show_coins = value
+    
+    -- Set activate or disactivate the PLAYER_MONEY event
+	if value then
+	   	self:RegisterEvent("PLAYER_MONEY", "EventHandler")
+	else
+	   	self:UnregisterEvent("PLAYER_MONEY")
+	end
+
+    -- Refesh
+    self:Update()
+end
+
 -- Get the value for show_seconds
 function AllPlayed:GetShowSeconds()
     self:Debug("AllPlayed:GetShowSeconds: ", self.db.profile.options.show_seconds)
@@ -930,11 +995,6 @@ function AllPlayed:SetShowSeconds( value )
     -- If there is a timer active, we change the rate
     if metro:MetroStatus(self.name) then
         metro:ChangeMetroRate( self.name, self.db.profile.options.refresh_rate )
---        if self.is_fubar_loaded then
---            self:Update()
---        else
---            self:TimerUpdate()
---        end
     end
     
     -- Refesh
