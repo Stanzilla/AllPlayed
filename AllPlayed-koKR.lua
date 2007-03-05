@@ -15,8 +15,8 @@ L:RegisterTranslations("koKR", function()
         -- Menus
         ["Display"]                                             		= "보기 설정", 
         ["Set the display options"]                             		= "보기 설정", 
-        ["All Factions"]                                        		= "모든 평판", 
-        ["All factions will be displayed"]                      		= "모든 평판을 표시합니다.", 
+        ["All Factions"]                                        		= "모든 진영", 
+        ["All factions will be displayed"]                      		= "모든 진영을 표시합니다.", 
         ["All Realms"]                                          		= "모든 서버", 
         ["All realms will de displayed"]                        		= "모든 서버를 표시합니다.", 
         ["Show Seconds"]                                        		= "초단위 보기", 
