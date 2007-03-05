@@ -42,4 +42,5 @@ libs\FuBarPlugin-2.0\FuBarPlugin-2.0.lua
 libs\Metrognome-2.0\Metrognome-2.0.lua
 
 AllPlayed-enUS.lua
+AllPlayed-koKR.lua
 AllPlayed.lua
