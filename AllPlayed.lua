@@ -104,6 +104,13 @@ AllPlayed:RegisterDefaults('profile', {
         font_size					= 12,
         opacity						= .8,
         sort_type					= "alpha",
+        is_ignored = {
+        	-- Realm
+        	['*'] = {
+        		-- Name
+        		['*'] = false,
+        	},
+        },
     },
 })
 
@@ -276,12 +283,21 @@ local command_options = {
                 },
 			}, order = 2
 		},
+--[[		
         ignore = {
             name    = L["Ignore"],
             desc    = L["Ignore the current PC"],
             type    = 'toggle',
             get     = "GetIsIgnored",
             set     = "SetIsIgnored",
+            order   = 3
+        },
+]]--
+        ignore = {
+            name    = L["Ignore Characters"],
+            desc    = L["Hide characters from display"],
+            type    = 'group',
+            args    = {}, 			-- Will be set in OnEnable
             order   = 3
         },
         bc_installed = {
@@ -363,6 +379,23 @@ function AllPlayed:OnEnable()
     
     -- Get the values for the current character
     self:SaveVar()
+    
+    -- Initialise the is_ignored option table
+    for faction, faction_table in pairs(self.db.account.data) do
+        for realm, realm_table in pairs(faction_table) do
+        	for pc, _ in pairs(realm_table) do
+        		local pc_name = realm .. " : " .. pc
+        		command_options.args.ignore.args[pc_name] = {
+        			name = pc_name,
+        			desc = string.format(L["Hide %s of %s from display"], pc, realm),
+        			type = 'toggle',
+        			get  = function() return self:GetIsCharIgnored(realm, pc) end,
+        			set  = function(value) self:SetIsCharIgnored(realm, pc, value) end
+        		}
+        	end
+        end
+    end
+    
     
     -- Build the sorting tables 
   	self:BuildSortTables()
@@ -468,7 +501,8 @@ function AllPlayed:ComputeTotal()
             self.total_realm[faction][realm].coin = 0
             self.total_realm[faction][realm].xp = 0
             for pc, pc_table in pairs(realm_table) do
-                if not pc_table.is_ignored then
+--                if not pc_table.is_ignored then
+                if not self:GetIsCharIgnored(realm, pc) then
 					-- Need to get the current seconds_played for the PC
 					local seconds_played = self:EstimateTimePlayed(pc, 
 																   realm, 
@@ -615,7 +649,8 @@ function AllPlayed:FillTablet()
                     )
                 
                     for _, pc in ipairs(self.sort_realm_pc[self.db.profile.options.sort_type][faction][realm]) do
-                        if (not self.db.account.data[faction][realm][pc].is_ignored) then
+--                        if (not self.db.account.data[faction][realm][pc].is_ignored) then
+                        if not self:GetIsCharIgnored(realm, pc) then
                             -- Seconds played are still going up for the current PC
                             local seconds_played = self:EstimateTimePlayed(
                                                         pc, 
@@ -1259,6 +1294,31 @@ function AllPlayed:SetOpacity( value )
     -- Update the tablet transparency
     tablet:SetTransparency(self:GetFrame(), value)
 
+    -- Refesh
+    self:Update()
+end
+
+-- Vefiry if a character should be ignore when displayed and counter
+function AllPlayed:GetIsCharIgnored( realm, name )
+    self:Debug("AllPlayed:GetIsCharIgnored: %s, %s, %s", 
+    			realm, 
+    			name, 
+    			self.db.profile.options.is_ignored[realm][name]
+    )
+
+	return self.db.profile.options.is_ignored[realm][name]
+end
+
+-- Set the value the is_ignored value for a particular character
+function AllPlayed:SetIsCharIgnored( realm, name, value )
+    self:Debug("AllPlayed:GetIsCharIgnored: %s, %s, %s", 
+    			realm, 
+    			name, 
+    			self.db.profile.options.is_ignored[realm][name]
+    )
+
+	self.db.profile.options.is_ignored[realm][name] = value
+	
     -- Refesh
     self:Update()
 end
