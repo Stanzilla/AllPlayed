@@ -381,6 +381,7 @@ function AllPlayed:OnEnable()
     self:SaveVar()
     
     -- Initialise the is_ignored option table
+    command_options.args.ignore.args = {}
     for faction, faction_table in pairs(self.db.account.data) do
         for realm, realm_table in pairs(faction_table) do
         	for pc, _ in pairs(realm_table) do
@@ -1397,13 +1398,13 @@ function FormatXP(xp)
    
    if xp > 1000000 then
       -- Millions of XP
-      display_xp = string.format( "%.1f M XP", xp / 1000000 )
+      display_xp = string.format( L["%.1f M XP"], xp / 1000000 )
    elseif xp > 1000 then
       -- Thousands of XP
-      display_xp = string.format( "%.1f K XP", xp / 1000 )
+      display_xp = string.format( L["%.1f K XP"], xp / 1000 )
    else
       -- Very few XP
-      display_xp = string.format( "%d XP" , xp )
+      display_xp = string.format( L["%d XP"] , xp )
    end
    
    return display_xp

@@ -3,7 +3,10 @@
 ## X-eMail: laotseu.ace@gmail.com
 ## Title: AllPlayed |cff7fff7f -Ace2-|r
 ## Notes: Track time played, rested XP and money for all characters
-## Version: 20003-4.$Revision$
+## Version: 20003-5.$Revision$
+
+## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon
+## X-Credits: Thanks to next96 for the koKR localization
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
 ## X-Beta-Download: http://files.wowace.com/AllPlayed/
 ## X-RelSite-WoWI: 6158
@@ -11,9 +14,10 @@
 ## X-RelSite-UI.WoW: 3485
 ## X-Category: Interface Enhancements
 ## X-Date: $Date$
-## DefaultState: enabled
 
 ## $Id$
+
+## DefaultState: enabled
 
 ## OptionalDeps: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0, FuBar
 ## X-Embeds: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0

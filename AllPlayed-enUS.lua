@@ -82,6 +82,9 @@ L:RegisterTranslations("enUS", function()
         ["Total Cash Value: "]                                  		= true, 
         ["Total XP: "]													= true,
         ["Unknown"]														= true,
+        ["%.1f M XP"]													= true,
+        ["%.1f K XP"]													= true,
+        ["%d XP"]														= true,
 
         -- Console commands
         ["/allplayed"]                                          		= true, 
