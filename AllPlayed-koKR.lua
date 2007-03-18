@@ -62,9 +62,9 @@ L:RegisterTranslations("koKR", function()
         ["% opacity of the tooltip background"]					= "툴팁 배경의 투명도를 변경합니다.",
         ["Sort"]								= "정렬",
         ["Set the sort options"]						= "정렬 방법",
-
-        ["Ignore"]                                              		= "현재캐릭터 숨김", 
-        ["Ignore the current PC"]                               		= "현재 접속하고 있는 캐릭터는 숨깁니다.", 
+        ["Ignore Characters"]                                      		= "무시할 캐릭터", 
+        ["Hide characters from display"]                           		= "현재 캐릭터를 표시하지 않습니다.", 
+        ["Hide %s of %s from display"]									= "%s ($s 서버) 캐릭터를 숨깁니다.",
         ["BC Installed?"]                                          		= "확장팩 설치?", 
         ["Is the Burning Crusade expansion installed?"]            		= "확장팩이 설치되어 있나요?", 
         ["Close"]                                               		= "닫기", 
