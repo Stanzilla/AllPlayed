@@ -82,6 +82,9 @@ L:RegisterTranslations("koKR", function()
         ["Total Cash Value: "]                                  		= "총 금액: ", 
         ["Total XP: "]								= "총 경험치: ",
         ["Unknown"]								= "알 수 없음",
+        ["%.1f M XP"]								= "%.1f 백만 경험치",
+        ["%.1f K XP"]								= "%.1f 천 경험치",
+        ["%d XP"]								= "%d 겅험치",
 
         -- Console commands
 --      ["/allplayed"]                                          		= true, 
