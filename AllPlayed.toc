@@ -5,13 +5,13 @@
 ## Notes: Track time played, rested XP and money for all characters
 ## Version: 20003-5.$Revision$
 
-## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon
-## X-Credits: Thanks to next96 for the koKR localization
+## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96 for the koKR localization
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
 ## X-Beta-Download: http://files.wowace.com/AllPlayed/
-## X-RelSite-WoWI: 6158
-## X-RelSite-Curse: 4814
-## X-RelSite-UI.WoW: 3485
+## X-AceForum: http://www.wowace.com/forums/index.php?topic=2042.0
+## X-RelSite-UI.Wow: http://ui.worldofwar.net/ui.php?id=3485
+## X-RelSite-WoWI: http://www.wowinterface.com/downloads/info6158-AllPlayed.html
+## X-RelSite-Curse: http://wow-en.curse-gaming.com/downloads/details/4814/allplayed/
 ## X-Category: Interface Enhancements
 ## X-Date: $Date$
 
@@ -19,8 +19,8 @@
 
 ## DefaultState: enabled
 
-## OptionalDeps: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0, FuBar
-## X-Embeds: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0
+## OptionalDeps: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0, FuBar, Babble-2.2
+## X-Embeds: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, Metrognome, FuBarPlugin-2.0, Babble-2.2
 
 ## SavedVariables: AllPlayedDB
 
@@ -44,6 +44,7 @@ libs\Abacus-2.0\Abacus-2.0.lua
 libs\Crayon-2.0\Crayon-2.0.lua
 libs\FuBarPlugin-2.0\FuBarPlugin-2.0.lua
 libs\Metrognome-2.0\Metrognome-2.0.lua
+libs\Babble-Class-2.2\Babble-Class-2.2.lua
 
 AllPlayed-enUS.lua
 AllPlayed-koKR.lua

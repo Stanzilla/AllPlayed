@@ -9,18 +9,6 @@
 -- Ten days in second, needed to estimate the rested XP
 local TEN_DAYS  = 60 * 60 * 24 * 10
 
--- Class colours
-local CLASS_COLOURS = {}
-CLASS_COLOURS['DRUID']      = "ff7d0a"
-CLASS_COLOURS['HUNTER']     = "abd473"
-CLASS_COLOURS['MAGE']       = "69ccf0"
-CLASS_COLOURS['PALADIN']    = "f58cba"
-CLASS_COLOURS['PRIEST']     = "ffffff"
-CLASS_COLOURS['ROGUE']      = "fff569"
-CLASS_COLOURS['SHAMAN']     = "00dbba"
-CLASS_COLOURS['WARLOCK']    = "9482ca"
-CLASS_COLOURS['WARRIOR']    = "c79c6e"
-
 
 -- Load external libraries 
 
@@ -36,6 +24,21 @@ local metro = AceLibrary("Metrognome-2.0")
 local tablet = AceLibrary("Tablet-2.0")
 -- dewdrop is for the menu functions (only needed if FuBar is not there)
 local dewdrop = AceLibrary("Dewdrop-2.0")
+-- babble-class is here just to get the offical raid class colours
+local BC = AceLibrary("Babble-Class-2.2")
+
+-- Class colours
+local CLASS_COLOURS = {}
+CLASS_COLOURS['DRUID']      = BC:GetHexColor("DRUID")
+CLASS_COLOURS['HUNTER']     = BC:GetHexColor("HUNTER")
+CLASS_COLOURS['MAGE']       = BC:GetHexColor("MAGE")
+CLASS_COLOURS['PALADIN']    = BC:GetHexColor("PALADIN")
+CLASS_COLOURS['PRIEST']     = BC:GetHexColor("PRIEST")
+CLASS_COLOURS['ROGUE']      = BC:GetHexColor("ROGUE")
+CLASS_COLOURS['SHAMAN']     = BC:GetHexColor("SHAMAN")
+CLASS_COLOURS['WARLOCK']    = BC:GetHexColor("WARLOCK")
+CLASS_COLOURS['WARRIOR']    = BC:GetHexColor("WARRIOR")
+
 
 local tabletParent = "AllPlayedTabletParent"
 
