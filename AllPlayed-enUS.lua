@@ -5,6 +5,7 @@ local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 -- This is only a place-holder for future possible localisation files
 L:RegisterTranslations("enUS", function()
     return {
+
         -- Faction names 
         ["Alliance"]                                            		= true,
         ["Horde"]                                               		= true, 
@@ -13,6 +14,7 @@ L:RegisterTranslations("enUS", function()
         ["All Played Breakdown"]                                		= true, 
 
         -- Menus
+    	["AllPlayed Configuration"]										= true,
         ["Display"]                                             		= true, 
         ["Set the display options"]                             		= true, 
         ["All Factions"]                                        		= true, 
@@ -45,6 +47,8 @@ L:RegisterTranslations("enUS", function()
         ["Show zone/subzone"]											= true,
         ["Colorize Class"]                                      		= true,
         ["Colorize the character name based on class"]          		= true,
+        ["Use Old Shaman Colour"]										= true,
+        ["Use the pre-210 patch colour for the Shaman class"]			= true,
         ["Sort Type"]													= true,
         ["Select the sort type"]										= true,
         ["By name"]														= true,
@@ -89,6 +93,8 @@ L:RegisterTranslations("enUS", function()
         -- Console commands
         ["/allplayed"]                                          		= true, 
         ["/ap"]                                                 		= true, 
+        ["/allplayedcl"]                                          		= true, 
+        ["/apcl"]                                                 		= true, 
 
     }
 end)

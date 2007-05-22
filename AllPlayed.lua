@@ -39,6 +39,8 @@ CLASS_COLOURS['SHAMAN']     = BC:GetHexColor("SHAMAN")
 CLASS_COLOURS['WARLOCK']    = BC:GetHexColor("WARLOCK")
 CLASS_COLOURS['WARRIOR']    = BC:GetHexColor("WARRIOR")
 
+CLASS_COLOURS['PRE-210-SHAMAN'] = "00dbba"
+
 
 local tabletParent = "AllPlayedTabletParent"
 
@@ -101,9 +103,10 @@ AllPlayed:RegisterDefaults('profile', {
         refresh_rate                = 1,
         show_class_name             = false,
         colour_class                = false,
+        use_pre_210_shaman_colour	= false,
         show_location               = "none",
         show_xp_total               = false,
-        bc_installed				= true,
+--        bc_installed				= true,
         font_size					= 12,
         opacity						= .8,
         sort_type					= "alpha",
@@ -117,11 +120,16 @@ AllPlayed:RegisterDefaults('profile', {
     },
 })
 
--- Options for both FuBar and AceConsole
+-- Options for Waterfall, FuBar (Dewdrop) and AceConsole
 -- See AceOptions for the format
 local command_options = {
     type = 'group',
     args = {
+    	title	= {
+    		type = "header",
+    		name = L["AllPlayed Configuration"],
+    		order = 1
+    	},
         display = {
             type = 'group', name = L["Display"], desc = L["Set the display options"], args = {
                 all_factions = {
@@ -232,6 +240,14 @@ local command_options = {
                     set       = "SetColourClass",
                     order     = 10,
                 },
+                use_pre_210_shaman_colour = {
+                    name      = L["Use Old Shaman Colour"],
+                    desc      = L["Use the pre-210 patch colour for the Shaman class"],
+                    type      = 'toggle',
+                    get       = "GetUsePre210Colours",
+                    set       = "SetUsePre210Colours",
+                    order     = 11,
+                },
                 font_size = {
                     name      = L["Font Size"],
                     desc      = L["Select the font size"],
@@ -241,7 +257,7 @@ local command_options = {
                     step      = 1,
                     get       = "GetFontSize",
                     set       = "SetFontSize",
-                    order     = 11,
+                    order     = 12,
                 },
                 opacity = {
                     name      = L["Opacity"],
@@ -253,9 +269,9 @@ local command_options = {
                     isPercent = true,
                     get       = "GetOpacity",
                     set       = "SetOpacity",
-                    order     = 12,
+                    order     = 13,
                 },
-            }, order = 1
+            }, order = 10
         },
         sort = {
 			type = 'group', name = L["Sort"], desc = L["Set the sort options"], args = {
@@ -284,32 +300,14 @@ local command_options = {
                     set       = "SetIsSortReverse",
                     order     = 2,
                 },
-			}, order = 2
+			}, order = 20
 		},
---[[		
-        ignore = {
-            name    = L["Ignore"],
-            desc    = L["Ignore the current PC"],
-            type    = 'toggle',
-            get     = "GetIsIgnored",
-            set     = "SetIsIgnored",
-            order   = 3
-        },
-]]--
         ignore = {
             name    = L["Ignore Characters"],
             desc    = L["Hide characters from display"],
             type    = 'group',
             args    = {}, 			-- Will be set in OnEnable
-            order   = 3
-        },
-        bc_installed = {
-            name    = L["BC Installed?"],
-            desc    = L["Is the Burning Crusade expansion installed?"],
-            type    = 'toggle',
-            get     = "GetIsBCInstalled",
-            set     = "SetIsBCInstalled",
-            order   = 4
+            order   = 30
         },
     }
 }
@@ -317,14 +315,56 @@ local command_options = {
 
 -- Register the chat commands
 -- :RegisterChatCommand takes the slash commands and an AceOptions data table
-AllPlayed:RegisterChatCommand({ L["/ap"], L["/allplayed"] }, command_options) 
+--AllPlayed:RegisterChatCommand({ L["/ap"], L["/allplayed"] }, command_options) 
 
 -- This function is called by the ACE2 framework one time after the addon is loaded
 function AllPlayed:OnInitialize()
     -- code here, executed only once.
     --self:SetDebugging(true) -- to have debugging through your whole app.
-    
-    
+
+--[[	
+	if AceLibrary:HasInstance("Waterfall-1.0") then
+		AceLibrary("Waterfall-1.0"):Register('AllPlayed',
+			'aceOptions', command_options,
+			'title', L["AllPlayed Configuration"],
+			'treeLevels', 2,
+			'colorR', 1, 'colorG', 1, 'colorB', 0
+		)
+		self:RegisterChatCommand({ L["/ap"], L["/allplayed"] }, function()
+			AceLibrary("Waterfall-1.0"):Open('AllPlayed')
+		end)
+		if AceLibrary:HasInstance("Dewdrop-2.0") then
+			self:RegisterChatCommand({L["/apdd"], L["/allplayeddd"]}, function()
+				AceLibrary("Dewdrop-2.0"):Open('AllPlayed', 'children', function()
+					AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
+				end)
+			end)
+		end
+		self:RegisterChatCommand({L["/apcl"], L["/allplayedcl"]}, command_options)
+	elseif AceLibrary:HasInstance("Dewdrop-2.0") then
+			self:RegisterChatCommand({L["/ap"], L["/allplayed"]}, function()
+				AceLibrary("Dewdrop-2.0"):Open('AllPlayed', 'children', function()
+					AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
+				end)
+			end)
+		self:RegisterChatCommand({L["/apcl"], L["/allplayedcl"]}, command_options)
+	else
+		-- This should never be called since Dewdrop is embedded with AllPlayed but
+		-- I'm putting it anyways just in case.
+		self:RegisterChatCommand({L["/ap"], L["/allplayed"]}, command_options)
+	end
+]]--
+	-- Register the command line
+	-- Most of this code is shamelessly stolen from Nymbia's Quartz (big thanks)
+	-- /ap and /allplayed will open a dewdrop menu
+	-- /apcl and /allplayedcl will be used for the command line options
+	self:RegisterChatCommand({L["/ap"], L["/allplayed"]}, function()
+		AceLibrary("Dewdrop-2.0"):Open('AllPlayed', 'children', function()
+			AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
+		end)
+	end)
+	self:RegisterChatCommand({L["/apcl"], L["/allplayedcl"]}, command_options)
+
    
     -- Initial setup is done by OnEnable (not mush to do here)
     -- We set total variables to zero and create the tables that will never
@@ -370,8 +410,15 @@ function AllPlayed:OnEnable()
     
     -- Initial update of values
     
+    -- What colour should be used for Shaman?
+    if(self:GetUsePre210Colours()) then
+    	CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
+    else
+		CLASS_COLOURS['SHAMAN'] = BC:GetHexColor("SHAMAN")
+    end
+    
     -- Is BC installed
-    if(self:GetIsBCInstalled()) then
+    if(GetAccountExpansionLevel() == 1) then
     	self.max_pc_level = 70
     else
     	self.max_pc_level = 60
@@ -441,6 +488,7 @@ AllPlayed.defaultMinimapPosition = 200
 AllPlayed.cannotDetachTooltip = false
 AllPlayed.hideWithoutStandby = true
 AllPlayed.clickableTooltip = false 
+AllPlayed.hideMenuTitle = true			-- The menu title is explicitely provided in the command_options table
 
 function AllPlayed:OnDataUpdate()
     self:Debug("AllPlayed:OnDataUpdate()")
@@ -850,6 +898,7 @@ function AllPlayed:EventHandler()
     self:ComputeTotal()
 end
 
+--[[
 -- Function called from Metrognome when FuBar is not loaded
 function AllPlayed:TimerUpdate()
     self:ComputeTotal()
@@ -871,6 +920,7 @@ function AllPlayed:TimerUpdate()
     tablet:Refresh(tabletParent)
 
 end
+]]--
 
 --[[ ================================================================= ]]--
 --[[                  Store and retreive methods                       ]]--
@@ -1126,6 +1176,30 @@ function AllPlayed:SetShowClassName( value )
     self:Update()
 end
 
+-- Get the value of use_pre_210_shaman_colour
+function AllPlayed:GetUsePre210Colours()
+    self:Debug("AllPlayed:GetUsePre210Colours: ", self.db.profile.options.use_pre_210_shaman_colour)
+    
+    return self.db.profile.options.use_pre_210_shaman_colour
+end
+
+-- Set the value of colour_class
+function AllPlayed:SetUsePre210Colours( value )
+    self:Debug("AllPlayed:SetUsePre210Colours: old %s, new %s", self.db.profile.options.use_pre_210_shaman_colour, value )
+    
+    self.db.profile.options.use_pre_210_shaman_colour = value
+    
+    -- Set the proper colour for the shaman class
+	if(value) then
+		CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
+	else
+		CLASS_COLOURS['SHAMAN'] = BC:GetHexColor("SHAMAN")
+	end
+
+    -- Refesh
+    self:Update()
+end
+
 -- Get the value of colour_class
 function AllPlayed:GetColourClass()
     self:Debug("AllPlayed:GetColourClass: ", self.db.profile.options.colour_class)
@@ -1177,13 +1251,15 @@ function AllPlayed:SetShowLocation( value )
     self:Update()
 end
 
+--[[
 -- Get the current bc_installed value
 function AllPlayed:GetIsBCInstalled()
     self:Debug("AllPlayed:GetIsBCInstalled: ",
                self.db.profile.options.bc_installed
     )
 
-    return self.db.profile.options.bc_installed
+--    return self.db.profile.options.bc_installed
+	return (GetAccountExpansionLevel() == 1)
 end
 
 -- Set the value for bc_installed
@@ -1205,6 +1281,7 @@ function AllPlayed:SetIsBCInstalled(value)
     -- Refesh
     self:Update()
 end
+]]--
 
 -- Get the value of sort_type
 function AllPlayed:GetSortType()
@@ -1343,7 +1420,7 @@ end
 function AllPlayed:Quit()
     self:Debug("Quit()")
 
-    RequestTimePlayed()
+    self:RequestTimePlayed()
     return self.hooks.Quit()
 end
 
@@ -1396,6 +1473,8 @@ function AllPlayed:FormatTime(seconds)
     return A:FormatDurationFull( seconds, false, not self:GetShowSeconds() )
 end
 
+-- Function that format the XP based on the value
+-- The result is a string with XP, K XP or M XP depending on the size of the XP to display
 function FormatXP(xp)
    local display_xp = ""
    
@@ -1413,6 +1492,8 @@ function FormatXP(xp)
    return display_xp
 end
 
+-- Fonction that format the money string
+-- The result is a string with colour coding
 function FormatMoney(coin)
     return A:FormatMoneyFull( coin, true, false )
 end
