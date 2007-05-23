@@ -18,8 +18,6 @@ local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 local A = AceLibrary("Abacus-2.0")
 -- C is for colour management functions
 local C = AceLibrary("Crayon-2.0")
--- metro is for the Metrognome timer librairy functions
-local metro = AceLibrary("Metrognome-2.0")
 -- tablet is for the tablet library functions
 local tablet = AceLibrary("Tablet-2.0")
 -- dewdrop is for the menu functions (only needed if FuBar is not there)
@@ -95,7 +93,7 @@ AllPlayed:RegisterDefaults('profile', {
         all_factions                = true,
         all_realms                  = true,
         show_coins					= true,
-        show_seconds                = true,
+        show_seconds                = false,
         show_progress               = true,
         show_rested_xp              = true,
         percent_rest                = "100",
@@ -454,20 +452,16 @@ function AllPlayed:OnEnable()
     -- Request the time played so we can populate seconds_played
     self:RequestTimePlayed()
     
-    -- Start the Metrognome event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
-    -- or 20 seconds depending on the refresh_rate setting
-	metro:RegisterMetro(self.name, self.Update, self.db.profile.options.refresh_rate, self)
-	metro:StartMetro(self.name)
+  -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
+  -- or 20 seconds depending on the refresh_rate setting
+	self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
 end
 
 function AllPlayed:OnDisable()
-    -- Stop the Metrognome event
---    if self.is_fubar_loaded then
-        metro:UnregisterMetro(self.name)
---    else
-    if not self.is_fubar_loaded then
-        tablet:Close(tabletParent)
-    end
+	self:CancelScheduledEvent(self.name)
+	if not self.is_fubar_loaded then
+		tablet:Close(tabletParent)
+	end
 end
 
 function AllPlayed:IsDebugging() return self.db.profile.debugging end
@@ -1066,7 +1060,7 @@ function AllPlayed:GetShowSeconds()
 end
 
 -- Set the value of show_seconds
--- Also set the refresh rate use by Metrognome
+-- Also set the timer refresh rate
 function AllPlayed:SetShowSeconds( value )
     self:Debug( "AllPlayed:SetShowSeconds: old %s, new %s", self.db.profile.options.show_seconds, value)
     
@@ -1082,8 +1076,8 @@ function AllPlayed:SetShowSeconds( value )
     self:Debug("=> refresh rate:", self.db.profile.options.refresh_rate) 
     
     -- If there is a timer active, we change the rate
-    if metro:MetroStatus(self.name) then
-        metro:ChangeMetroRate( self.name, self.db.profile.options.refresh_rate )
+    if self:IsEventScheduled(self.name) then
+        self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
     end
     
     -- Refesh
