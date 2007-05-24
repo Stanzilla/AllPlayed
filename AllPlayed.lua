@@ -93,7 +93,7 @@ AllPlayed:RegisterDefaults('profile', {
         all_factions                = true,
         all_realms                  = true,
         show_coins					= true,
-        show_seconds                = false,
+        show_seconds                = true,
         show_progress               = true,
         show_rested_xp              = true,
         percent_rest                = "100",
