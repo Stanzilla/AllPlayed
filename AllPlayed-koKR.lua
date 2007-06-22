@@ -13,6 +13,7 @@ L:RegisterTranslations("koKR", function()
 --      ["All Played Breakdown"]                                		= true, 
 
         -- Menus
+    	["AllPlayed Configuration"]										= "AllPlayed 설정",
         ["Display"]                                             		= "보기 설정", 
         ["Set the display options"]                             		= "보기 설정", 
         ["All Factions"]                                        		= "모든 진영", 
@@ -45,6 +46,8 @@ L:RegisterTranslations("koKR", function()
         ["Show zone/subzone"]							= "지역/세부지역 표시",
         ["Colorize Class"]                                      		= "직업 색상 표시",
         ["Colorize the character name based on class"]          		= "직업의 색상에 따라 캐릭터 이름의 색상을 변경합니다.",
+        ["Use Old Shaman Colour"]										= "이전 주술사 색상 사용",
+        ["Use the pre-210 patch colour for the Shaman class"]			= "2.1 패치 이전의 주술사 색상을 사용합니다.",
         ["Sort Type"]								= "정렬 렬식",
         ["Select the sort type"]						= "정렬 방식을 선택합니다.",
         ["By name"]								= "이름순으로",
@@ -89,6 +92,8 @@ L:RegisterTranslations("koKR", function()
         -- Console commands
 --      ["/allplayed"]                                          		= true, 
 --      ["/ap"]                                                 		= true, 
+--        ["/allplayedcl"]                                          		= true, 
+--        ["/apcl"]                                                 		= true, 
 
     }
 end)
