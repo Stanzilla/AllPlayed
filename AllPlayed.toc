@@ -3,7 +3,7 @@
 ## X-eMail: laotseu.ace@gmail.com
 ## Title: AllPlayed |cff7fff7f -Ace2-|r
 ## Notes: Track time played, rested XP and money for all characters
-## Version: 20100-2.$Revision$
+## Version: 20100-1.$Revision$
 
 ## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96 for the koKR localization
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
@@ -24,26 +24,29 @@
 
 ## SavedVariables: AllPlayedDB
 
-## Embedded ACE2 libraries
-libs\AceLibrary\AceLibrary.lua
-libs\AceOO-2.0\AceOO-2.0.lua
+#### Embedded ACE2 libraries
+##libs\AceLibrary\AceLibrary.lua
+##libs\AceOO-2.0\AceOO-2.0.lua
+##
+##libs\AceEvent-2.0\AceEvent-2.0.lua
+##libs\AceHook-2.1\AceHook-2.1.lua
+##libs\AceDB-2.0\AceDB-2.0.lua
+##libs\AceDebug-2.0\AceDebug-2.0.lua
+##libs\AceLocale-2.2\AceLocale-2.2.lua
+##libs\AceConsole-2.0\AceConsole-2.0.lua
+##libs\AceAddon-2.0\AceAddon-2.0.lua
+##
+##
+#### Other embeded libraries
+##libs\Dewdrop-2.0\Dewdrop-2.0.lua
+##libs\Tablet-2.0\Tablet-2.0.lua
+##libs\Abacus-2.0\Abacus-2.0.lua
+##libs\Crayon-2.0\Crayon-2.0.lua
+##libs\FuBarPlugin-2.0\FuBarPlugin-2.0.lua
+##libs\Metrognome-2.0\Metrognome-2.0.lua
+##libs\Babble-Class-2.2\Babble-Class-2.2.lua
 
-libs\AceEvent-2.0\AceEvent-2.0.lua
-libs\AceHook-2.1\AceHook-2.1.lua
-libs\AceDB-2.0\AceDB-2.0.lua
-libs\AceDebug-2.0\AceDebug-2.0.lua
-libs\AceLocale-2.2\AceLocale-2.2.lua
-libs\AceConsole-2.0\AceConsole-2.0.lua
-libs\AceAddon-2.0\AceAddon-2.0.lua
-
-
-## Other embeded libraries
-libs\Dewdrop-2.0\Dewdrop-2.0.lua
-libs\Tablet-2.0\Tablet-2.0.lua
-libs\Abacus-2.0\Abacus-2.0.lua
-libs\Crayon-2.0\Crayon-2.0.lua
-libs\FuBarPlugin-2.0\FuBarPlugin-2.0.lua
-libs\Babble-Class-2.2\Babble-Class-2.2.lua
+embeds.xml
 
 AllPlayed-enUS.lua
 AllPlayed-koKR.lua
