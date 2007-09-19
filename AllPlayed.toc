@@ -49,5 +49,6 @@
 embeds.xml
 
 AllPlayed-enUS.lua
+AllPlayed-deDE.lua
 AllPlayed-koKR.lua
 AllPlayed.lua
