@@ -1,4 +1,4 @@
--- AllPlayed.lua
+﻿-- AllPlayed.lua
 -- $Id$
 
 --[[ ================================================================= ]]--
@@ -10,7 +10,7 @@
 local TEN_DAYS  = 60 * 60 * 24 * 10
 
 
--- Load external libraries 
+-- Load external libraries
 
 -- L is for localisation (to allow translation of the addon)
 local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
@@ -68,15 +68,15 @@ AllPlayed:RegisterDefaults('account', {
                 ['*'] = {
                     class                       = "",   -- English class name
                     class_loc                   = "",   -- Localized class name
-                    level                       = 0, 
-                    coin                        = 0, 
+                    level                       = 0,
+                    coin                        = 0,
                     rested_xp                   = 0,
                     xp                          = -1,
-                    max_rested_xp               = 0, 
-                    last_update                 = 0, 
-                    is_resting                  = false, 
+                    max_rested_xp               = 0,
+                    last_update                 = 0,
+                    is_resting                  = false,
                     is_ignored                  = false,
-                    seconds_played              = 0,  
+                    seconds_played              = 0,
                     seconds_played_last_update  = 0,
                     zone_text                   = L["Unknown"],
                     subzone_text                = "",
@@ -186,9 +186,9 @@ local command_options = {
                     get       = "GetShowLocation",
                     set       = "SetShowLocation",
                     validate  = { ["none"]      = L["Don't show location"],
-                                  ["loc"]       = L["Show zone"], 
-                                  ["sub"]       = L["Show subzone"], 
-                                  ["loc/sub"]   = L["Show zone/subzone"] 
+                                  ["loc"]       = L["Show zone"],
+                                  ["sub"]       = L["Show subzone"],
+                                  ["loc/sub"]   = L["Show zone/subzone"]
                     },
                     order     = 7,
                 },
@@ -279,9 +279,9 @@ local command_options = {
 					type      = 'text',
 					get       = "GetSortType",
 					set       = "SetSortType",
-					validate  = { 
+					validate  = {
 								  ["alpha"] 			= L["By name"],
-								  ["level"] 			= L["By level"], 
+								  ["level"] 			= L["By level"],
 								  ["xp"]				= L["By experience"],
 								  ["rested_xp"]			= L["By rested XP"],
 								  ["percent_rest"]		= L["By % rested"],
@@ -313,14 +313,14 @@ local command_options = {
 
 -- Register the chat commands
 -- :RegisterChatCommand takes the slash commands and an AceOptions data table
---AllPlayed:RegisterChatCommand({ L["/ap"], L["/allplayed"] }, command_options) 
+--AllPlayed:RegisterChatCommand({ L["/ap"], L["/allplayed"] }, command_options)
 
 -- This function is called by the ACE2 framework one time after the addon is loaded
 function AllPlayed:OnInitialize()
     -- code here, executed only once.
     --self:SetDebugging(true) -- to have debugging through your whole app.
 
---[[	
+--[[
 	if AceLibrary:HasInstance("Waterfall-1.0") then
 		AceLibrary("Waterfall-1.0"):Register('AllPlayed',
 			'aceOptions', command_options,
@@ -363,7 +363,7 @@ function AllPlayed:OnInitialize()
 	end)
 	self:RegisterChatCommand({L["/apcl"], L["/allplayedcl"]}, command_options)
 
-   
+
     -- Initial setup is done by OnEnable (not mush to do here)
     -- We set total variables to zero and create the tables that will never
     -- be deleted
@@ -372,7 +372,7 @@ function AllPlayed:OnInitialize()
     }
     self.total_realm        = { }
     self.total              = { time_played = 0, coin = 0, xp = 0 }
-    
+
     self.sort_tables_done    = false
 end
 
@@ -383,7 +383,7 @@ function AllPlayed:OnEnable()
 
     -- code here, executed after everything is loaded.
     -- Note: AceDB-2.0 will also call this when standby is toggled.
-    
+
     -- Register the events we need
     -- (event unregistering is done automagicaly by ACE)
     self:RegisterEvent("TIME_PLAYED_MSG",       "OnTimePlayedMsg")
@@ -395,39 +395,39 @@ function AllPlayed:OnEnable()
     if(self:GetShowCoins()) then
     	self:RegisterEvent("PLAYER_MONEY",      "EventHandler")
     end
-    
+
     -- Hook the functions that need hooking
     -- (hook removal is done automagicaly by ACE)
     self:Hook("Logout", true)
     self:Hook("Quit",   true)
-  
+
     -- Initialize values that don't change between reloads
     self.faction    = UnitFactionGroup("player")
     self.realm      = GetRealmName()
     self.pc         = UnitName("player")
-    
+
     -- Initial update of values
-    
+
     -- What colour should be used for Shaman?
     if(self:GetUsePre210Colours()) then
     	CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
     else
 		CLASS_COLOURS['SHAMAN'] = BC:GetHexColor("SHAMAN")
     end
-    
+
     -- Is BC installed
     if(GetAccountExpansionLevel() == 1) then
     	self.max_pc_level = 70
     else
     	self.max_pc_level = 60
     end
-    
+
     -- Set the initial table transparency
     tablet:SetTransparency(self:GetFrame(), self:GetOpacity())
-    
+
     -- Get the values for the current character
     self:SaveVar()
-    
+
     -- Initialise the is_ignored option table
     command_options.args.ignore.args = {}
     for faction, faction_table in pairs(self.db.account.data) do
@@ -444,14 +444,14 @@ function AllPlayed:OnEnable()
         	end
         end
     end
-    
-    
-    -- Build the sorting tables 
+
+
+    -- Build the sorting tables
   	self:BuildSortTables()
 
     -- Request the time played so we can populate seconds_played
     self:RequestTimePlayed()
-    
+
   -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
   -- or 20 seconds depending on the refresh_rate setting
 	self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
@@ -481,31 +481,31 @@ AllPlayed.defaultPosition = "LEFT"
 AllPlayed.defaultMinimapPosition = 200
 AllPlayed.cannotDetachTooltip = false
 AllPlayed.hideWithoutStandby = true
-AllPlayed.clickableTooltip = false 
+AllPlayed.clickableTooltip = false
 AllPlayed.hideMenuTitle = true			-- The menu title is explicitely provided in the command_options table
 
 function AllPlayed:OnDataUpdate()
     self:Debug("AllPlayed:OnDataUpdate()")
-    
+
     -- Update the data that may have changed but are not tracked by an event
     self.db.account.data[self.faction][self.realm][self.pc].is_resting = IsResting()
-    
+
     -- Recompute the totals
     self:ComputeTotal()
 end
 
 function AllPlayed:OnTextUpdate()
     self:Debug("AllPlayed:OnTextUpdate()")
-    
+
     self:SetText( self:FormatTime(self.total.time_played) )
 end
 
 function AllPlayed:OnTooltipUpdate()
     self:Debug("OnTooltipUpdate()")
     self:Debug("=>self.total.time_played: ", self.total.time_played)
-    
+
     self:FillTablet()
-    
+
     --tablet:SetHint("Click to do something")
     -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
 end
@@ -524,23 +524,23 @@ end
 -- Get the totals per faction and realm
 function AllPlayed:ComputeTotal()
     self:Debug("AllPlayed:ComputeTotal()")
-    
+
     -- Let's start from scratch
     self.total_faction[L["Horde"]].time_played      = 0
-    self.total_faction[L["Horde"]].coin             = 0 
-    self.total_faction[L["Horde"]].xp               = 0 
+    self.total_faction[L["Horde"]].coin             = 0
+    self.total_faction[L["Horde"]].xp               = 0
     self.total_faction[L["Alliance"]].time_played   = 0
-    self.total_faction[L["Alliance"]].coin          = 0 
-    self.total_faction[L["Alliance"]].xp            = 0 
+    self.total_faction[L["Alliance"]].coin          = 0
+    self.total_faction[L["Alliance"]].xp            = 0
     self.total.time_played                          = 0
-    self.total.coin                                 = 0 
+    self.total.coin                                 = 0
     self.total.xp                                   = 0
-    
+
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.account.data) do
         for realm, realm_table in pairs(faction_table) do
             self:Debug("faction: %s realm: %s", faction, realm)
-            
+
             if not self.total_realm[faction] then self.total_realm[faction] = {} end
             if not self.total_realm[faction][realm] then self.total_realm[faction][realm] = {} end
             self.total_realm[faction][realm].time_played = 0
@@ -550,8 +550,8 @@ function AllPlayed:ComputeTotal()
 --                if not pc_table.is_ignored then
                 if not self:GetIsCharIgnored(realm, pc) then
 					-- Need to get the current seconds_played for the PC
-					local seconds_played = self:EstimateTimePlayed(pc, 
-																   realm, 
+					local seconds_played = self:EstimateTimePlayed(pc,
+																   realm,
 																   pc_table.seconds_played,
 																   pc_table.seconds_played_last_update
 										   )
@@ -571,13 +571,13 @@ function AllPlayed:ComputeTotal()
             end
         end
     end
-    
+
     -- The Grand Total varies according to the options
     if self.db.profile.options.all_realms then
         if self.db.profile.options.all_factions then
             -- Everything count
-            self.total.time_played 
-                =   self.total_faction[L["Horde"]].time_played 
+            self.total.time_played
+                =   self.total_faction[L["Horde"]].time_played
                   + self.total_faction[L["Alliance"]].time_played
             self.total.coin
                 =   self.total_faction[L["Horde"]].coin
@@ -603,31 +603,31 @@ end
 function AllPlayed:FillTablet()
     self:Debug("AllPlayed:FillTablet()")
     self:Debug("=>self.total.time_played: ", self.total.time_played)
-    
+
     -- Update the sort tables
-	self:BuildSortTables()    
-    
+	self:BuildSortTables()
+
 --    local estimated_rested_xp 	= 0
     local first_category 		= true
     local nb_columns = 1
-    
+
     -- Is the Location column needed?
     if self:GetShowLocation() ~= "none" then
         nb_columns = nb_columns + 1
     end
-    
+
     -- Is the gold/rested XP column needed?
-    if self:GetShowCoins() 
-       	or self:GetShowXPTotal() 
+    if self:GetShowCoins()
+       	or self:GetShowXPTotal()
        	or self:GetShowRestedXP()
-       	or self:GetShowRestedXPCountdown() 
+       	or self:GetShowRestedXPCountdown()
        	or self:GetPercentRest() ~= "0" then
         nb_columns = nb_columns + 1
     end
 
     -- Set the title for the table (just when using FuBar
     tablet:SetTitle(C:White(L["All Played Breakdown"]))
-    
+
 	local cat = tablet:AddCategory(
 		'id', 'Normal Line',
 		'columns', nb_columns,
@@ -639,7 +639,7 @@ function AllPlayed:FillTablet()
 		'child_size3', self:GetFontSize()
 
 	)
-	
+
     -- We group by factions, then by realm, then by PC
     for _, faction in ipairs (self.sort_faction) do
         -- We do not print the faction if no option to select it is on
@@ -657,7 +657,7 @@ function AllPlayed:FillTablet()
                     and self.total_realm[faction][realm].time_played ~= 0
                 ) then
                     --self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
-                    
+
                     -- Build the Realm aggregated line
                     local text_realm = string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s"),
                                                       realm,
@@ -675,9 +675,9 @@ function AllPlayed:FillTablet()
                                                     FormatXP(self.total_realm[faction][realm].xp)
                                      )
                     end
-                    
+
                     text_realm = text_realm .. C:Green("]")
-                    
+
                     if first_category then
                     	first_category = false
                     else
@@ -687,40 +687,40 @@ function AllPlayed:FillTablet()
 						   'text', " "
 						)
                     end
-                    
+
                     cat:AddLine(
                        'columns', 1,
                        'indentation', 0,
                        'text', text_realm
                     )
-                
+
                     for _, pc in ipairs(self.sort_realm_pc[self.db.profile.options.sort_type][faction][realm]) do
 --                        if (not self.db.account.data[faction][realm][pc].is_ignored) then
                         if not self:GetIsCharIgnored(realm, pc) then
                             -- Seconds played are still going up for the current PC
                             local seconds_played = self:EstimateTimePlayed(
-                                                        pc, 
-                                                        realm, 
+                                                        pc,
+                                                        realm,
                                                         self.db.account.data[faction][realm][pc].seconds_played,
                                                         self.db.account.data[faction][realm][pc].seconds_played_last_update
                                                    )
-                            
-                            local text_pc = FormatCharacterName( pc, 
-                                                                 self.db.account.data[faction][realm][pc].level, 
+
+                            local text_pc = FormatCharacterName( pc,
+                                                                 self.db.account.data[faction][realm][pc].level,
                                                                  self.db.account.data[faction][realm][pc].xp,
-                                                                 seconds_played, 
-                                                                 self.db.account.data[faction][realm][pc].class, 
-                                                                 self.db.account.data[faction][realm][pc].class_loc, 
-                                                                 faction 
+                                                                 seconds_played,
+                                                                 self.db.account.data[faction][realm][pc].class,
+                                                                 self.db.account.data[faction][realm][pc].class_loc,
+                                                                 faction
                                             )
-                                            
+
 							local text_location = ""
 							if self:GetShowLocation() ~= "none" then
 								 if self:GetShowLocation() == "loc"
-                                    or 
+                                    or
                                     self.db.account.data[faction][realm][pc].zone_text == L["Unknown"]
-                                    or 
-                                    (self:GetShowLocation() == "loc/sub" and 
+                                    or
+                                    (self:GetShowLocation() == "loc/sub" and
                                      self.db.account.data[faction][realm][pc].subzone_text == "")
                                  then
 								 	text_location = FactionColour(
@@ -735,33 +735,33 @@ function AllPlayed:FillTablet()
 								 else
 								 	text_location = FactionColour(
 								 						faction,
-								 						self.db.account.data[faction][realm][pc].zone_text 
+								 						self.db.account.data[faction][realm][pc].zone_text
 								 						.. '/' .. self.db.account.data[faction][realm][pc].subzone_text
-								 					)							 
+								 					)
 								 end
 							end
-							
-                            
+
+
                             local text_coin = ""
                             if self:GetShowCoins() then
                             	text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
                             end
-                            
-                            if self.db.account.data[faction][realm][pc].level < self.max_pc_level and 
+
+                            if self.db.account.data[faction][realm][pc].level < self.max_pc_level and
                                (self.db.account.data[faction][realm][pc].level > 1 or
                                 self.db.account.data[faction][realm][pc].xp > 0)
                             then
                                 -- How must rested XP do we have?
-                                local estimated_rested_xp = self:EstimateRestedXP( 
-                                                            pc, 
-                                                            realm, 
-                                                            self.db.account.data[faction][realm][pc].level, 
-                                                            self.db.account.data[faction][realm][pc].rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].max_rested_xp, 
-                                                            self.db.account.data[faction][realm][pc].last_update, 
-                                                            self.db.account.data[faction][realm][pc].is_resting 
+                                local estimated_rested_xp = self:EstimateRestedXP(
+                                                            pc,
+                                                            realm,
+                                                            self.db.account.data[faction][realm][pc].level,
+                                                            self.db.account.data[faction][realm][pc].rested_xp,
+                                                            self.db.account.data[faction][realm][pc].max_rested_xp,
+                                                            self.db.account.data[faction][realm][pc].last_update,
+                                                            self.db.account.data[faction][realm][pc].is_resting
                                                       )
-                            
+
                                 -- Do we need to show the rested XP for the character?
                                 if self:GetShowRestedXP() then
                                 	if text_coin ~= "" then text_coin = text_coin .. FactionColour( faction, " : " ) end
@@ -769,15 +769,15 @@ function AllPlayed:FillTablet()
                                                                             estimated_rested_xp
                                                              )
                                 end
-                                
+
                                 local percent_for_colour = estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp
                                 local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
-                                
+
                                 -- The time to rest is way more if not in an inn or a major city
                                 if not self.db.account.data[faction][realm][pc].is_resting then
                                     countdown_seconds = countdown_seconds * 4
                                 end
-                                
+
                                 local text_countdown = ""
                                 if percent_for_colour < 1 and ( self.db.account.data[faction][realm][pc].is_resting or
                                                                 pc ~= self.pc or realm ~= self.realm
@@ -785,7 +785,7 @@ function AllPlayed:FillTablet()
                                 then
                                     text_countdown = self:FormatTime(countdown_seconds)
                                 end
-                                
+
                                 -- Do we show the percent XP rested and/or the countdown until 100% rested?
                                 if self:GetPercentRest() ~= "0" and self:GetShowRestedXPCountdown() and text_countdown ~= "" then
                                     text_coin = text_coin .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
@@ -802,7 +802,7 @@ function AllPlayed:FillTablet()
                                     text_coin = text_coin .. PercentColour( percent_for_colour, " (-" .. text_countdown .. ")" )
                                 end
                             end
-                            
+
                             if text_location ~= "" and text_coin ~= "" then
                             	cat:AddLine( 'text',  text_pc,
                             				 'text2', text_location,
@@ -838,21 +838,21 @@ function AllPlayed:FillTablet()
         'text',  C:Orange( L["Total Time Played: "] ),
         'text2', C:Yellow( self:FormatTime(self.total.time_played) )
     )
-    
+
     if self:GetShowCoins() then
 		cat:AddLine(
 			'text',  C:Orange( L["Total Cash Value: "] ),
 			'text2', FormatMoney(self.total.coin)
 		)
     end
-    
+
     if self:GetShowXPTotal() then
        cat:AddLine(
            'text',  C:Orange( L["Total XP: "] ),
            'text2', C:Yellow( FormatXP(self.total.xp) )
        )
     end
-    
+
     --tablet:SetHint("Click to do something")
     -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
 end
@@ -861,7 +861,7 @@ end
 -- Function trigered when the TIME_PLAYED_MSG event is fired
 function AllPlayed:OnTimePlayedMsg(seconds_played)
     self:Debug("OnTimePlayedMsg(): ",seconds_played)
-    
+
     -- We save the normal variables and the seconds played
     self:SetSecondsPlayed(seconds_played)
     self:SaveVar()
@@ -873,10 +873,10 @@ end
 -- Event handler for the events that trigger a sort
 function AllPlayed:EventHandlerWithSort()
     self:Debug("EventHandlerWithSort(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
-    
+
     -- Trigger the sort
 	self.sort_tables_done = false
-	
+
 	-- Call the global event handler
 	self:EventHandler()
 end
@@ -884,10 +884,10 @@ end
 -- Event handler for the other events registered
 function AllPlayed:EventHandler()
     self:Debug("EventHandler(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
-    
+
     -- We save a new copy of the vars
     self:SaveVar()
-    
+
     -- Compute totals
     self:ComputeTotal()
 end
@@ -899,14 +899,14 @@ function AllPlayed:TimerUpdate()
     --self:FillTablet()
 
     -- We have to register the tabler for every update!!!!
-    tablet:Register(tabletParent, 
+    tablet:Register(tabletParent,
         'menu', function()
              dewdrop:FeedAceOptionsTable(command_options)
         end,
         'cantAttach', true,
         'detachedData', self.db.profile.tabletData,
-        'children', function() 
-            AllPlayed:FillTablet() 
+        'children', function()
+            AllPlayed:FillTablet()
         end,
         'showTitleWhenDetached', true
     )
@@ -926,8 +926,8 @@ end
 function AllPlayed:SaveVar()
     self:Debug("AllPlayed:SaveVar()")
 
-    -- Fill some of the SaveVariables with values that do not change between 
-    self.db.account.data[self.faction][self.realm][self.pc].class_loc, 
+    -- Fill some of the SaveVariables with values that do not change between
+    self.db.account.data[self.faction][self.realm][self.pc].class_loc,
         self.db.account.data[self.faction][self.realm][self.pc].class       = UnitClass("player")
     self.db.account.data[self.faction][self.realm][self.pc].level           = UnitLevel("player")
     self.db.account.data[self.faction][self.realm][self.pc].xp              = UnitXP("player")
@@ -936,23 +936,23 @@ function AllPlayed:SaveVar()
     self.db.account.data[self.faction][self.realm][self.pc].is_resting      = IsResting()
     self.db.account.data[self.faction][self.realm][self.pc].zone_text       = GetZoneText()
     self.db.account.data[self.faction][self.realm][self.pc].subzone_text    = GetSubZoneText()
-    
+
     --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.account.data[self.faction][self.realm][self.pc].zone_text)
-    
+
     -- Make sure that coin is not nil
     if GetMoney() == nil then
         self.db.account.data[self.faction][self.realm][self.pc].coin        = 0
     else
         self.db.account.data[self.faction][self.realm][self.pc].coin        = GetMoney()
     end
-    
+
     -- Make sure that rested_xp is not nil
     if GetXPExhaustion() == nil then
         self.db.account.data[self.faction][self.realm][self.pc].rested_xp   = 0
     else
         self.db.account.data[self.faction][self.realm][self.pc].rested_xp   = GetXPExhaustion()
     end
-    
+
 end
 
 -- Set the value seconds_played that will be saved in the save variables
@@ -961,7 +961,7 @@ function AllPlayed:SetSecondsPlayed(seconds_played)
 
     self.db.account.data[self.faction][self.realm][self.pc].seconds_played              = seconds_played
     self.db.account.data[self.faction][self.realm][self.pc].seconds_played_last_update  = time()
-    
+
 end
 
 --[[ Methods used for the option menu ]]--
@@ -978,9 +978,9 @@ end
 -- Set the value for is_ignored
 function AllPlayed:SetIsIgnored(value)
     self:Debug("AllPlayed:SetIsIgnored: ",value)
-    
+
     self.db.account.data[self.faction][self.realm][self.pc].is_ignored = value
-    
+
     -- Compute the totals
     self:ComputeTotal()
 
@@ -991,19 +991,19 @@ end
 -- Get the current all_factions value
 function AllPlayed:GetAllFactions()
     self:Debug("AllPlayed:GetAllFactions: ", self.db.profile.options.all_factions)
-    
+
     return self.db.profile.options.all_factions
 end
 
 -- Set the value for all_factions
 function AllPlayed:SetAllFactions( value )
     self:Debug("AllPlayed:SetAllFactions: old %s, new %s", self.db.profile.options.all_factions, value )
-    
+
     self.db.profile.options.all_factions = value
-    
+
     -- Compute the totals
     self:ComputeTotal()
-    
+
     -- Refesh
     self:Update()
 end
@@ -1011,16 +1011,16 @@ end
 -- Get the current all_realms value
 function AllPlayed:GetAllRealms()
     self:Debug("AllPlayed:GetAllRealms: ", self.db.profile.options.all_realms)
-    
+
     return self.db.profile.options.all_realms
 end
 
 -- Set the value for all_realms
 function AllPlayed:SetAllRealms( value )
     self:Debug("AllPlayed:SetAllRealms: old %s, new %s", self.db.profile.options.all_realms, value )
-    
+
     self.db.profile.options.all_realms = value
-    
+
     -- Compute the totals
     self:ComputeTotal()
 
@@ -1031,16 +1031,16 @@ end
 -- Get the value of show_coins
 function AllPlayed:GetShowCoins()
     self:Debug("AllPlayed:GetShowCoins: ", self.db.profile.options.show_coins)
-    
+
     return self.db.profile.options.show_coins
 end
 
 -- Set the value of show_coins
 function AllPlayed:SetShowCoins( value )
     self:Debug("AllPlayed:SetShowCoins: old %s, new %s", self.db.profile.options.show_coins, value )
-    
+
     self.db.profile.options.show_coins = value
-    
+
     -- Set activate or disactivate the PLAYER_MONEY event
 	if value then
 	   	self:RegisterEvent("PLAYER_MONEY", "EventHandler")
@@ -1063,9 +1063,9 @@ end
 -- Also set the timer refresh rate
 function AllPlayed:SetShowSeconds( value )
     self:Debug( "AllPlayed:SetShowSeconds: old %s, new %s", self.db.profile.options.show_seconds, value)
-    
+
     self.db.profile.options.show_seconds = value
-    
+
     if value then
         -- If the seconds are displayed, we need to refresh every seconds
         self.db.profile.options.refresh_rate = 1
@@ -1073,29 +1073,29 @@ function AllPlayed:SetShowSeconds( value )
         -- If only the minutes are shown, 3 refreshs a minute will do nicely
         self.db.profile.options.refresh_rate = 20
     end
-    self:Debug("=> refresh rate:", self.db.profile.options.refresh_rate) 
-    
+    self:Debug("=> refresh rate:", self.db.profile.options.refresh_rate)
+
     -- If there is a timer active, we change the rate
     if self:IsEventScheduled(self.name) then
         self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
     end
-    
+
     -- Refesh
     self:Update()
-   
+
 end
 
 -- Get the value of show_progress
 function AllPlayed:GetShowProgress()
     self:Debug("AllPlayed:GetShowProgress: ", self.db.profile.options.show_progress)
-    
+
     return self.db.profile.options.show_progress
 end
 
 -- Set the value of show_progress
 function AllPlayed:SetShowProgress( value )
     self:Debug("AllPlayed:SetShowProgress: old %s, new %s", self.db.profile.options.show_progress, value )
-    
+
     self.db.profile.options.show_progress = value
 
     -- Refesh
@@ -1105,14 +1105,14 @@ end
 -- Get the value of show_rested_xp
 function AllPlayed:GetShowRestedXP()
     self:Debug("AllPlayed:GetShowRestedXP: ", self.db.profile.options.show_rested_xp)
-    
+
     return self.db.profile.options.show_rested_xp
 end
 
 -- Set the value of show_rested_xp
 function AllPlayed:SetShowRestedXP( value )
     self:Debug("AllPlayed:SetShowRestedXP: old %s, new %s", self.db.profile.options.show_rested_xp, value )
-    
+
     self.db.profile.options.show_rested_xp = value
 
     -- Refesh
@@ -1122,14 +1122,14 @@ end
 -- Get the value of percent_rest
 function AllPlayed:GetPercentRest()
     self:Debug("AllPlayed:GetAllRealms: ", self.db.profile.options.percent_rest)
-    
+
     return self.db.profile.options.percent_rest
 end
 
 -- Set the value of percent_rest
 function AllPlayed:SetPercentRest( value )
     self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.percent_rest, value )
-    
+
     self.db.profile.options.percent_rest = value
 
     -- Refesh
@@ -1139,14 +1139,14 @@ end
 -- Get the value of show_rested_xp_countdown
 function AllPlayed:GetShowRestedXPCountdown()
     self:Debug("AllPlayed:GetShowRestedXPCountdown: ", self.db.profile.options.show_rested_xp_countdown)
-    
+
     return self.db.profile.options.show_rested_xp_countdown
 end
 
 -- Set the value of show_rested_xp_countdown
 function AllPlayed:SetShowRestedXPCountdown( value )
     self:Debug("AllPlayed:SetShowRestedXPCountdown: old %s, new %s", self.db.profile.options.show_rested_xp_countdown, value )
-    
+
     self.db.profile.options.show_rested_xp_countdown = value
 
     -- Refesh
@@ -1156,14 +1156,14 @@ end
 -- Get the value of show_class_name
 function AllPlayed:GetShowClassName()
     self:Debug("AllPlayed:GetShowClassName: ", self.db.profile.options.show_class_name)
-    
+
     return self.db.profile.options.show_class_name
 end
 
 -- Set the value of show_class_name
 function AllPlayed:SetShowClassName( value )
     self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.show_class_name, value )
-    
+
     self.db.profile.options.show_class_name = value
 
     -- Refesh
@@ -1173,16 +1173,16 @@ end
 -- Get the value of use_pre_210_shaman_colour
 function AllPlayed:GetUsePre210Colours()
     self:Debug("AllPlayed:GetUsePre210Colours: ", self.db.profile.options.use_pre_210_shaman_colour)
-    
+
     return self.db.profile.options.use_pre_210_shaman_colour
 end
 
 -- Set the value of colour_class
 function AllPlayed:SetUsePre210Colours( value )
     self:Debug("AllPlayed:SetUsePre210Colours: old %s, new %s", self.db.profile.options.use_pre_210_shaman_colour, value )
-    
+
     self.db.profile.options.use_pre_210_shaman_colour = value
-    
+
     -- Set the proper colour for the shaman class
 	if(value) then
 		CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
@@ -1197,14 +1197,14 @@ end
 -- Get the value of colour_class
 function AllPlayed:GetColourClass()
     self:Debug("AllPlayed:GetColourClass: ", self.db.profile.options.colour_class)
-    
+
     return self.db.profile.options.colour_class
 end
 
 -- Set the value of colour_class
 function AllPlayed:SetColourClass( value )
     self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.colour_class, value )
-    
+
     self.db.profile.options.colour_class = value
 
     -- Refesh
@@ -1214,14 +1214,14 @@ end
 -- Get the value of show_xp_total
 function AllPlayed:GetShowXPTotal()
     self:Debug("AllPlayed:GetShowXPTotal: ", self.db.profile.options.show_xp_total)
-    
+
     return self.db.profile.options.show_xp_total
 end
 
 -- Set the value of show_xp_total
 function AllPlayed:SetShowXPTotal( value )
     self:Debug("AllPlayed:SetShowXPTotal: old %s, new %s", self.db.profile.options.show_xp_total, value )
-    
+
     self.db.profile.options.show_xp_total = value
 
     -- Refesh
@@ -1231,14 +1231,14 @@ end
 -- Get the value of show_location
 function AllPlayed:GetShowLocation()
     self:Debug("AllPlayed:GetShowLocation: ", self.db.profile.options.show_location)
-    
+
     return self.db.profile.options.show_location
 end
 
 -- Set the value of show_location
 function AllPlayed:SetShowLocation( value )
     self:Debug("AllPlayed:SetShowLocation: old %s, new %s", self.db.profile.options.show_location, value )
-    
+
     self.db.profile.options.show_location = value
 
     -- Refesh
@@ -1259,16 +1259,16 @@ end
 -- Set the value for bc_installed
 function AllPlayed:SetIsBCInstalled(value)
     self:Debug("AllPlayed:SetIsBCInstalled: ",value)
-    
+
     self.db.profile.options.bc_installed = value
 
-	-- The only difference is the maximum level that a PC can get to    
+	-- The only difference is the maximum level that a PC can get to
 	if(value) then
 		self.max_pc_level = 70
 	else
 		self.max_pc_level = 60
 	end
-    
+
     -- Compute the totals
     self:ComputeTotal()
 
@@ -1280,19 +1280,19 @@ end
 -- Get the value of sort_type
 function AllPlayed:GetSortType()
     self:Debug("AllPlayed:GetSortType: ", self.db.profile.options.sort_type)
-    
+
     if self:GetIsSortReverse() then
     	return string.sub(self.db.profile.options.sort_type, 5)
     else
 		return self.db.profile.options.sort_type
     end
-    
+
 end
 
 -- Set the value of sort_type
 function AllPlayed:SetSortType( value )
     self:Debug("AllPlayed:SetSortType: old %s, new %s", self.db.profile.options.sort_type, value )
-    
+
     if self:GetIsSortReverse() then
     	self.db.profile.options.sort_type = "rev-" .. value
     else
@@ -1306,7 +1306,7 @@ end
 -- Get the value of "rev-" in sort_type
 function AllPlayed:GetIsSortReverse()
     self:Debug("AllPlayed:GetSortType: ", self.db.profile.options.sort_type)
-    
+
     if string.find(self.db.profile.options.sort_type, "rev-") == 1 then
     	return true
     else
@@ -1317,14 +1317,14 @@ end
 -- Set the value of "rev-" in sort_type
 function AllPlayed:SetIsSortReverse( value )
     self:Debug("AllPlayed:SetSortType: old %s, new %s", self.db.profile.options.sort_type, value )
-    
+
     local sort_type
     if self:GetIsSortReverse() then
         sort_type = string.sub(self.db.profile.options.sort_type,5)
     else
     	sort_type = self.db.profile.options.sort_type
     end
-    
+
     if value then
     	self.db.profile.options.sort_type = "rev-" .. sort_type
     else
@@ -1339,14 +1339,14 @@ end
 -- Get the value of font_size
 function AllPlayed:GetFontSize()
     self:Debug("AllPlayed:GetFontSize: ", self.db.profile.options.font_size)
-    
+
     return self.db.profile.options.font_size
 end
 
 -- Set the value of font_size
 function AllPlayed:SetFontSize( value )
     self:Debug("AllPlayed:SetFontSize: old %s, new %s", self.db.profile.options.font_size, value )
-    
+
     self.db.profile.options.font_size = value
 
     -- Refesh
@@ -1356,16 +1356,16 @@ end
 -- Get the value of opacity
 function AllPlayed:GetOpacity()
     self:Debug("AllPlayed:GetOpacity: ", self.db.profile.options.opacity)
-    
+
     return self.db.profile.options.opacity
 end
 
 -- Set the value of opacity
 function AllPlayed:SetOpacity( value )
     self:Debug("AllPlayed:SetOpacity: old %s, new %s", self.db.profile.options.opacity, value )
-    
+
     self.db.profile.options.opacity = value
-    
+
     -- Update the tablet transparency
     tablet:SetTransparency(self:GetFrame(), value)
 
@@ -1375,9 +1375,9 @@ end
 
 -- Vefiry if a character should be ignore when displayed and counter
 function AllPlayed:GetIsCharIgnored( realm, name )
-    self:Debug("AllPlayed:GetIsCharIgnored: %s, %s, %s", 
-    			realm, 
-    			name, 
+    self:Debug("AllPlayed:GetIsCharIgnored: %s, %s, %s",
+    			realm,
+    			name,
     			self.db.profile.options.is_ignored[realm][name]
     )
 
@@ -1386,14 +1386,14 @@ end
 
 -- Set the value the is_ignored value for a particular character
 function AllPlayed:SetIsCharIgnored( realm, name, value )
-    self:Debug("AllPlayed:GetIsCharIgnored: %s, %s, %s", 
-    			realm, 
-    			name, 
+    self:Debug("AllPlayed:GetIsCharIgnored: %s, %s, %s",
+    			realm,
+    			name,
     			self.db.profile.options.is_ignored[realm][name]
     )
 
 	self.db.profile.options.is_ignored[realm][name] = value
-	
+
     -- Refesh
     self:Update()
 end
@@ -1437,14 +1437,14 @@ end
 -- was in an Inn
 function AllPlayed:EstimateRestedXP( pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting )
     self:Debug("AllPlayed:EstimateRestedXP: %s, %s, %s, %s, %s, %s, %s",pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting)
-    -- I'm putting level as a parameter even though I don't use it for now. I need to find 
+    -- I'm putting level as a parameter even though I don't use it for now. I need to find
     -- out at what level do a character start to gain rested XP
-    
+
     -- If the character is the current player and he is not in an Inn, he gain no rest
     if pc == AllPlayed.pc and realm == self.realm and not is_resting then
         return rested_xp
     end
-    
+
     -- It takes 10 days to for a character to be fully rested if he is in an Inn,
     -- otherwise it takes 40 days.
     if is_resting then
@@ -1460,7 +1460,7 @@ function AllPlayed:RequestTimePlayed()
     if time() - self.db.account.data[self.faction][self.realm][self.pc].seconds_played_last_update > 10 then
         RequestTimePlayed()
     end
-    
+
 end
 
 function AllPlayed:FormatTime(seconds)
@@ -1471,7 +1471,7 @@ end
 -- The result is a string with XP, K XP or M XP depending on the size of the XP to display
 function FormatXP(xp)
    local display_xp = ""
-   
+
    if xp > 1000000 then
       -- Millions of XP
       display_xp = string.format( L["%.1f M XP"], xp / 1000000 )
@@ -1482,7 +1482,7 @@ function FormatXP(xp)
       -- Very few XP
       display_xp = string.format( L["%d XP"] , xp )
    end
-   
+
    return display_xp
 end
 
@@ -1519,18 +1519,18 @@ function ClassColour( class, faction, string )
     end
 end
 
--- This function format and colorize the Character name and level 
+-- This function format and colorize the Character name and level
 -- based on the options selected by the user
 function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, faction )
     AllPlayed:Debug("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
-    
+
     if xp == nil then
         AllPlayed:Print("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
     end
 
     local result_string     = ""
     local level_string      = ""
-    
+
     -- Format the level string according to the show_progress option
     if AllPlayed:GetShowProgress() and xp ~= -1 then
         local progress = min( xp / XPToNextLevel(level), .99 )
@@ -1538,28 +1538,28 @@ function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, f
     else
         level_string = string.format( "%d" , level )
    end
-    
+
     -- Created use the all cap english name if the localized name is not present
     -- This should never happen but I like to code defensively
-    local class_display = class_loc 
+    local class_display = class_loc
     if class_display == "" then class_display = class end
-    
+
     if class_display ~= "" and AllPlayed:GetShowClassName() then
         level_string = string.format( "%s %s", class_display, level_string )
     end
-    
+
     result_string =  string.format( ClassColour( class, faction, "%s (%s)" ) .. FactionColour( faction, " : %s" ),
                           pc,
                           level_string,
                           AllPlayed:FormatTime(seconds_played)
                     )
-                    
+
     -- Do we need to show the total XP
     if AllPlayed:GetShowXPTotal() and xp ~= -1 then
         local pc_xp = xp + XPToLevel(level)
         result_string = result_string .. FactionColour( faction, " : " .. FormatXP(pc_xp) )
     end
-    
+
     return result_string
 end
 
@@ -1586,15 +1586,15 @@ end
 function AllPlayed:BuildSortTables()
 	-- If the sort is already done, we don't redo it.
 	if self.sort_tables_done then return end
-	
+
 	-- Static sort for the factions
 	self.sort_faction = { L["Horde"], L["Alliance"] }
 
-	self.sort_faction_realm = { ["alpha"] = {}, 
-								["rev-alpha"] = {}, 
-								["level"] = {}, 
-								["rev-level"] ={}, 
-								["xp"] = {}, 
+	self.sort_faction_realm = { ["alpha"] = {},
+								["rev-alpha"] = {},
+								["level"] = {},
+								["rev-level"] ={},
+								["xp"] = {},
 								["rev-xp"] = {},
 								["rested_xp"] = {},
 								["rev-rested_xp"] = {},
@@ -1605,11 +1605,11 @@ function AllPlayed:BuildSortTables()
 								["time_played"] = {},
 								["rev-time_played"] = {}
 	}
-	self.sort_realm_pc = {  ["alpha"] = {}, 
-							["rev-alpha"] = {}, 
-							["level"] = {}, 
-							["rev-level"] ={}, 
-							["xp"] = {}, 
+	self.sort_realm_pc = {  ["alpha"] = {},
+							["rev-alpha"] = {},
+							["level"] = {},
+							["rev-level"] ={},
+							["xp"] = {},
 							["rev-xp"] = {},
 							["rested_xp"] = {},
 							["rev-rested_xp"] = {},
@@ -1625,7 +1625,7 @@ function AllPlayed:BuildSortTables()
 
 		-- Realms in each faction are alpha sorted
 		self:Debug("ST : Faction = ",faction)
-		self.sort_faction_realm["alpha"][faction] 
+		self.sort_faction_realm["alpha"][faction]
 			= buildSortedTable( faction_table )
 		self.sort_faction_realm["rev-alpha"][faction]
 			= self.sort_faction_realm["alpha"][faction]
@@ -1674,7 +1674,7 @@ function AllPlayed:BuildSortTables()
 			-- PC in each realm are alpha sorted by name
 			self:Debug("ST : Realm = ",realm)
 			self.sort_realm_pc["alpha"][faction][realm] = buildSortedTable( realm_table )
-			self.sort_realm_pc["rev-alpha"][faction][realm] 
+			self.sort_realm_pc["rev-alpha"][faction][realm]
 				= buildSortedTable( realm_table, function(a,b) return a>b end )
 			self.sort_realm_pc["level"][faction][realm]
 				= buildSortedTable( realm_table, PCSortByLevel )
@@ -1700,13 +1700,13 @@ function AllPlayed:BuildSortTables()
 				= buildSortedTable( realm_table, PCSortByTimePlayed )
 			self.sort_realm_pc["rev-time_played"][faction][realm]
 				= buildSortedTable( realm_table, PCSortByRevTimePlayed )
-				
+
 		end
 
 	end
-	
+
 	self.sort_tables_done = true
-end        
+end
 
 -- This function build a table of sorted keys that will latter
 -- be used with ipairs in order to get the value of a hash in order
@@ -1716,16 +1716,16 @@ local table_to_sort = {}
 local realm_for_sort = nil
 function buildSortedTable( unsorted_table, sort_function, realm )
     AllPlayed:Debug("buildSortedTable:")
-    
+
     -- If the realm is needed for the sort, we initialize it
     realm_for_sort = realm or nil
-    
+
     table_to_sort = unsorted_table
     local sorted_key_table = {}
-    
+
     for key in pairs(unsorted_table) do table.insert(sorted_key_table, key) end
     table.sort(sorted_key_table, sort_function)
-    
+
     --table_to_sort = nil
     return sorted_key_table
 end
@@ -1774,31 +1774,31 @@ end
 function PCSortByRestedXP(a,b)
     local estimated_rested_xp_a = 0
     local estimated_rested_xp_b = 0
-    
+
     if a and table_to_sort[a] then
-        estimated_rested_xp_a = AllPlayed:EstimateRestedXP( 
-										a, 
-										realm_for_sort, 
-										table_to_sort[a].level, 
-										table_to_sort[a].rested_xp, 
-										table_to_sort[a].max_rested_xp, 
-										table_to_sort[a].last_update, 
-										table_to_sort[a].is_resting 
+        estimated_rested_xp_a = AllPlayed:EstimateRestedXP(
+										a,
+										realm_for_sort,
+										table_to_sort[a].level,
+										table_to_sort[a].rested_xp,
+										table_to_sort[a].max_rested_xp,
+										table_to_sort[a].last_update,
+										table_to_sort[a].is_resting
         )
     end
 
     if b and table_to_sort[b] then
-        estimated_rested_xp_b = AllPlayed:EstimateRestedXP( 
-										b, 
-										realm_for_sort, 
-										table_to_sort[b].level, 
-										table_to_sort[b].rested_xp, 
-										table_to_sort[b].max_rested_xp, 
-										table_to_sort[b].last_update, 
-										table_to_sort[b].is_resting 
+        estimated_rested_xp_b = AllPlayed:EstimateRestedXP(
+										b,
+										realm_for_sort,
+										table_to_sort[b].level,
+										table_to_sort[b].rested_xp,
+										table_to_sort[b].max_rested_xp,
+										table_to_sort[b].last_update,
+										table_to_sort[b].is_resting
         )
     end
-    
+
     AllPlayed:Debug("PCSortByRestedXP: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
     if estimated_rested_xp_a ~= estimated_rested_xp_b then
@@ -1812,31 +1812,31 @@ end
 function PCSortByRevRestedXP(a,b)
     local estimated_rested_xp_a = 0
     local estimated_rested_xp_b = 0
-    
+
     if a and table_to_sort[a] then
-        estimated_rested_xp_a = AllPlayed:EstimateRestedXP( 
-										a, 
-										realm_for_sort, 
-										table_to_sort[a].level, 
-										table_to_sort[a].rested_xp, 
-										table_to_sort[a].max_rested_xp, 
-										table_to_sort[a].last_update, 
-										table_to_sort[a].is_resting 
+        estimated_rested_xp_a = AllPlayed:EstimateRestedXP(
+										a,
+										realm_for_sort,
+										table_to_sort[a].level,
+										table_to_sort[a].rested_xp,
+										table_to_sort[a].max_rested_xp,
+										table_to_sort[a].last_update,
+										table_to_sort[a].is_resting
         )
     end
 
     if b and table_to_sort[b] then
-        estimated_rested_xp_b = AllPlayed:EstimateRestedXP( 
-										b, 
-										realm_for_sort, 
-										table_to_sort[b].level, 
-										table_to_sort[b].rested_xp, 
-										table_to_sort[b].max_rested_xp, 
-										table_to_sort[b].last_update, 
-										table_to_sort[b].is_resting 
+        estimated_rested_xp_b = AllPlayed:EstimateRestedXP(
+										b,
+										realm_for_sort,
+										table_to_sort[b].level,
+										table_to_sort[b].rested_xp,
+										table_to_sort[b].max_rested_xp,
+										table_to_sort[b].last_update,
+										table_to_sort[b].is_resting
         )
     end
-    
+
     AllPlayed:Debug("PCSortByRestedXP: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
     if estimated_rested_xp_b ~= estimated_rested_xp_a then
@@ -1850,31 +1850,31 @@ end
 function PCSortByPercentRest(a,b)
     local estimated_rested_xp_a = 0
     local estimated_rested_xp_b = 0
-    
+
     if a and table_to_sort[a] then
-        estimated_rested_xp_a = AllPlayed:EstimateRestedXP( 
-										a, 
-										realm_for_sort, 
-										table_to_sort[a].level, 
-										table_to_sort[a].rested_xp, 
-										table_to_sort[a].max_rested_xp, 
-										table_to_sort[a].last_update, 
-										table_to_sort[a].is_resting 
+        estimated_rested_xp_a = AllPlayed:EstimateRestedXP(
+										a,
+										realm_for_sort,
+										table_to_sort[a].level,
+										table_to_sort[a].rested_xp,
+										table_to_sort[a].max_rested_xp,
+										table_to_sort[a].last_update,
+										table_to_sort[a].is_resting
         )
     end
 
     if b and table_to_sort[b] then
-        estimated_rested_xp_b = AllPlayed:EstimateRestedXP( 
-										b, 
-										realm_for_sort, 
-										table_to_sort[b].level, 
-										table_to_sort[b].rested_xp, 
-										table_to_sort[b].max_rested_xp, 
-										table_to_sort[b].last_update, 
-										table_to_sort[b].is_resting 
+        estimated_rested_xp_b = AllPlayed:EstimateRestedXP(
+										b,
+										realm_for_sort,
+										table_to_sort[b].level,
+										table_to_sort[b].rested_xp,
+										table_to_sort[b].max_rested_xp,
+										table_to_sort[b].last_update,
+										table_to_sort[b].is_resting
         )
     end
-    
+
     AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
     if estimated_rested_xp_a / table_to_sort[a].max_rested_xp
@@ -1892,31 +1892,31 @@ end
 function PCSortByRevPercentRest(a,b)
     local estimated_rested_xp_a = 0
     local estimated_rested_xp_b = 0
-    
+
     if a and table_to_sort[a] then
-        estimated_rested_xp_a = AllPlayed:EstimateRestedXP( 
-										a, 
-										realm_for_sort, 
-										table_to_sort[a].level, 
-										table_to_sort[a].rested_xp, 
-										table_to_sort[a].max_rested_xp, 
-										table_to_sort[a].last_update, 
-										table_to_sort[a].is_resting 
+        estimated_rested_xp_a = AllPlayed:EstimateRestedXP(
+										a,
+										realm_for_sort,
+										table_to_sort[a].level,
+										table_to_sort[a].rested_xp,
+										table_to_sort[a].max_rested_xp,
+										table_to_sort[a].last_update,
+										table_to_sort[a].is_resting
         )
     end
 
     if b and table_to_sort[b] then
-        estimated_rested_xp_b = AllPlayed:EstimateRestedXP( 
-										b, 
-										realm_for_sort, 
-										table_to_sort[b].level, 
-										table_to_sort[b].rested_xp, 
-										table_to_sort[b].max_rested_xp, 
-										table_to_sort[b].last_update, 
-										table_to_sort[b].is_resting 
+        estimated_rested_xp_b = AllPlayed:EstimateRestedXP(
+										b,
+										realm_for_sort,
+										table_to_sort[b].level,
+										table_to_sort[b].rested_xp,
+										table_to_sort[b].max_rested_xp,
+										table_to_sort[b].last_update,
+										table_to_sort[b].is_resting
         )
     end
-    
+
     AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
     if estimated_rested_xp_b / table_to_sort[b].max_rested_xp
@@ -1973,7 +1973,7 @@ XPToLevelCache[0]     = 0
 XPToLevelCache[1]     = 0
 function XPToLevel( level )
     if XPToLevelCache[level] == nil then
-        XPToLevelCache[level] = XPToNextLevel( level - 1 ) + XPToLevel( level - 1 )
+        XPToLevelCache[level] = NewXPToNextLevel( level - 1 ) + XPToLevel( level - 1 )
     end
 
     return XPToLevelCache[level]
@@ -1983,21 +1983,23 @@ end
 -- next level. Will need to review this when BC becomes live.
 local XPToNextLevelCache = {}
 -- Until there is a new formula for BC, I use the published XP values
+--[[
 XPToNextLevelCache[60]    = 494000
-XPToNextLevelCache[61]    = 574700  
-XPToNextLevelCache[62]    = 614400   
-XPToNextLevelCache[63]    = 650300   
-XPToNextLevelCache[64]    = 682300   
-XPToNextLevelCache[65]    = 710200   
-XPToNextLevelCache[66]    = 734100   
-XPToNextLevelCache[67]    = 753700   
-XPToNextLevelCache[68]    = 768900   
-XPToNextLevelCache[69]    = 779700   
+XPToNextLevelCache[61]    = 574700
+XPToNextLevelCache[62]    = 614400
+XPToNextLevelCache[63]    = 650300
+XPToNextLevelCache[64]    = 682300
+XPToNextLevelCache[65]    = 710200
+XPToNextLevelCache[66]    = 734100
+XPToNextLevelCache[67]    = 753700
+XPToNextLevelCache[68]    = 768900
+XPToNextLevelCache[69]    = 779700
+]]--
 function XPToNextLevel( level )
     if XPToNextLevelCache[level] == nil then
         XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * XPDiff(level) + 360 * level
     end
-    
+
     return XPToNextLevelCache[level]
 end
 
@@ -2006,10 +2008,62 @@ end
 -- level 28
 function XPDiff( level )
    local x = max( level - 28, 0 )
-   
+
    if ( x < 4 ) then
       return ( x * (x + 1) ) / 2
    else
       return 5 * (x - 2)
    end
 end
+
+-- This is in preparation of patch 2.3
+function NewXPToNextLevel( level )
+	if XPToNextLevelCache[level] == nil then
+		-- There are currently 4 different formulas to get the XP to next level
+		-- I expect the formulas under 60 to change quite a bit
+		-- See <http://www.wowwiki.com/Formulas:XP_To_Level> for details
+		if     ( level < 32  ) then
+			-- level 1 to 31
+			XPToNextLevelCache[level] = (40 * level * level)  +  (360 * level)
+			-- There is a little weird exception for level 29 to 31
+			if     level == 29 then XPToNextLevelCache[level] = XPToNextLevelCache[level] + 1 * MXP(level)
+			elseif level == 30 then XPToNextLevelCache[level] = XPToNextLevelCache[level] + 3 * MXP(level)
+			elseif level == 31 then XPToNextLevelCache[level] = XPToNextLevelCache[level] + 6 * MXP(level)
+			end
+		elseif ( level < 60  ) then
+			-- level 32 to 59
+			XPToNextLevelCache[level] = (65 * level * level)  -  (165 * level)  -  6750
+		elseif ( level == 60 ) then
+			-- level 60
+			XPToNextLevelCache[level] = 494000
+		else
+			-- level 61 to 70
+			XPToNextLevelCache[level] = 155 + MXP(level) * (1344 - ( (69-level) * (3+(69-level)*4) ))
+		end
+
+		-- Round the result to the nearest 100
+		XPToNextLevelCache[level] = math.floor(XPToNextLevelCache[level] / 100 + 0.5) * 100
+	end
+
+	return XPToNextLevelCache[level]
+end
+
+-- Basic amount of XP earned to kill a mob of the character current level
+function MXP( level )
+	-- The formula changed for TBC
+	if ( level < 60 ) then
+		return  45 + (5 * level)
+	else
+		return 235 + (5 * level)
+	end
+
+end
+--[[
+function AllPlayed:testXP()
+--	local levels = { 60, 61, 62, 63, 64, 65, 66, 67, 68, 69 }
+
+	for k = 61,69 do
+		self:Print("%s => %s",k,XPToNextLevelCache[k])
+	end
+end
+]]--
