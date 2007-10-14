@@ -25,6 +25,9 @@ local dewdrop = AceLibrary("Dewdrop-2.0")
 -- babble-class is here just to get the offical raid class colours
 local BC = AceLibrary("Babble-Class-2.2")
 
+-- Local cache
+local XPToNextLevelCache = {}
+
 -- Class colours
 local CLASS_COLOURS = {}
 CLASS_COLOURS['DRUID']      = BC:GetHexColor("DRUID")
@@ -38,7 +41,6 @@ CLASS_COLOURS['WARLOCK']    = BC:GetHexColor("WARLOCK")
 CLASS_COLOURS['WARRIOR']    = BC:GetHexColor("WARRIOR")
 
 CLASS_COLOURS['PRE-210-SHAMAN'] = "00dbba"
-
 
 local tabletParent = "AllPlayedTabletParent"
 
@@ -83,7 +85,13 @@ AllPlayed:RegisterDefaults('account', {
                 }
             }
         }
-    }
+    },
+    cache = {
+		XPToNextLevel = {
+			-- Build version
+			['*'] = {}
+		}
+	 }
 })
 
 -- The options that only change the display are done by profile
@@ -92,7 +100,7 @@ AllPlayed:RegisterDefaults('profile', {
     options = {
         all_factions                = true,
         all_realms                  = true,
-        show_coins					= true,
+        show_coins						= true,
         show_seconds                = true,
         show_progress               = true,
         show_rested_xp              = true,
@@ -104,7 +112,6 @@ AllPlayed:RegisterDefaults('profile', {
         use_pre_210_shaman_colour	= false,
         show_location               = "none",
         show_xp_total               = false,
---        bc_installed				= true,
         font_size					= 12,
         opacity						= .8,
         sort_type					= "alpha",
@@ -320,38 +327,6 @@ function AllPlayed:OnInitialize()
     -- code here, executed only once.
     --self:SetDebugging(true) -- to have debugging through your whole app.
 
---[[
-	if AceLibrary:HasInstance("Waterfall-1.0") then
-		AceLibrary("Waterfall-1.0"):Register('AllPlayed',
-			'aceOptions', command_options,
-			'title', L["AllPlayed Configuration"],
-			'treeLevels', 2,
-			'colorR', 1, 'colorG', 1, 'colorB', 0
-		)
-		self:RegisterChatCommand({ L["/ap"], L["/allplayed"] }, function()
-			AceLibrary("Waterfall-1.0"):Open('AllPlayed')
-		end)
-		if AceLibrary:HasInstance("Dewdrop-2.0") then
-			self:RegisterChatCommand({L["/apdd"], L["/allplayeddd"]}, function()
-				AceLibrary("Dewdrop-2.0"):Open('AllPlayed', 'children', function()
-					AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
-				end)
-			end)
-		end
-		self:RegisterChatCommand({L["/apcl"], L["/allplayedcl"]}, command_options)
-	elseif AceLibrary:HasInstance("Dewdrop-2.0") then
-			self:RegisterChatCommand({L["/ap"], L["/allplayed"]}, function()
-				AceLibrary("Dewdrop-2.0"):Open('AllPlayed', 'children', function()
-					AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
-				end)
-			end)
-		self:RegisterChatCommand({L["/apcl"], L["/allplayedcl"]}, command_options)
-	else
-		-- This should never be called since Dewdrop is embedded with AllPlayed but
-		-- I'm putting it anyways just in case.
-		self:RegisterChatCommand({L["/ap"], L["/allplayed"]}, command_options)
-	end
-]]--
 	-- Register the command line
 	-- Most of this code is shamelessly stolen from Nymbia's Quartz (big thanks)
 	-- /ap and /allplayed will open a dewdrop menu
@@ -374,6 +349,15 @@ function AllPlayed:OnInitialize()
     self.total              = { time_played = 0, coin = 0, xp = 0 }
 
     self.sort_tables_done    = false
+
+	-- Initialize the cache
+	local _, build_version = GetBuildInfo()
+	--if self.db.account.cache.XPToNextLevel[build_version] ~= nil then
+	--	for index,value in ipairs(self.db.account.cache.XPToNextLevel[build_version]) do
+	--		XPToNextLevelCache[index] = value
+	--	end
+	--end
+	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
 end
 
 function AllPlayed:OnEnable()
@@ -936,6 +920,12 @@ function AllPlayed:SaveVar()
     self.db.account.data[self.faction][self.realm][self.pc].is_resting      = IsResting()
     self.db.account.data[self.faction][self.realm][self.pc].zone_text       = GetZoneText()
     self.db.account.data[self.faction][self.realm][self.pc].subzone_text    = GetSubZoneText()
+
+    -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
+    if UnitXPMax("player") ~= XPToNextLevel(UnitLevel("player")) then
+    	local _, build_version = GetBuildInfo()
+    	self.db.account.cache.XPToNextLevel[build_version][UnitLevel("player")] = UnitXPMax("player")
+    end
 
     --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.account.data[self.faction][self.realm][self.pc].zone_text)
 
@@ -1973,7 +1963,7 @@ XPToLevelCache[0]     = 0
 XPToLevelCache[1]     = 0
 function XPToLevel( level )
     if XPToLevelCache[level] == nil then
-        XPToLevelCache[level] = NewXPToNextLevel( level - 1 ) + XPToLevel( level - 1 )
+        XPToLevelCache[level] = XPToNextLevel( level - 1 ) + XPToLevel( level - 1 )
     end
 
     return XPToLevelCache[level]
@@ -1981,7 +1971,7 @@ end
 
 -- This function caculate the number of XP that you need at a particular level to reach
 -- next level. Will need to review this when BC becomes live.
-local XPToNextLevelCache = {}
+--local XPToNextLevelCache = {}
 -- Until there is a new formula for BC, I use the published XP values
 --[[
 XPToNextLevelCache[60]    = 494000
@@ -1995,6 +1985,8 @@ XPToNextLevelCache[67]    = 753700
 XPToNextLevelCache[68]    = 768900
 XPToNextLevelCache[69]    = 779700
 ]]--
+
+--[[
 function XPToNextLevel( level )
     if XPToNextLevelCache[level] == nil then
         XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * XPDiff(level) + 360 * level
@@ -2015,9 +2007,10 @@ function XPDiff( level )
       return 5 * (x - 2)
    end
 end
+]]--
 
 -- This is in preparation of patch 2.3
-function NewXPToNextLevel( level )
+function XPToNextLevel( level )
 	if XPToNextLevelCache[level] == nil then
 		-- There are currently 4 different formulas to get the XP to next level
 		-- I expect the formulas under 60 to change quite a bit
