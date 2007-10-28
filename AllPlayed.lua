@@ -351,13 +351,9 @@ function AllPlayed:OnInitialize()
     self.sort_tables_done    = false
 
 	-- Initialize the cache
-	local _, build_version = GetBuildInfo()
-	--if self.db.account.cache.XPToNextLevel[build_version] ~= nil then
-	--	for index,value in ipairs(self.db.account.cache.XPToNextLevel[build_version]) do
-	--		XPToNextLevelCache[index] = value
-	--	end
-	--end
-	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
+	local build_version
+--	self.game_version, build_version = GetBuildInfo()
+	InitXPToLevelCache()
 end
 
 function AllPlayed:OnEnable()
@@ -1971,21 +1967,80 @@ end
 
 -- This function caculate the number of XP that you need at a particular level to reach
 -- next level. Will need to review this when BC becomes live.
---local XPToNextLevelCache = {}
--- Until there is a new formula for BC, I use the published XP values
---[[
-XPToNextLevelCache[60]    = 494000
-XPToNextLevelCache[61]    = 574700
-XPToNextLevelCache[62]    = 614400
-XPToNextLevelCache[63]    = 650300
-XPToNextLevelCache[64]    = 682300
-XPToNextLevelCache[65]    = 710200
-XPToNextLevelCache[66]    = 734100
-XPToNextLevelCache[67]    = 753700
-XPToNextLevelCache[68]    = 768900
-XPToNextLevelCache[69]    = 779700
-]]--
+-- Until there is a new formula for 2.3, I use the published XP values
 
+function InitXPToLevelCache( game_version, build_version )
+	if game_version == nil then
+		game_version, build_version = GetBuildInfo()
+	elseif build_version == nil then
+		_, build_version = GetBuildInfo()
+	end
+
+	-- Values for the 2.3 patches as recorded on WoWWiki
+	if game_version ~= "2.2.3" then
+		XPToNextLevelCache[11]    = 8700
+		XPToNextLevelCache[12]    = 9800
+		XPToNextLevelCache[13]    = 11000
+		XPToNextLevelCache[14]    = 12300
+		XPToNextLevelCache[15]    = 13600
+		XPToNextLevelCache[16]    = 15000
+		XPToNextLevelCache[17]    = 16400
+		XPToNextLevelCache[18]    = 17800
+		XPToNextLevelCache[19]    = 19300
+		XPToNextLevelCache[20]    = 20800
+		XPToNextLevelCache[21]    = 22400
+		XPToNextLevelCache[23]    = 24000
+		XPToNextLevelCache[23]    = 25500
+		XPToNextLevelCache[24]    = 27200
+		XPToNextLevelCache[25]    = 28900
+		XPToNextLevelCache[26]    = 30500
+		XPToNextLevelCache[27]    = 32200
+		XPToNextLevelCache[28]    = 33900
+		XPToNextLevelCache[29]    = 36300
+		XPToNextLevelCache[30]    = 38800
+		XPToNextLevelCache[31]    = 41600
+		XPToNextLevelCache[32]    = 44600
+		XPToNextLevelCache[33]    = 48000
+		XPToNextLevelCache[34]    = 51400
+		XPToNextLevelCache[35]    = 55000
+		XPToNextLevelCache[36]    = 58700
+		XPToNextLevelCache[37]    = 62400
+		XPToNextLevelCache[38]    = 66200
+		XPToNextLevelCache[39]    = 70200
+		XPToNextLevelCache[40]    = 74300
+		XPToNextLevelCache[41]    = 78500
+		XPToNextLevelCache[42]    = 82800
+		XPToNextLevelCache[43]    = 87100
+		XPToNextLevelCache[44]    = 91600
+		XPToNextLevelCache[45]    = 95300
+		XPToNextLevelCache[46]    = 101000
+		XPToNextLevelCache[47]    = 105800
+		XPToNextLevelCache[48]    = 110700
+		XPToNextLevelCache[49]    = 115700
+		XPToNextLevelCache[50]    = 120900
+		XPToNextLevelCache[51]    = 126100
+		XPToNextLevelCache[52]    = 131500
+		XPToNextLevelCache[53]    = 137000
+		XPToNextLevelCache[54]    = 142500
+		XPToNextLevelCache[55]    = 148200
+		XPToNextLevelCache[56]    = 154000
+		XPToNextLevelCache[57]    = 159900
+		XPToNextLevelCache[58]    = 165800
+		XPToNextLevelCache[59]    = 172000
+	end
+
+	-- Initialize the exceptions that were found by AllPlayed
+	--	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
+	if AllPlayed.db.account.cache.XPToNextLevel[build_version] ~= nil then
+		for level = 1,69 do
+			if AllPlayed.db.account.cache.XPToNextLevel[build_version][level] ~= nil then
+				XPToNextLevelCache[level] = AllPlayed.db.account.cache.XPToNextLevel[build_version][level]
+			end
+		end
+	end
+
+
+end
 --[[
 function XPToNextLevel( level )
     if XPToNextLevelCache[level] == nil then
@@ -2036,6 +2091,13 @@ function XPToNextLevel( level )
 
 		-- Round the result to the nearest 100
 		XPToNextLevelCache[level] = math.floor(XPToNextLevelCache[level] / 100 + 0.5) * 100
+
+		-- Fix the value for patch 2.3 and above (formula provided on WoWWiki)
+		--[[
+		if level >10 and level < 60 and "2.2.3" =~ GetBuildInfo() then
+			XPToNextLevelCache[level] = math.floor((XPToNextLevelCache[level] * (1-math.min(level-10,18)/100)) /100) * 100
+		end
+		]]
 	end
 
 	return XPToNextLevelCache[level]
