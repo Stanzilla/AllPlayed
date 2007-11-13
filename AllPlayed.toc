@@ -1,9 +1,9 @@
-## Interface: 20200
+## Interface: 20300
 ## Author: LaoTseu
 ## X-eMail: laotseu.ace@gmail.com
 ## Title: AllPlayed |cff7fff7f -Ace2-|r
 ## Notes: Track time played, rested XP and money for all characters
-## Version: 20200-1.$Revision$
+## Version: 20300-1.$Revision$
 
 ## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96 for the koKR and kuja for deDE localizations.
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
