@@ -20,6 +20,6 @@
 <Script file="libs\Abacus-2.0\Abacus-2.0.lua"/>
 <Script file="libs\Crayon-2.0\Crayon-2.0.lua"/>
 <Script file="libs\FuBarPlugin-2.0\FuBarPlugin-2.0.lua"/>
-<Script file="libs\Babble-Class-2.2\Babble-Class-2.2.lua"/>
+<!-- <Script file="libs\Babble-Class-2.2\Babble-Class-2.2.lua"/> -->
 
 </Ui>

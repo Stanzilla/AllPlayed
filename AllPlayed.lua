@@ -9,6 +9,8 @@
 -- Ten days in second, needed to estimate the rested XP
 local TEN_DAYS  = 60 * 60 * 24 * 10
 
+-- Prototypes for local functions
+--local AllPlayed.GetClassHexColour				-- AllPlayed.GetClassHexColour(class)
 
 -- Load external libraries
 
@@ -23,30 +25,20 @@ local tablet = AceLibrary("Tablet-2.0")
 -- dewdrop is for the menu functions (only needed if FuBar is not there)
 local dewdrop = AceLibrary("Dewdrop-2.0")
 -- babble-class is here just to get the offical raid class colours
-local BC = AceLibrary("Babble-Class-2.2")
+--local BC = AceLibrary("Babble-Class-2.2")
+
+-- Class colours
+CLASS_COLOURS = {}
 
 -- Local cache
 local XPToNextLevelCache = {}
-
--- Class colours
-local CLASS_COLOURS = {}
-CLASS_COLOURS['DRUID']      = BC:GetHexColor("DRUID")
-CLASS_COLOURS['HUNTER']     = BC:GetHexColor("HUNTER")
-CLASS_COLOURS['MAGE']       = BC:GetHexColor("MAGE")
-CLASS_COLOURS['PALADIN']    = BC:GetHexColor("PALADIN")
-CLASS_COLOURS['PRIEST']     = BC:GetHexColor("PRIEST")
-CLASS_COLOURS['ROGUE']      = BC:GetHexColor("ROGUE")
-CLASS_COLOURS['SHAMAN']     = BC:GetHexColor("SHAMAN")
-CLASS_COLOURS['WARLOCK']    = BC:GetHexColor("WARLOCK")
-CLASS_COLOURS['WARRIOR']    = BC:GetHexColor("WARRIOR")
-
-CLASS_COLOURS['PRE-210-SHAMAN'] = "00dbba"
 
 local tabletParent = "AllPlayedTabletParent"
 
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
 AllPlayed = {}
 AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","FuBarPlugin-2.0")
+
 
 -- Keep track if FuBar is present
 if IsAddOnLoaded("Fubar") then
@@ -388,11 +380,24 @@ function AllPlayed:OnEnable()
 
     -- Initial update of values
 
+	 -- Class colours
+	 CLASS_COLOURS['DRUID']      = AllPlayed.GetClassHexColour("DRUID")
+	 CLASS_COLOURS['HUNTER']     = AllPlayed.GetClassHexColour("HUNTER")
+	 CLASS_COLOURS['MAGE']       = AllPlayed.GetClassHexColour("MAGE")
+	 CLASS_COLOURS['PALADIN']    = AllPlayed.GetClassHexColour("PALADIN")
+	 CLASS_COLOURS['PRIEST']     = AllPlayed.GetClassHexColour("PRIEST")
+	 CLASS_COLOURS['ROGUE']      = AllPlayed.GetClassHexColour("ROGUE")
+	 CLASS_COLOURS['WARLOCK']    = AllPlayed.GetClassHexColour("WARLOCK")
+	 CLASS_COLOURS['WARRIOR']    = AllPlayed.GetClassHexColour("WARRIOR")
+
+	 CLASS_COLOURS['PRE-210-SHAMAN'] = "00dbba"
+
+
     -- What colour should be used for Shaman?
     if(self:GetUsePre210Colours()) then
     	CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
     else
-		CLASS_COLOURS['SHAMAN'] = BC:GetHexColor("SHAMAN")
+		CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
     end
 
     -- Is BC installed
@@ -1173,7 +1178,7 @@ function AllPlayed:SetUsePre210Colours( value )
 	if(value) then
 		CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
 	else
-		CLASS_COLOURS['SHAMAN'] = BC:GetHexColor("SHAMAN")
+		CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
 	end
 
     -- Refesh
@@ -2122,3 +2127,28 @@ function AllPlayed:testXP()
 	end
 end
 ]]--
+
+-- #################################################################################
+-- #################################################################################
+-- ##
+-- ## AllPlayed.GetClassHexColour(class)
+-- ## ----------------------------------
+-- ##
+-- ## Return the HEX color string for a specific character class
+-- ##
+-- ## Note: This function was taken nearly verbatim from the Bable-Class library.
+-- ##       I figured seven lines or code was not worth including a library.
+-- ##
+-- ## Parameter: 	class				= Class name not localised
+-- ##
+-- ## Return:		classColor		= Hexadecimal string representing the class color
+-- ##
+-- #################################################################################
+
+function AllPlayed.GetClassHexColour(class)
+	if RAID_CLASS_COLORS and RAID_CLASS_COLORS[class] then
+		return string.format("%02x%02x%02x",RAID_CLASS_COLORS[class].r*255, RAID_CLASS_COLORS[class].g*255, RAID_CLASS_COLORS[class].b*255)
+	else
+		return "a1a1a1"
+	end
+end
