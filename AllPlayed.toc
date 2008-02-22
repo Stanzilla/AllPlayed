@@ -1,7 +1,7 @@
 ## Interface: 20300
 ## Author: LaoTseu
 ## X-eMail: laotseu.ace@gmail.com
-## Title: AllPlayed |cff7fff7f -Ace2-|r
+## Title: AllPlayed
 ## Notes: Track time played, rested XP and money for all characters
 ## Version: 20300-1.$Revision$
 
