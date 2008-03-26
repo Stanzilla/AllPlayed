@@ -47,7 +47,7 @@ else
     AllPlayed.is_fubar_loaded = false
 end
 
--- The data will be saved in WFT\{account name}\SaveVariables\AllPlayedDB.lua
+-- The data will be saved in WTF\{account name}\SaveVariables\AllPlayedDB.lua
 AllPlayed:RegisterDB("AllPlayedDB")
 
 -- Set the default for the save variables. Not very useful except to show the format
