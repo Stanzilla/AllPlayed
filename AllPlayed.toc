@@ -1,6 +1,5 @@
 ## Interface: 20400
 ## Author: LaoTseu
-## X-eMail: laotseu.ace@gmail.com
 ## Title: AllPlayed
 ## Notes: Track time played, rested XP and money for all characters
 ## Version: 20400-1.$Revision$
