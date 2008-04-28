@@ -2,6 +2,8 @@
 ## Author: LaoTseu
 ## Title: AllPlayed
 ## Notes: Track time played, rested XP and money for all characters
+## Notes-zhCN: 显示同账号下所有角色游戏时间、经验以及金钱等讯息。
+## Notes-zhTW: 顯示同賬號下所有角色遊戲時間、經驗以及金錢等訊息。
 ## Version: 20400-1.$Revision$
 
 ## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96 for the koKR, kuja for deDE and RoyalHawk for zhZN localizations.
@@ -29,4 +31,5 @@ AllPlayed-enUS.lua
 AllPlayed-deDE.lua
 AllPlayed-koKR.lua
 AllPlayed-zhCN.lua
+AllPlayed-zhTW.lua
 AllPlayed.lua
