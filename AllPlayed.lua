@@ -1746,8 +1746,10 @@ function PCSortByXP(a,b)
 	-- First per level
 	if table_to_sort[a].level ~= table_to_sort[b].level then
 		return table_to_sort[a].level < table_to_sort[b].level
-	else
+	elseif table_to_sort[a].xp ~= table_to_sort[b].xp then
 		return table_to_sort[a].xp < table_to_sort[b].xp
+	else
+		return a < b
 	end
 end
 
@@ -1756,8 +1758,10 @@ function PCSortByRevXP(a,b)
 	-- First per level
 	if table_to_sort[b].level ~= table_to_sort[a].level then
 		return table_to_sort[b].level < table_to_sort[a].level
-	else
+	elseif table_to_sort[a].xp ~= table_to_sort[b].xp then
 		return table_to_sort[b].xp < table_to_sort[a].xp
+	else
+		return a < b
 	end
 end
 
