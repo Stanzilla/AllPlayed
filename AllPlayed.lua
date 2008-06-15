@@ -877,29 +877,6 @@ function AllPlayed:EventHandler()
     self:ComputeTotal()
 end
 
---[[
--- Function called from Metrognome when FuBar is not loaded
-function AllPlayed:TimerUpdate()
-    self:ComputeTotal()
-    --self:FillTablet()
-
-    -- We have to register the tabler for every update!!!!
-    tablet:Register(tabletParent,
-        'menu', function()
-             dewdrop:FeedAceOptionsTable(command_options)
-        end,
-        'cantAttach', true,
-        'detachedData', self.db.profile.tabletData,
-        'children', function()
-            AllPlayed:FillTablet()
-        end,
-        'showTitleWhenDetached', true
-    )
-
-    tablet:Refresh(tabletParent)
-
-end
-]]--
 
 --[[ ================================================================= ]]--
 --[[                  Store and retreive methods                       ]]--
