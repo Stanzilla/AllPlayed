@@ -40,6 +40,32 @@ AllPlayed = {}
 AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","FuBarPlugin-2.0")
 
 
+-- Local function prototypes
+local FormatXP
+local FormatMoney
+local FactionColour
+local PercentColour
+local ClassColour
+local FormatCharacterName
+local pairsByKeys
+local buildSortedTable
+local PCSortByLevel
+local PCSortByRevLevel
+local PCSortByXP
+local PCSortByRevXP
+local PCSortByRestedXP
+local PCSortByRevRestedXP
+local PCSortByPercentRest
+local PCSortByRevPercentRest
+local PCSortByCoin
+local PCSortByRevCoin
+local PCSortByRevTimePlayed
+local PCSortByTimePlayed
+local XPToLevel
+local InitXPToLevelCache
+local XPToNextLevel
+local MXP
+
 -- Keep track if FuBar is present
 if IsAddOnLoaded("Fubar") then
     AllPlayed.is_fubar_loaded = true
@@ -458,7 +484,7 @@ function AllPlayed:SetDebugging(debugging) self.db.profile.debugging = debugging
 --[[ ================================================================= ]]--
 
 -- FuBar configuration
--- Defining there even if FuBar is not present doesn't cause any problem se I don't
+-- Defining there even if FuBar is not present doesn't cause any problem so I don't
 -- check self.is_fubar_loaded
 AllPlayed.OnMenuRequest = command_options
 AllPlayed.hasIcon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp"
@@ -1213,38 +1239,6 @@ function AllPlayed:SetShowLocation( value )
     self:Update()
 end
 
---[[
--- Get the current bc_installed value
-function AllPlayed:GetIsBCInstalled()
-    self:Debug("AllPlayed:GetIsBCInstalled: ",
-               self.db.profile.options.bc_installed
-    )
-
---    return self.db.profile.options.bc_installed
-	return (GetAccountExpansionLevel() == 1)
-end
-
--- Set the value for bc_installed
-function AllPlayed:SetIsBCInstalled(value)
-    self:Debug("AllPlayed:SetIsBCInstalled: ",value)
-
-    self.db.profile.options.bc_installed = value
-
-	-- The only difference is the maximum level that a PC can get to
-	if(value) then
-		self.max_pc_level = 70
-	else
-		self.max_pc_level = 60
-	end
-
-    -- Compute the totals
-    self:ComputeTotal()
-
-    -- Refesh
-    self:Update()
-end
-]]--
-
 -- Get the value of sort_type
 function AllPlayed:GetSortType()
     self:Debug("AllPlayed:GetSortType: ", self.db.profile.options.sort_type)
@@ -1963,57 +1957,55 @@ function InitXPToLevelCache( game_version, build_version )
 	end
 
 	-- Values for the 2.3 patches as recorded on WoWWiki
-	if game_version ~= "2.2.3" then
-		XPToNextLevelCache[11]    = 8700
-		XPToNextLevelCache[12]    = 9800
-		XPToNextLevelCache[13]    = 11000
-		XPToNextLevelCache[14]    = 12300
-		XPToNextLevelCache[15]    = 13600
-		XPToNextLevelCache[16]    = 15000
-		XPToNextLevelCache[17]    = 16400
-		XPToNextLevelCache[18]    = 17800
-		XPToNextLevelCache[19]    = 19300
-		XPToNextLevelCache[20]    = 20800
-		XPToNextLevelCache[21]    = 22400
-		XPToNextLevelCache[23]    = 24000
-		XPToNextLevelCache[23]    = 25500
-		XPToNextLevelCache[24]    = 27200
-		XPToNextLevelCache[25]    = 28900
-		XPToNextLevelCache[26]    = 30500
-		XPToNextLevelCache[27]    = 32200
-		XPToNextLevelCache[28]    = 33900
-		XPToNextLevelCache[29]    = 36300
-		XPToNextLevelCache[30]    = 38800
-		XPToNextLevelCache[31]    = 41600
-		XPToNextLevelCache[32]    = 44600
-		XPToNextLevelCache[33]    = 48000
-		XPToNextLevelCache[34]    = 51400
-		XPToNextLevelCache[35]    = 55000
-		XPToNextLevelCache[36]    = 58700
-		XPToNextLevelCache[37]    = 62400
-		XPToNextLevelCache[38]    = 66200
-		XPToNextLevelCache[39]    = 70200
-		XPToNextLevelCache[40]    = 74300
-		XPToNextLevelCache[41]    = 78500
-		XPToNextLevelCache[42]    = 82800
-		XPToNextLevelCache[43]    = 87100
-		XPToNextLevelCache[44]    = 91600
-		XPToNextLevelCache[45]    = 95300
-		XPToNextLevelCache[46]    = 101000
-		XPToNextLevelCache[47]    = 105800
-		XPToNextLevelCache[48]    = 110700
-		XPToNextLevelCache[49]    = 115700
-		XPToNextLevelCache[50]    = 120900
-		XPToNextLevelCache[51]    = 126100
-		XPToNextLevelCache[52]    = 131500
-		XPToNextLevelCache[53]    = 137000
-		XPToNextLevelCache[54]    = 142500
-		XPToNextLevelCache[55]    = 148200
-		XPToNextLevelCache[56]    = 154000
-		XPToNextLevelCache[57]    = 159900
-		XPToNextLevelCache[58]    = 165800
-		XPToNextLevelCache[59]    = 172000
-	end
+	XPToNextLevelCache[11]    = 8700
+	XPToNextLevelCache[12]    = 9800
+	XPToNextLevelCache[13]    = 11000
+	XPToNextLevelCache[14]    = 12300
+	XPToNextLevelCache[15]    = 13600
+	XPToNextLevelCache[16]    = 15000
+	XPToNextLevelCache[17]    = 16400
+	XPToNextLevelCache[18]    = 17800
+	XPToNextLevelCache[19]    = 19300
+	XPToNextLevelCache[20]    = 20800
+	XPToNextLevelCache[21]    = 22400
+	XPToNextLevelCache[23]    = 24000
+	XPToNextLevelCache[23]    = 25500
+	XPToNextLevelCache[24]    = 27200
+	XPToNextLevelCache[25]    = 28900
+	XPToNextLevelCache[26]    = 30500
+	XPToNextLevelCache[27]    = 32200
+	XPToNextLevelCache[28]    = 33900
+	XPToNextLevelCache[29]    = 36300
+	XPToNextLevelCache[30]    = 38800
+	XPToNextLevelCache[31]    = 41600
+	XPToNextLevelCache[32]    = 44600
+	XPToNextLevelCache[33]    = 48000
+	XPToNextLevelCache[34]    = 51400
+	XPToNextLevelCache[35]    = 55000
+	XPToNextLevelCache[36]    = 58700
+	XPToNextLevelCache[37]    = 62400
+	XPToNextLevelCache[38]    = 66200
+	XPToNextLevelCache[39]    = 70200
+	XPToNextLevelCache[40]    = 74300
+	XPToNextLevelCache[41]    = 78500
+	XPToNextLevelCache[42]    = 82800
+	XPToNextLevelCache[43]    = 87100
+	XPToNextLevelCache[44]    = 91600
+	XPToNextLevelCache[45]    = 95300
+	XPToNextLevelCache[46]    = 101000
+	XPToNextLevelCache[47]    = 105800
+	XPToNextLevelCache[48]    = 110700
+	XPToNextLevelCache[49]    = 115700
+	XPToNextLevelCache[50]    = 120900
+	XPToNextLevelCache[51]    = 126100
+	XPToNextLevelCache[52]    = 131500
+	XPToNextLevelCache[53]    = 137000
+	XPToNextLevelCache[54]    = 142500
+	XPToNextLevelCache[55]    = 148200
+	XPToNextLevelCache[56]    = 154000
+	XPToNextLevelCache[57]    = 159900
+	XPToNextLevelCache[58]    = 165800
+	XPToNextLevelCache[59]    = 172000
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
