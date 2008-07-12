@@ -20,8 +20,8 @@
 
 ## DefaultState: enabled
 
-## OptionalDeps: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, FuBarPlugin-2.0, FuBar, Babble-2.2
-## X-Embeds: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, FuBarPlugin-2.0, Babble-2.2
+## OptionalDeps: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, FuBarPlugin-2.0, FuBar
+## X-Embeds: Ace2, DewdropLib, TabletLib, AbacusLib, CrayonLib, FuBarPlugin-2.0
 
 ## SavedVariables: AllPlayedDB
 
