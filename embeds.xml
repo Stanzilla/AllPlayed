@@ -17,8 +17,10 @@
 <!-- Other embeded libraries -->
 <Script file="libs\Dewdrop-2.0\Dewdrop-2.0.lua"/>
 <Script file="libs\Tablet-2.0\Tablet-2.0.lua"/>
-<Script file="libs\Abacus-2.0\Abacus-2.0.lua"/>
-<Script file="libs\Crayon-2.0\Crayon-2.0.lua"/>
+<!-- <Script file="libs\Abacus-2.0\Abacus-2.0.lua"/> -->
+<Script file="libs\LibAbacus-3.0\LibAbacus-3.0.lua"/>
+<!-- <Script file="libs\Crayon-2.0\Crayon-2.0.lua"/> -->
+<Script file="libs\LibCrayon-3.0\LibCrayon-3.0.lua"/>
 <Script file="libs\FuBarPlugin-2.0\FuBarPlugin-2.0.lua"/>
 
 </Ui>

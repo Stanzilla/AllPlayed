@@ -17,9 +17,11 @@ local TEN_DAYS  = 60 * 60 * 24 * 10
 -- L is for localisation (to allow translation of the addon)
 local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 -- A is for time and money formating functions
-local A = AceLibrary("Abacus-2.0")
+--local A = AceLibrary("Abacus-2.0")
+local A = LibStub("LibAbacus-3.0")
 -- C is for colour management functions
-local C = AceLibrary("Crayon-2.0")
+--local C = AceLibrary("Crayon-2.0")
+local C = LibStub("LibCrayon-3.0")
 -- tablet is for the tablet library functions
 local tablet = AceLibrary("Tablet-2.0")
 -- dewdrop is for the menu functions (only needed if FuBar is not there)
@@ -493,7 +495,7 @@ AllPlayed.defaultMinimapPosition = 200
 AllPlayed.cannotDetachTooltip = false
 AllPlayed.hideWithoutStandby = true
 AllPlayed.clickableTooltip = false
-AllPlayed.hideMenuTitle = true			-- The menu title is explicitely provided in the command_options table
+AllPlayed.hideMenuTitle = true			-- The menu title is provided in the command_options table
 
 function AllPlayed:OnDataUpdate()
     self:Debug("AllPlayed:OnDataUpdate()")
