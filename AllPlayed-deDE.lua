@@ -1,5 +1,8 @@
 -- AllPlayed-deDE.lua
 -- $Id$
+if not AllPlayed_revision then AllPlayed_revision = {} end
+AllPlayed_revision.deDE	= ("$Revision$"):match("(%d+)")
+
 local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 
 -- This is only a place-holder for future possible localisation files

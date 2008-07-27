@@ -1,6 +1,11 @@
 ﻿-- AllPlayed.lua
 -- $Id$
 
+if not AllPlayed_revision then AllPlayed_revision = {} end
+AllPlayed_revision.main	= ("$Revision$"):match("(%d+)")
+AllPlayed_revision.toc  = GetAddOnMetadata("FuBar_DominosFu", "Version"):match("%$Revision:%s(%d+)")
+
+
 --[[ ================================================================= ]]--
 --[[                     Addon Initialisation                          ]]--
 --[[ ================================================================= ]]--
@@ -134,9 +139,9 @@ AllPlayed:RegisterDefaults('profile', {
         use_pre_210_shaman_colour	= false,
         show_location               = "none",
         show_xp_total               = false,
-        font_size					= 12,
-        opacity						= .8,
-        sort_type					= "alpha",
+        font_size							= 12,
+        opacity							= .8,
+        sort_type							= "alpha",
         is_ignored = {
         	-- Realm
         	['*'] = {
@@ -157,6 +162,14 @@ local command_options = {
     		name = L["AllPlayed Configuration"],
     		order = 1
     	},
+    	title2	= {
+    		type = "header",
+    		order = 2
+    	},
+		blankLine = {
+			type = 'header',
+			order = 3,
+		},
         display = {
             type = 'group', name = L["Display"], desc = L["Set the display options"], args = {
                 all_factions = {
@@ -474,6 +487,19 @@ function AllPlayed:OnEnable()
    -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
    -- or 20 seconds depending on the refresh_rate setting
 	self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
+
+	-- Find the curent revision number from all the files revisions
+	self.revision = 0
+	if AllPlayed_revision then
+		for _, rev in pairs(AllPlayed_revision) do
+			local revision = tonumber(rev)
+			if revision and revision > self.revision then self.revision = revision end
+		end
+	else
+		assert(false,"No AllPlayed_revision")
+	end
+	command_options.args.title2.name = string.format(L["Revision %s"], self.revision)
+
 end
 
 function AllPlayed:OnDisable()

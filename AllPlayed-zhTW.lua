@@ -1,5 +1,8 @@
 -- AllPlayed-zhTW.lua
 -- $Id: AllPlayed-zhTW.lua 29449 2007-03-03 16:18:41Z next96 $
+if not AllPlayed_revision then AllPlayed_revision = {} end
+AllPlayed_revision.zhTW	= ("$Revision$"):match("(%d+)")
+
 local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 
 -- This is only a place-holder for future possible localisation files

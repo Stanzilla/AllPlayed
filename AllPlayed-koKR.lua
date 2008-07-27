@@ -1,5 +1,8 @@
 -- AllPlayed-koKR.lua
 -- $Id: AllPlayed-koKR.lua 29449 2007-03-03 16:18:41Z next96 $
+if not AllPlayed_revision then AllPlayed_revision = {} end
+AllPlayed_revision.koKR	= ("$Revision: 79255 $"):match("(%d+)")
+
 local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 
 -- This is only a place-holder for future possible localisation files
