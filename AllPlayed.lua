@@ -17,10 +17,8 @@ local TEN_DAYS  = 60 * 60 * 24 * 10
 -- L is for localisation (to allow translation of the addon)
 local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 -- A is for time and money formating functions
---local A = AceLibrary("Abacus-2.0")
 local A = LibStub("LibAbacus-3.0")
 -- C is for colour management functions
---local C = AceLibrary("Crayon-2.0")
 local C = LibStub("LibCrayon-3.0")
 -- tablet is for the tablet library functions
 local tablet = AceLibrary("Tablet-2.0")
@@ -102,6 +100,10 @@ AllPlayed:RegisterDefaults('account', {
                     seconds_played_last_update  = 0,
                     zone_text                   = L["Unknown"],
                     subzone_text                = "",
+                    arena_points						= nil,
+                    honor_points						= nil,
+                    highest_rank						= nil,
+                    honor_kills						= nil,
                 }
             }
         }
@@ -386,15 +388,16 @@ function AllPlayed:OnEnable()
 
     -- Register the events we need
     -- (event unregistering is done automagicaly by ACE)
-    self:RegisterEvent("TIME_PLAYED_MSG",       "OnTimePlayedMsg")
-    self:RegisterEvent("PLAYER_LEVEL_UP",       "EventHandlerWithSort")
-    self:RegisterEvent("PLAYER_XP_UPDATE",      "EventHandlerWithSort")
-    self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "EventHandler")
-    self:RegisterEvent("ZONE_CHANGED",          "EventHandler")
-    self:RegisterEvent("MINIMAP_ZONE_CHANGED",  "EventHandler")
+    self:RegisterEvent("TIME_PLAYED_MSG",       		"OnTimePlayedMsg")
+    self:RegisterEvent("PLAYER_LEVEL_UP",       		"EventHandlerWithSort")
+    self:RegisterEvent("PLAYER_XP_UPDATE",      		"EventHandlerWithSort")
+    self:RegisterEvent("ZONE_CHANGED_NEW_AREA", 		"EventHandler")
+    self:RegisterEvent("ZONE_CHANGED",          		"EventHandler")
+    self:RegisterEvent("MINIMAP_ZONE_CHANGED",  		"EventHandler")
     if(self:GetShowCoins()) then
     	self:RegisterEvent("PLAYER_MONEY",      "EventHandler")
     end
+    self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
 
     -- Hook the functions that need hooking
     -- (hook removal is done automagicaly by ACE)
@@ -458,15 +461,18 @@ function AllPlayed:OnEnable()
         end
     end
 
+    -- Compute Honor at least once (it will be computed only if it change afterward
+    self:ComputeTotalHonor()
+
 
     -- Build the sorting tables
-  	self:BuildSortTables()
+  	 self:BuildSortTables()
 
     -- Request the time played so we can populate seconds_played
     self:RequestTimePlayed()
 
-  -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
-  -- or 20 seconds depending on the refresh_rate setting
+   -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
+   -- or 20 seconds depending on the refresh_rate setting
 	self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
 end
 
@@ -562,24 +568,24 @@ function AllPlayed:ComputeTotal()
             for pc, pc_table in pairs(realm_table) do
 --                if not pc_table.is_ignored then
                 if not self:GetIsCharIgnored(realm, pc) then
-					-- Need to get the current seconds_played for the PC
-					local seconds_played = self:EstimateTimePlayed(pc,
-																   realm,
-																   pc_table.seconds_played,
-																   pc_table.seconds_played_last_update
-										   )
+						-- Need to get the current seconds_played for the PC
+						local seconds_played = self:EstimateTimePlayed(pc,
+																		realm,
+																		pc_table.seconds_played,
+																		pc_table.seconds_played_last_update
+												)
 
-					local pc_xp = pc_table.xp
-					if (pc_xp ==-1) then pc_xp = 0 end
+						local pc_xp = pc_table.xp
+						if (pc_xp ==-1) then pc_xp = 0 end
 
-					pc_xp = pc_xp + XPToLevel(pc_table.level)
+						pc_xp = pc_xp + XPToLevel(pc_table.level)
 
-					self.total_faction[faction].time_played         = self.total_faction[faction].time_played       + seconds_played
-					self.total_faction[faction].coin                = self.total_faction[faction].coin              + pc_table.coin
-					self.total_faction[faction].xp                  = self.total_faction[faction].xp                + pc_xp
-					self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  + seconds_played
-					self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         + pc_table.coin
-					self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           + pc_xp
+						self.total_faction[faction].time_played         = self.total_faction[faction].time_played       + seconds_played
+						self.total_faction[faction].coin                = self.total_faction[faction].coin              + pc_table.coin
+						self.total_faction[faction].xp                  = self.total_faction[faction].xp                + pc_xp
+						self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  + seconds_played
+						self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         + pc_table.coin
+						self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           + pc_xp
                 end
             end
         end
@@ -609,6 +615,69 @@ function AllPlayed:ComputeTotal()
         self.total.time_played = self.total_realm[self.faction][self.realm].time_played
         self.total.coin        = self.total_realm[self.faction][self.realm].coin
         self.total.xp          = self.total_realm[self.faction][self.realm].xp
+    end
+end
+
+function AllPlayed:ComputeTotalHonor()
+    self:Debug("AllPlayed:ComputeTotalHonor()")
+
+    self.total_faction[L["Horde"]].honor_kills      = 0
+    self.total_faction[L["Horde"]].honor_points     = 0
+    self.total_faction[L["Horde"]].arena_points     = 0
+    self.total_faction[L["Alliance"]].honor_kills   = 0
+    self.total_faction[L["Alliance"]].honor_points  = 0
+    self.total_faction[L["Alliance"]].arena_points  = 0
+    self.total.honor_kills                          = 0
+    self.total.honor_points                         = 0
+    self.total.arena_points                         = 0
+
+    -- Let all the factions, realms and PC be counted
+    for faction, faction_table in pairs(self.db.account.data) do
+        for realm, realm_table in pairs(faction_table) do
+            self:Debug("faction: %s realm: %s", faction, realm)
+
+            if not self.total_realm[faction] then self.total_realm[faction] = {} end
+            if not self.total_realm[faction][realm] then self.total_realm[faction][realm] = {} end
+            self.total_realm[faction][realm].honor_kills = 0
+            self.total_realm[faction][realm].honor_points = 0
+            self.total_realm[faction][realm].arena_points = 0
+            for pc, pc_table in pairs(realm_table) do
+                if not self:GetIsCharIgnored(realm, pc) then
+						self.total_faction[faction].honor_kills         = self.total_faction[faction].honor_kills       + (pc_table.honor_kills or 0)
+						self.total_faction[faction].honor_points        = self.total_faction[faction].honor_points      + (pc_table.honor_points or 0)
+						self.total_faction[faction].arena_points        = self.total_faction[faction].arena_points      + (pc_table.arena_points or 0)
+						self.total_realm[faction][realm].honor_kills    = self.total_realm[faction][realm].honor_kills  + (pc_table.honor_kills or 0)
+						self.total_realm[faction][realm].honor_points   = self.total_realm[faction][realm].honor_points + (pc_table.honor_points or 0)
+						self.total_realm[faction][realm].arena_points   = self.total_realm[faction][realm].arena_points + (pc_table.arena_points or 0)
+                end
+            end
+        end
+    end
+
+    -- The Grand Total varies according to the options
+    if self.db.profile.options.all_realms then
+        if self.db.profile.options.all_factions then
+            -- Everything count
+            self.total.honor_kills
+                =   self.total_faction[L["Horde"]].honor_kills
+                  + self.total_faction[L["Alliance"]].honor_kills
+            self.total.honor_points
+                =   self.total_faction[L["Horde"]].honor_points
+                  + self.total_faction[L["Alliance"]].honor_points
+            self.total.arena_points
+                =   self.total_faction[L["Horde"]].arena_points
+                  + self.total_faction[L["Alliance"]].arena_points
+        else
+            -- Only the current faction count
+            self.total.honor_kills 	= self.total_faction[self.faction].honor_kills
+            self.total.honor_points = self.total_faction[self.faction].honor_points
+            self.total.arena_points = self.total_faction[self.faction].arena_points
+        end
+    else
+        -- Only the current realm count (all_factions is ignore)
+        self.total.honor_kills 	= self.total_realm[self.faction][self.realm].honor_kills
+        self.total.honor_points  = self.total_realm[self.faction][self.realm].honor_points
+        self.total.arena_points  = self.total_realm[self.faction][self.realm].arena_points
     end
 end
 
@@ -905,6 +974,17 @@ function AllPlayed:EventHandler()
     self:ComputeTotal()
 end
 
+-- Event handler for the other events registered
+function AllPlayed:EventHandlerHonorGain()
+    self:Debug("EventHandlerHonorGain(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
+
+    -- We save a new copy of the vars
+    self:SaveVarHonor()
+
+    -- Compute totals
+    self:ComputeTotalHonor()
+end
+
 
 --[[ ================================================================= ]]--
 --[[                  Store and retreive methods                       ]]--
@@ -926,6 +1006,7 @@ function AllPlayed:SaveVar()
     self.db.account.data[self.faction][self.realm][self.pc].is_resting      = IsResting()
     self.db.account.data[self.faction][self.realm][self.pc].zone_text       = GetZoneText()
     self.db.account.data[self.faction][self.realm][self.pc].subzone_text    = GetSubZoneText()
+	 self.db.account.data[self.faction][self.realm][self.pc].arena_points    = GetArenaCurrency()
 
     -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
     if UnitXPMax("player") ~= XPToNextLevel(UnitLevel("player")) then
@@ -949,6 +1030,17 @@ function AllPlayed:SaveVar()
         self.db.account.data[self.faction][self.realm][self.pc].rested_xp   = GetXPExhaustion()
     end
 
+	 -- Honor stuff
+	 self:SaveVarHonor()
+end
+
+-- Save only the honor portion of the deal (for the honor gain event)
+function AllPlayed:SaveVarHonor()
+    self:Debug("SaveVarHonor()")
+
+    self.db.account.data[self.faction][self.realm][self.pc].honor_points	 = GetHonorCurrency()
+    self.db.account.data[self.faction][self.realm][self.pc].honor_kills,
+    	self.db.account.data[self.faction][self.realm][self.pc].highest_rank  = GetPVPLifetimeStats()
 end
 
 -- Set the value seconds_played that will be saved in the save variables
@@ -979,6 +1071,7 @@ function AllPlayed:SetIsIgnored(value)
 
     -- Compute the totals
     self:ComputeTotal()
+    self:ComputeTotalHonor()
 
     -- Refesh
     self:Update()
@@ -999,6 +1092,7 @@ function AllPlayed:SetAllFactions( value )
 
     -- Compute the totals
     self:ComputeTotal()
+    self:ComputeTotalHonor()
 
     -- Refesh
     self:Update()
@@ -1019,6 +1113,7 @@ function AllPlayed:SetAllRealms( value )
 
     -- Compute the totals
     self:ComputeTotal()
+    self:ComputeTotalHonor()
 
     -- Refesh
     self:Update()
@@ -1970,7 +2065,7 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[19]    = 19300
 	XPToNextLevelCache[20]    = 20800
 	XPToNextLevelCache[21]    = 22400
-	XPToNextLevelCache[23]    = 24000
+	XPToNextLevelCache[22]    = 24000
 	XPToNextLevelCache[23]    = 25500
 	XPToNextLevelCache[24]    = 27200
 	XPToNextLevelCache[25]    = 28900
@@ -1993,7 +2088,7 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[42]    = 82800
 	XPToNextLevelCache[43]    = 87100
 	XPToNextLevelCache[44]    = 91600
-	XPToNextLevelCache[45]    = 95300
+	XPToNextLevelCache[45]    = 96300
 	XPToNextLevelCache[46]    = 101000
 	XPToNextLevelCache[47]    = 105800
 	XPToNextLevelCache[48]    = 110700
