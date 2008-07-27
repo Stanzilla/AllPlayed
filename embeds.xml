@@ -4,7 +4,7 @@
 <!-- Revision code -->
 <Script>
 	if not AllPlayed_revision then AllPlayed_revision = {} end;
-	AllPlayed_revision.embeds	= ("$Revision: 99999 $"):match("(%d+)");
+	AllPlayed_revision.embeds	= ("$Revision$"):match("(%d+)");
 </Script>
 
 
