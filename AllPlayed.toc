@@ -11,8 +11,8 @@
 ## X-Beta-Download: http://files.wowace.com/AllPlayed/
 ## X-AceForum: http://www.wowace.com/forums/index.php?topic=2042.0
 ## X-RelSite-UI.Wow: http://ui.worldofwar.net/ui.php?id=3485
-## X-RelSite-WoWI: http://www.wowinterface.com/downloads/info6158-AllPlayed.html
-## X-RelSite-Curse: http://wow-en.curse-gaming.com/downloads/details/4814/allplayed/
+## X-RelSite-WoWI: 6158
+## X-RelSite-Curse: 4814
 ## X-Category: Interface Enhancements
 ## X-Date: $Date$
 
