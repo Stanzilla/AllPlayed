@@ -10,7 +10,7 @@
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
 ## X-Beta-Download: http://files.wowace.com/AllPlayed/
 ## X-AceForum: http://www.wowace.com/forums/index.php?topic=2042.0
-## X-RelSite-UI.Wow: http://ui.worldofwar.net/ui.php?id=3485
+## X-RelSite-UI.WoW: 3485
 ## X-RelSite-WoWI: 6158
 ## X-RelSite-Curse: 4814
 ## X-Category: Interface Enhancements
