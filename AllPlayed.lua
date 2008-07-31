@@ -139,6 +139,10 @@ AllPlayed:RegisterDefaults('profile', {
         use_pre_210_shaman_colour	= false,
         show_location               = "none",
         show_xp_total               = false,
+		  show_arena_points				= false,
+		  show_honor_points				= false,
+		  show_honor_kills				= false,
+		  show_pvp_totals					= false,
         font_size							= 12,
         opacity							= .8,
         sort_type							= "alpha",
@@ -264,13 +268,50 @@ local command_options = {
                     },
                     order     = 8,
                 },
+                pvp = {
+                	  type = 'group', name = L["PVP"], desc = L["Set the PVP options"], args = {
+									show_arena_points	= {
+										name        = L["Arena Points"],
+										desc        = L["Show the character arena points"],
+										type        = 'toggle',
+										get         = "GetShowArenaPoints",
+										set         = "SetShowArenaPoints",
+										order = 1,
+									},
+		  						   show_honor_points= {
+										name        = L["Honor Points"],
+										desc        = L["Show the character honor points"],
+										type        = 'toggle',
+										get         = "GetShowHonorPoints",
+										set         = "SetShowHonorPoints",
+										order = 2,
+									},
+		  							show_honor_kills= {
+										name        = L["Honor Kills"],
+										desc        = L["Show the character honor kills"],
+										type        = 'toggle',
+										get         = "GetShowHonorKills",
+										set         = "SetShowHonorKills",
+										order = 3,
+									},
+		  							show_pvp_totals = {
+										name        = L["Show PVP Totals"],
+										desc        = L["Show the honor related stats for all characters"],
+										type        = 'toggle',
+										get         = "GetShowPVPTotals",
+										set         = "SetShowPVPTotals",
+										order = 4,
+									},
+						  },
+                    order     = 9,
+					 },
                 show_class_name = {
                     name      = L["Show Class Name"],
                     desc      = L["Show the character class beside the level"],
                     type      = 'toggle',
                     get       = "GetShowClassName",
                     set       = "SetShowClassName",
-                    order     = 9,
+                    order     = 10,
                 },
                 colorize_class = {
                     name      = L["Colorize Class"],
@@ -278,7 +319,7 @@ local command_options = {
                     type      = 'toggle',
                     get       = "GetColourClass",
                     set       = "SetColourClass",
-                    order     = 10,
+                    order     = 11,
                 },
                 use_pre_210_shaman_colour = {
                     name      = L["Use Old Shaman Colour"],
@@ -286,7 +327,7 @@ local command_options = {
                     type      = 'toggle',
                     get       = "GetUsePre210Colours",
                     set       = "SetUsePre210Colours",
-                    order     = 11,
+                    order     = 12,
                 },
                 font_size = {
                     name      = L["Font Size"],
@@ -297,7 +338,7 @@ local command_options = {
                     step      = 1,
                     get       = "GetFontSize",
                     set       = "SetFontSize",
-                    order     = 12,
+                    order     = 13,
                 },
                 opacity = {
                     name      = L["Opacity"],
@@ -309,7 +350,7 @@ local command_options = {
                     isPercent = true,
                     get       = "GetOpacity",
                     set       = "SetOpacity",
-                    order     = 13,
+                    order     = 14,
                 },
             }, order = 10
         },
@@ -444,12 +485,8 @@ function AllPlayed:OnEnable()
 		CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
     end
 
-    -- Is BC installed
-    if(GetAccountExpansionLevel() == 1) then
-    	self.max_pc_level = 70
-    else
-    	self.max_pc_level = 60
-    end
+    -- Find the max level
+    self.max_pc_level = 60  +  10 * GetAccountExpansionLevel()
 
     -- Set the initial table transparency
     tablet:SetTransparency(self:GetFrame(), self:GetOpacity())
@@ -518,7 +555,7 @@ function AllPlayed:SetDebugging(debugging) self.db.profile.debugging = debugging
 --[[ ================================================================= ]]--
 
 -- FuBar configuration
--- Defining there even if FuBar is not present doesn't cause any problem so I don't
+-- Defining these even if FuBar is not present doesn't cause any problem so I don't
 -- check self.is_fubar_loaded
 AllPlayed.OnMenuRequest = command_options
 AllPlayed.hasIcon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp"
@@ -603,6 +640,8 @@ function AllPlayed:ComputeTotal()
 
 						local pc_xp = pc_table.xp
 						if (pc_xp ==-1) then pc_xp = 0 end
+
+						if (pc_table.level == self.max_pc_level) then pc_xp = 0 end
 
 						pc_xp = pc_xp + XPToLevel(pc_table.level)
 
@@ -1236,6 +1275,74 @@ function AllPlayed:SetShowRestedXP( value )
     self:Update()
 end
 
+-- Get the value of show_arena_points
+function AllPlayed:GetShowArenaPoints()
+    self:Debug("AllPlayed:GetShowArenaPoints: ", self.db.profile.options.show_arena_points)
+
+    return self.db.profile.options.show_arena_points
+end
+
+-- Set the value of show_arena_points
+function AllPlayed:SetShowArenaPoints( value )
+    self:Debug("AllPlayed:SetShowArenaPoints: old %s, new %s", self.db.profile.options.show_arena_points, value )
+
+    self.db.profile.options.show_arena_points = value
+
+    -- Refesh
+    self:Update()
+end
+
+-- Get the value of show_honor_points
+function AllPlayed:GetShowHonorPoints()
+    self:Debug("AllPlayed:GetShowHonorPoints: ", self.db.profile.options.show_honor_points)
+
+    return self.db.profile.options.show_honor_points
+end
+
+-- Set the value of show_honor_points
+function AllPlayed:SetShowHonorPoints( value )
+    self:Debug("AllPlayed:SetShowHonorPoints: old %s, new %s", self.db.profile.options.show_honor_points, value )
+
+    self.db.profile.options.show_honor_points = value
+
+    -- Refesh
+    self:Update()
+end
+
+-- Get the value of show_honor_kills
+function AllPlayed:GetShowHonorKills()
+    self:Debug("AllPlayed:GetShowHonorKills: ", self.db.profile.options.show_honor_kills)
+
+    return self.db.profile.options.show_honor_kills
+end
+
+-- Set the value of show_honor_kills
+function AllPlayed:SetShowHonorKills( value )
+    self:Debug("AllPlayed:SetShowHonorKills: old %s, new %s", self.db.profile.options.show_honor_kills, value )
+
+    self.db.profile.options.show_honor_kills = value
+
+    -- Refesh
+    self:Update()
+end
+
+-- Get the value of show_pvp_totals
+function AllPlayed:GetShowPVPTotals()
+    self:Debug("AllPlayed:GetShowPVPTotals: ", self.db.profile.options.show_pvp_totals)
+
+    return self.db.profile.options.show_pvp_totals
+end
+
+-- Set the value of show_pvp_totals
+function AllPlayed:SetShowPVPTotals( value )
+    self:Debug("AllPlayed:SetShowPVPTotals: old %s, new %s", self.db.profile.options.show_pvp_totals, value )
+
+    self.db.profile.options.show_pvp_totals = value
+
+    -- Refesh
+    self:Update()
+end
+
 -- Get the value of percent_rest
 function AllPlayed:GetPercentRest()
     self:Debug("AllPlayed:GetAllRealms: ", self.db.profile.options.percent_rest)
@@ -1607,45 +1714,48 @@ end
 -- This function format and colorize the Character name and level
 -- based on the options selected by the user
 function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, faction )
-    AllPlayed:Debug("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
+	AllPlayed:Debug("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
 
-    if xp == nil then
-        AllPlayed:Print("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
-    end
+	local result_string     = ""
+	local level_string      = ""
 
-    local result_string     = ""
-    local level_string      = ""
+	-- Format the level string according to the show_progress option
+	if AllPlayed:GetShowProgress() and xp ~= -1 then
+		local progress
+		if level == AllPlayed.max_pc_level then
+			progress = 0
+		else
+			progress = min( xp / XPToNextLevel(level), .99 )
+		end
 
-    -- Format the level string according to the show_progress option
-    if AllPlayed:GetShowProgress() and xp ~= -1 then
-        local progress = min( xp / XPToNextLevel(level), .99 )
-        level_string = string.format( "%.2f" , level + progress )
-    else
-        level_string = string.format( "%d" , level )
-   end
+		level_string = string.format( "%.2f" , level + progress )
+	else
+		level_string = string.format( "%d" , level )
+	end
 
-    -- Created use the all cap english name if the localized name is not present
-    -- This should never happen but I like to code defensively
-    local class_display = class_loc
-    if class_display == "" then class_display = class end
+	-- Created use the all cap english name if the localized name is not present
+	-- This should never happen but I like to code defensively
+	local class_display = class_loc
+	if class_display == "" then class_display = class end
 
-    if class_display ~= "" and AllPlayed:GetShowClassName() then
-        level_string = string.format( "%s %s", class_display, level_string )
-    end
+	if class_display ~= "" and AllPlayed:GetShowClassName() then
+		level_string = string.format( "%s %s", class_display, level_string )
+	end
 
-    result_string =  string.format( ClassColour( class, faction, "%s (%s)" ) .. FactionColour( faction, " : %s" ),
-                          pc,
-                          level_string,
-                          AllPlayed:FormatTime(seconds_played)
-                    )
+	result_string =  string.format( ClassColour( class, faction, "%s (%s)" ) .. FactionColour( faction, " : %s" ),
+											  pc,
+											  level_string,
+											  AllPlayed:FormatTime(seconds_played)
+					  )
 
-    -- Do we need to show the total XP
-    if AllPlayed:GetShowXPTotal() and xp ~= -1 then
-        local pc_xp = xp + XPToLevel(level)
-        result_string = result_string .. FactionColour( faction, " : " .. FormatXP(pc_xp) )
-    end
+	-- Do we need to show the total XP
+	if AllPlayed:GetShowXPTotal() and xp ~= -1 then
+		local pc_xp = XPToLevel(level)
+		if AllPlayed.max_pc_level < level then pc_xp = pc_xp + xp end
+		result_string = result_string .. FactionColour( faction, " : " .. FormatXP(pc_xp) )
+	end
 
-    return result_string
+	return result_string
 end
 
 
@@ -2233,7 +2343,7 @@ end
 -- ## Return the HEX color string for a specific character class
 -- ##
 -- ## Note: This function was taken nearly verbatim from the Bable-Class library.
--- ##       I figured seven lines or code was not worth including a library.
+-- ##       I figured seven lines of code was not worth including a library.
 -- ##
 -- ## Parameter: 	class				= Class name not localised
 -- ##
