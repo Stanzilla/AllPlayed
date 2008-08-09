@@ -466,14 +466,15 @@ function AllPlayed:OnEnable()
     -- Initial update of values
 
 	 -- Class colours
-	 CLASS_COLOURS['DRUID']      = AllPlayed.GetClassHexColour("DRUID")
-	 CLASS_COLOURS['HUNTER']     = AllPlayed.GetClassHexColour("HUNTER")
-	 CLASS_COLOURS['MAGE']       = AllPlayed.GetClassHexColour("MAGE")
-	 CLASS_COLOURS['PALADIN']    = AllPlayed.GetClassHexColour("PALADIN")
-	 CLASS_COLOURS['PRIEST']     = AllPlayed.GetClassHexColour("PRIEST")
-	 CLASS_COLOURS['ROGUE']      = AllPlayed.GetClassHexColour("ROGUE")
-	 CLASS_COLOURS['WARLOCK']    = AllPlayed.GetClassHexColour("WARLOCK")
-	 CLASS_COLOURS['WARRIOR']    = AllPlayed.GetClassHexColour("WARRIOR")
+	 CLASS_COLOURS['DEATHKNIGHT']	= AllPlayed.GetClassHexColour("DEATHKNIGHT")
+	 CLASS_COLOURS['DRUID']      	= AllPlayed.GetClassHexColour("DRUID")
+	 CLASS_COLOURS['HUNTER']     	= AllPlayed.GetClassHexColour("HUNTER")
+	 CLASS_COLOURS['MAGE']       	= AllPlayed.GetClassHexColour("MAGE")
+	 CLASS_COLOURS['PALADIN']    	= AllPlayed.GetClassHexColour("PALADIN")
+	 CLASS_COLOURS['PRIEST']     	= AllPlayed.GetClassHexColour("PRIEST")
+	 CLASS_COLOURS['ROGUE']      	= AllPlayed.GetClassHexColour("ROGUE")
+	 CLASS_COLOURS['WARLOCK']    	= AllPlayed.GetClassHexColour("WARLOCK")
+	 CLASS_COLOURS['WARRIOR']    	= AllPlayed.GetClassHexColour("WARRIOR")
 
 	 CLASS_COLOURS['PRE-210-SHAMAN'] = "00dbba"
 
@@ -2239,6 +2240,7 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[57]    = 159900
 	XPToNextLevelCache[58]    = 165800
 	XPToNextLevelCache[59]    = 172000
+	XPToNextLevelCache[70] 	  = 1256500
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
