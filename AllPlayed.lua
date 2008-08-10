@@ -2241,6 +2241,9 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[58]    = 165800
 	XPToNextLevelCache[59]    = 172000
 	XPToNextLevelCache[70] 	  = 1256500
+	XPToNextLevelCache[71] 	  = 1269500
+	XPToNextLevelCache[75] 	  = 1322800
+	XPToNextLevelCache[77] 	  = 1350100
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
@@ -2360,3 +2363,5 @@ function AllPlayed.GetClassHexColour(class)
 		return "a1a1a1"
 	end
 end
+
+-- Deathknight : b=0.23, g=0.12, r=0.77
