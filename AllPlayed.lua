@@ -109,6 +109,12 @@ AllPlayed:RegisterDefaults('account', {
                     honor_points						= nil,
                     highest_rank						= nil,
                     honor_kills						= nil,
+						  nb_badges_of_justice			= nil,
+						  nb_wg_marks						= nil,
+						  nb_ab_marks			         = nil,
+						  nb_av_marks						= nil,
+						  nb_eots_marks					= nil,
+
                 }
             }
         }
@@ -1062,17 +1068,17 @@ end
 function AllPlayed:SaveVar()
     self:Debug("AllPlayed:SaveVar()")
 
-    -- Fill some of the SaveVariables with values that do not change between
-    self.db.account.data[self.faction][self.realm][self.pc].class_loc,
-        self.db.account.data[self.faction][self.realm][self.pc].class       = UnitClass("player")
-    self.db.account.data[self.faction][self.realm][self.pc].level           = UnitLevel("player")
-    self.db.account.data[self.faction][self.realm][self.pc].xp              = UnitXP("player")
-    self.db.account.data[self.faction][self.realm][self.pc].max_rested_xp   = UnitXPMax("player") * 1.5
-    self.db.account.data[self.faction][self.realm][self.pc].last_update     = time()
-    self.db.account.data[self.faction][self.realm][self.pc].is_resting      = IsResting()
-    self.db.account.data[self.faction][self.realm][self.pc].zone_text       = GetZoneText()
-    self.db.account.data[self.faction][self.realm][self.pc].subzone_text    = GetSubZoneText()
-	 self.db.account.data[self.faction][self.realm][self.pc].arena_points    = GetArenaCurrency()
+    -- Fill some of the SaveVariables
+    local pc = self.db.account.data[self.faction][self.realm][self.pc]
+    pc.class_loc, pc.class	= UnitClass("player")
+    pc.level           		= UnitLevel("player")
+    pc.xp              		= UnitXP("player")
+    pc.max_rested_xp   		= UnitXPMax("player") * 1.5
+    pc.last_update     		= time()
+    pc.is_resting      		= IsResting()
+    pc.zone_text       		= GetZoneText()
+    pc.subzone_text    		= GetSubZoneText()
+	 pc.arena_points    		= GetArenaCurrency()
 
     -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
     if UnitXPMax("player") ~= XPToNextLevel(UnitLevel("player")) then
@@ -1083,38 +1089,47 @@ function AllPlayed:SaveVar()
     --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.account.data[self.faction][self.realm][self.pc].zone_text)
 
     -- Make sure that coin is not nil
-    if GetMoney() == nil then
-        self.db.account.data[self.faction][self.realm][self.pc].coin        = 0
-    else
-        self.db.account.data[self.faction][self.realm][self.pc].coin        = GetMoney()
-    end
+    pc.coin = GetMoney() or 0
 
     -- Make sure that rested_xp is not nil
-    if GetXPExhaustion() == nil then
-        self.db.account.data[self.faction][self.realm][self.pc].rested_xp   = 0
-    else
-        self.db.account.data[self.faction][self.realm][self.pc].rested_xp   = GetXPExhaustion()
-    end
+    pc.rested_xp = GetXPExhaustion() or 0
 
-	 -- Honor stuff
+	 -- PvPstuff
 	 self:SaveVarHonor()
+	 self:SaveVarMarks()
 end
 
 -- Save only the honor portion of the deal (for the honor gain event)
 function AllPlayed:SaveVarHonor()
-    self:Debug("SaveVarHonor()")
+	self:Debug("SaveVarHonor()")
 
-    self.db.account.data[self.faction][self.realm][self.pc].honor_points	 = GetHonorCurrency()
-    self.db.account.data[self.faction][self.realm][self.pc].honor_kills,
-    	self.db.account.data[self.faction][self.realm][self.pc].highest_rank  = GetPVPLifetimeStats()
+	local pc = self.db.account.data[self.faction][self.realm][self.pc]
+
+	pc.honor_points	 					= GetHonorCurrency()
+	pc.honor_kills, pc.highest_rank = GetPVPLifetimeStats()
+end
+
+-- Save the PvP badge and mark counts
+function AllPlayed:SaveVarMarks()
+	self:Debug("SaveVarMarks()")
+
+	local pc = self.db.account.data[self.faction][self.realm][self.pc]
+
+	pc.nb_badges_of_justice 	= GetItemCount(29434, true)
+	pc.nb_wg_marks				= GetItemCount(20558, true)
+	pc.nb_ab_marks				= GetItemCount(20559, true)
+	pc.nb_av_marks				= GetItemCount(20560, true)
+	pc.nb_eots_marks				= GetItemCount(29024, true)
 end
 
 -- Set the value seconds_played that will be saved in the save variables
 function AllPlayed:SetSecondsPlayed(seconds_played)
-    self:Debug("SetSecondsPlayed(): ",seconds_played)
+	self:Debug("SetSecondsPlayed(): ",seconds_played)
 
-    self.db.account.data[self.faction][self.realm][self.pc].seconds_played              = seconds_played
-    self.db.account.data[self.faction][self.realm][self.pc].seconds_played_last_update  = time()
+	local pc = self.db.account.data[self.faction][self.realm][self.pc]
+
+	pc.seconds_played              = seconds_played
+	pc.seconds_played_last_update  = time()
 
 end
 
