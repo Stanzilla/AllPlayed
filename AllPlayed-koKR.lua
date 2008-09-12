@@ -3,11 +3,13 @@
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.koKR	= ("$Revision: 79255 $"):match("(%d+)")
 
+
 local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 
 -- This is only a place-holder for future possible localisation files
 L:RegisterTranslations("koKR", function()
     return {
+
         -- Faction names 
 --      ["Alliance"]                                            		= "얼라이언스",
 --      ["Horde"]                                               		= "호드", 
@@ -17,6 +19,7 @@ L:RegisterTranslations("koKR", function()
 
         -- Menus
     	["AllPlayed Configuration"]										= "AllPlayed 설정",
+	["Revision %s"]								= "리비전 %s",
         ["Display"]                                             		= "보기 설정", 
         ["Set the display options"]                             		= "보기 설정", 
         ["All Factions"]                                        		= "모든 진영", 
@@ -39,6 +42,16 @@ L:RegisterTranslations("koKR", function()
         ["Set the base for % display of rested XP"]				= "휴식 경험치 표시의 기준을 선택합니다.", 
         ["Rested XP Countdown"]							= "휴식 경험치 알림",
         ["Show the time remaining before the character is 100% rested"]		= "캐릭터의 휴식 경험치가 100%가 되기전에 알림메시지를 표시합니다.",
+--	["PVP"]									= true,
+	["Set the PVP options"]							= "PVP 설정",
+	["Arena Points"]							= "투기장",
+	["Show the character arena points"]					= "캐릭터 투기장 점수를 표시합니다.",
+	["Honor Points"]							= "명예",
+	["Show the character honor points"]					= "캐릭터 명예 점수를 표시합니다.",
+	["Honor Kills"]								= "명예 킬수",
+	["Show the character honor kills"]					= "캐릭터의 명예 킬 수를 표시합니다.",
+	["Show PVP Totals"]							= "총 PVP",
+	["Show the honor related stats for all characters"]			= "모든 캐릭터의 명예 상태를 표시합니다.",
         ["Show Class Name"]                                     		= "직업 보기",
         ["Show the character class beside the level"]           		= "레벨 옆에 캐릭터의 직업을 표시합니다.",
         ["Show Location"]							= "지역 보기",
