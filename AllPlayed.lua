@@ -566,6 +566,7 @@ function AllPlayed:SetDebugging(debugging) self.db.profile.debugging = debugging
 -- check self.is_fubar_loaded
 AllPlayed.OnMenuRequest = command_options
 AllPlayed.hasIcon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp"
+--AllPlayed.hasIcon = "Interface\\AddOns\\AllPlayed\\Copper2"
 AllPlayed.defaultPosition = "LEFT"
 AllPlayed.defaultMinimapPosition = 200
 AllPlayed.cannotDetachTooltip = false
@@ -1695,9 +1696,42 @@ function FormatXP(xp)
 end
 
 -- Fonction that format the money string
--- The result is a string with colour coding
-function FormatMoney(coin)
-    return A:FormatMoneyFull( coin, true, false )
+-- The result is a string with embeded coin icons
+local gold_icon 	= "|TInterface\\AddOns\\AllPlayed\\Gold:0:0:0:0|t"
+local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:0:0|t"
+local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:0:0|t"
+--[[
+local gold_icon 	= "|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:0:0|t"
+local silver_icon = "|TInterface\\PVPFrame\\PVP-Currency-Alliance:0:0:0:0|t"
+local copper_icon = "|TInterface\\PVPFrame\\PVP-Currency-Horde:0:0:0:0|t"
+]]--
+function FormatMoney(amount)
+   return A:FormatMoneyFull( amount, true, false )
+--[[
+	local string = ""
+
+	if amount >= 10000 then
+		string = format("%d%s%d%s%d%s",
+							 amount / 10000,
+							 gold_icon,
+							 (amount % 10000) / 100,
+							 silver_icon,
+							 (amount % 100),
+							 copper_icon)
+	elseif amount >= 100 then
+		string = format("%d%s%d%s",
+							 (amount % 10000) / 100,
+							 silver_icon,
+							 (amount % 100),
+							 copper_icon)
+	else
+		string = format("%d%s",
+							 amount,
+							 copper_icon)
+	end
+
+	return C:White(string)
+]]--
 end
 
 
