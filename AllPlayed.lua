@@ -2289,10 +2289,16 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[57]    = 159900
 	XPToNextLevelCache[58]    = 165800
 	XPToNextLevelCache[59]    = 172000
-	XPToNextLevelCache[70] 	  = 1256500
-	XPToNextLevelCache[71] 	  = 1269500
-	XPToNextLevelCache[75] 	  = 1322800
-	XPToNextLevelCache[77] 	  = 1350100
+	XPToNextLevelCache[70] 	  = 1523800
+	XPToNextLevelCache[71] 	  = 1539600
+	XPToNextLevelCache[72] 	  = 1555700
+	XPToNextLevelCache[73] 	  = 1571800
+	XPToNextLevelCache[74] 	  = 1587900
+	XPToNextLevelCache[75] 	  = 1604200
+	XPToNextLevelCache[76] 	  = 1620700
+	XPToNextLevelCache[77] 	  = 1637400
+	XPToNextLevelCache[78] 	  = 1653900
+	XPToNextLevelCache[79] 	  = 1670800
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
