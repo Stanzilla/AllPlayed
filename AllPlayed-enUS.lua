@@ -51,6 +51,16 @@ L:RegisterTranslations("enUS", function()
 		["Honor Kills"]																	= true,
 		["Show the character honor kills"]											= true,
 		["Show PVP Totals"]																= true,
+		["Badges of Justice"]															= true,
+		["Show the character badges of Justice"]									= true,
+		["WG Marks"]																		= true,
+		["Show the Warsong Gulch Marks"]												= true,
+		["AB Marks"]																		= true,
+		["Show the Arathi Basin Marks"]												= true,
+		["AV Marks"]																		= true,
+		["Show the Alterac Valley Marks"]											= true,
+		["EotS Marks"]																		= true,
+		["Show the Eye of the Storm Marks"]											= true,
 		["Show the honor related stats for all characters"]					= true,
 		["Show Class Name"]                                     				= true,
 		["Show the character class beside the level"]           				= true,
@@ -89,6 +99,8 @@ L:RegisterTranslations("enUS", function()
 		["Close"]                                        	       			= true,
 		["Close the tooltip"]                            	       			= true,
 		["None"]                                         	       			= true,
+		["100%"]																				= true,
+		["150%"]																				= true,
 
 		-- Strings
 		["v%s - %s (Type /ap for help)"]                 	       			= true,
@@ -104,6 +116,11 @@ L:RegisterTranslations("enUS", function()
 		["%.1f M XP"]																		= true,
 		["%.1f K XP"]																		= true,
 		["%d XP"]																			= true,
+		["%d WG"]																			= true,
+		["%d AB"]																			= true,
+		["%d AV"]																			= true,
+		["%d EotS"]																			= true,
+		["%d BoJ"]																			= true,
 
 		-- Console commands
 		["/allplayed"]                                   	       			= true,
