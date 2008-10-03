@@ -2403,10 +2403,14 @@ end
 -- Until there is a new formula for 2.3, I use the published XP values
 
 function InitXPToLevelCache( game_version, build_version )
+	local date, toc_number
+
 	if game_version == nil then
-		game_version, build_version = GetBuildInfo()
+		game_version, build_version, date, toc_number = GetBuildInfo()
 	elseif build_version == nil then
-		_, build_version = GetBuildInfo()
+		_, build_version, date, toc_number = GetBuildInfo()
+	else
+		_, _, date, toc_number = GetBuildInfo()
 	end
 
 	-- Values for the 2.3 patches as recorded on WoWWiki
@@ -2469,6 +2473,20 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[77] 	  = 1637400
 	XPToNextLevelCache[78] 	  = 1653900
 	XPToNextLevelCache[79] 	  = 1670800
+
+	-- values for the 3.0.2 patch and WotLK
+	if toc_number and toc_number >= 30000 then
+		XPToNextLevelCache[60]	= 290000
+		XPToNextLevelCache[61]	= 317000
+		XPToNextLevelCache[62]	= 349000
+		XPToNextLevelCache[63]	= 386000
+		XPToNextLevelCache[64]	= 428000
+		XPToNextLevelCache[65]	= 475000
+		XPToNextLevelCache[66]	= 527000
+		XPToNextLevelCache[67]	= 585000
+		XPToNextLevelCache[68]	= 648000
+		XPToNextLevelCache[69]	= 717000
+	end
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
