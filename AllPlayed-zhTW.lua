@@ -1,5 +1,5 @@
 -- AllPlayed-zhTW.lua
--- $Id: AllPlayed-zhTW.lua 29449 2007-03-03 16:18:41Z next96 $
+-- $Id$
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.zhTW	= ("$Revision$"):match("(%d+)")
 

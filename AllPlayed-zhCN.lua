@@ -1,5 +1,5 @@
 -- AllPlayed-zhCN.lua
--- $Id: AllPlayed-zhCN.lua 2007-08-18 Felix $
+-- $Id$
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.zhCN	= ("$Revision$"):match("(%d+)")
 
