@@ -93,6 +93,7 @@ L:RegisterTranslations("enUS", function()
 		["Set the sort options"]														= true,
 		["Ignore Characters"]                                      			= true,
 		["Hide characters from display"]                           			= true,
+		["%s : %s"]																			= true,
 		["Hide %s of %s from display"]												= true,
 		["BC Installed?"]                                          			= true,
 		["Is the Burning Crusade expansion installed?"]            			= true,

@@ -98,7 +98,6 @@ AllPlayed:RegisterDefaults('account', {
                     max_rested_xp               = 0,
                     last_update                 = 0,
                     is_resting                  = false,
-                    is_ignored                  = false,
                     seconds_played              = 0,
                     seconds_played_last_update  = 0,
                     zone_text                   = L["Unknown"],
@@ -550,13 +549,13 @@ function AllPlayed:OnEnable()
     for faction, faction_table in pairs(self.db.account.data) do
         for realm, realm_table in pairs(faction_table) do
         	for pc, _ in pairs(realm_table) do
-        		local pc_name = realm .. " : " .. pc
+        		local pc_name = format(L["%s : %s"], realm, pc)
         		command_options.args.ignore.args[pc_name] = {
         			name = pc_name,
         			desc = string.format(L["Hide %s of %s from display"], pc, realm),
         			type = 'toggle',
-        			get  = function() return self:GetIsCharIgnored(realm, pc) end,
-        			set  = function(value) self:SetIsCharIgnored(realm, pc, value) end
+        			get  = function() return AllPlayed:GetOption('is_ignored',realm, pc) end,
+        			set  = function(value) AllPlayed:SetOption('is_ignored', value, realm, pc) end
         		}
         	end
         end
@@ -564,7 +563,6 @@ function AllPlayed:OnEnable()
 
     -- Compute Honor at least once (it will be computed only if it change afterward
     self:ComputeTotalHonor()
-
 
     -- Build the sorting tables
   	 self:BuildSortTables()
@@ -610,7 +608,6 @@ function AllPlayed:SetDebugging(debugging) self.db.profile.debugging = debugging
 -- check self.is_fubar_loaded
 AllPlayed.OnMenuRequest = command_options
 AllPlayed.hasIcon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp"
---AllPlayed.hasIcon = "Interface\\AddOns\\AllPlayed\\Copper2"
 AllPlayed.defaultPosition = "LEFT"
 AllPlayed.defaultMinimapPosition = 200
 AllPlayed.cannotDetachTooltip = false
@@ -681,8 +678,7 @@ function AllPlayed:ComputeTotal()
             self.total_realm[faction][realm].coin = 0
             self.total_realm[faction][realm].xp = 0
             for pc, pc_table in pairs(realm_table) do
---                if not pc_table.is_ignored then
-                if not self:GetIsCharIgnored(realm, pc) then
+                if not self:GetOption('is_ignored', realm, pc) then
 						-- Need to get the current seconds_played for the PC
 						local seconds_played = self:EstimateTimePlayed(pc,
 																		realm,
@@ -759,7 +755,7 @@ function AllPlayed:ComputeTotalHonor()
             self.total_realm[faction][realm].honor_points = 0
             self.total_realm[faction][realm].arena_points = 0
             for pc, pc_table in pairs(realm_table) do
-                if not self:GetIsCharIgnored(realm, pc) then
+                if not self:GetOption('is_ignored', realm, pc) then
 						self.total_faction[faction].honor_kills         = self.total_faction[faction].honor_kills       + (pc_table.honor_kills or 0)
 						self.total_faction[faction].honor_points        = self.total_faction[faction].honor_points      + (pc_table.honor_points or 0)
 						self.total_faction[faction].arena_points        = self.total_faction[faction].arena_points      + (pc_table.arena_points or 0)
@@ -894,8 +890,7 @@ function AllPlayed:FillTablet()
                     )
 
                     for _, pc in ipairs(self.sort_realm_pc[self:GetOption('sort_type')][faction][realm]) do
---                        if (not self.db.account.data[faction][realm][pc].is_ignored) then
-                        if not self:GetIsCharIgnored(realm, pc) then
+                        if not self:GetOption('is_ignored', realm, pc) then
                             -- Seconds played are still going up for the current PC
                             local seconds_played = self:EstimateTimePlayed(
                                                         pc,
@@ -1184,8 +1179,15 @@ end
 function AllPlayed:GetOption( option, ... )
 	--self:Debug(format("AllPlayed:GetOption(%s) = %s", option or 'nil', tostring(self.db.profile.options[option] or 'nil')))
 
+
+	-- is_ignored has multiple parameters
+	if option == 'is_ignored' then
+		local realm, name = ...
+
+		return self.db.profile.options.is_ignored[realm][name]
+
 	-- The sort direction is kept in the sort name
-	if option == 'reverse_sort' then
+	elseif option == 'reverse_sort' then
 		if string.find(self.db.profile.options.sort_type, "rev-") == 1 then
 			return true
 		else
@@ -1298,6 +1300,7 @@ function AllPlayed:SetOption( option, value, ... )
 	self:Update()
 end
 
+--[[
 -- Vefiry if a character should be ignore when displayed and counter
 function AllPlayed:GetIsCharIgnored( realm, name )
     --self:Debug("AllPlayed:GetIsCharIgnored: %s, %s, %s",
@@ -1322,7 +1325,7 @@ function AllPlayed:SetIsCharIgnored( realm, name, value )
     -- Refesh
 	self:Update()
 end
-
+]]--
 
 --[[ ================================================================= ]]--
 --[[                         Hook function                             ]]--
