@@ -284,48 +284,48 @@ local command_options = {
 										name        = L["Arena Points"],
 										desc        = L["Show the character arena points"],
 										type        = 'toggle',
-										get         = "GetShowArenaPoints",
-										set         = "SetShowArenaPoints",
+										get       	= function() return AllPlayed:GetOption('show_arena_points') end,
+										set       	= function(v) AllPlayed:SetOption('show_arena_points',v) end,
 										order = 1,
 									},
 		  						   show_honor_points= {
 										name        = L["Honor Points"],
 										desc        = L["Show the character honor points"],
 										type        = 'toggle',
-										get         = "GetShowHonorPoints",
-										set         = "SetShowHonorPoints",
+										get       	= function() return AllPlayed:GetOption('show_honor_points') end,
+										set       	= function(v) AllPlayed:SetOption('show_honor_points',v) end,
 										order = 2,
 									},
 		  							show_honor_kills= {
 										name        = L["Honor Kills"],
 										desc        = L["Show the character honor kills"],
 										type        = 'toggle',
-										get         = "GetShowHonorKills",
-										set         = "SetShowHonorKills",
+										get       	= function() return AllPlayed:GetOption('show_honor_kills') end,
+										set       	= function(v) AllPlayed:SetOption('show_honor_kills',v) end,
 										order = 3,
 									},
 									show_badges_of_justice = {
 										name        = L["Badges of Justice"],
 										desc        = L["Show the character badges of Justice"],
 										type        = 'toggle',
-										get         = "GetShowBadgesOfJustice",
-										set         = "SetShowBadgesOfJustice",
+										get       	= function() return AllPlayed:GetOption('show_badges_of_justice') end,
+										set       	= function(v) AllPlayed:SetOption('show_badges_of_justice',v) end,
 										order = 4,
 									},
 									show_ab_marks = {
 										name        = L["AB Marks"],
 										desc        = L["Show the Arathi Basin Marks"],
 										type        = 'toggle',
-										get         = "GetShowABMarks",
-										set         = "SetShowABMarks",
+										get       	= function() return AllPlayed:GetOption('show_ab_marks') end,
+										set       	= function(v) AllPlayed:SetOption('show_ab_marks',v) end,
 										order = 5,
 									},
 									show_av_marks = {
 										name        = L["AV Marks"],
 										desc        = L["Show the Alterac Valley Marks"],
 										type        = 'toggle',
-										get         = "GetShowAVMarks",
-										set         = "SetShowAVMarks",
+										get       	= function() return AllPlayed:GetOption('show_ab_marks') end,
+										set       	= function(v) AllPlayed:SetOption('show_ab_marks',v) end,
 										order = 6,
 									},
 									show_wg_marks = {
@@ -359,24 +359,24 @@ local command_options = {
                     name      = L["Show Class Name"],
                     desc      = L["Show the character class beside the level"],
                     type      = 'toggle',
-                    get       = "GetShowClassName",
-                    set       = "SetShowClassName",
+						  get       = function() return AllPlayed:GetOption('show_class_name') end,
+						  set       = function(v) AllPlayed:SetOption('show_class_name',v) end,
                     order     = 10,
                 },
                 colorize_class = {
                     name      = L["Colorize Class"],
                     desc      = L["Colorize the character name based on class"],
                     type      = 'toggle',
-                    get       = "GetColourClass",
-                    set       = "SetColourClass",
+						  get       = function() return AllPlayed:GetOption('colorize_class') end,
+						  set       = function(v) AllPlayed:SetOption('colorize_class',v) end,
                     order     = 11,
                 },
                 use_pre_210_shaman_colour = {
                     name      = L["Use Old Shaman Colour"],
                     desc      = L["Use the pre-210 patch colour for the Shaman class"],
                     type      = 'toggle',
-                    get       = "GetUsePre210Colours",
-                    set       = "SetUsePre210Colours",
+						  get       = function() return AllPlayed:GetOption('use_pre_210_shaman_colour') end,
+						  set       = function(v) AllPlayed:SetOption('use_pre_210_shaman_colour',v) end,
                     order     = 12,
                 },
                 font_size = {
@@ -386,8 +386,8 @@ local command_options = {
                     min		  = 8,
                     max       = 20,
                     step      = 1,
-                    get       = "GetFontSize",
-                    set       = "SetFontSize",
+						  get       = function() return AllPlayed:GetOption('font_size') end,
+						  set       = function(v) AllPlayed:SetOption('font_size',v) end,
                     order     = 13,
                 },
                 opacity = {
@@ -398,8 +398,8 @@ local command_options = {
                     max       = 1,
                     step      = .05,
                     isPercent = true,
-                    get       = "GetOpacity",
-                    set       = "SetOpacity",
+						  get       = function() return AllPlayed:GetOption('opacity') end,
+						  set       = function(v) AllPlayed:SetOption('opacity',v) end,
                     order     = 14,
                 },
             }, order = 10
@@ -410,8 +410,8 @@ local command_options = {
 					name      = L["Sort Type"],
 					desc      = L["Select the sort type"],
 					type      = 'text',
-					get       = "GetSortType",
-					set       = "SetSortType",
+				   get       = function() return AllPlayed:GetOption('sort_type') end,
+				   set       = function(v) AllPlayed:SetOption('sort_type',v) end,
 					validate  = {
 								  ["alpha"] 			= L["By name"],
 								  ["level"] 			= L["By level"],
@@ -423,14 +423,14 @@ local command_options = {
 					},
 					order     = 1,
 				},
-                reverse_sort = {
-                    name      = L["Sort in reverse order"],
-                    desc      = L["Use the curent sort type in reverse order"],
-                    type      = 'toggle',
-                    get       = "GetIsSortReverse",
-                    set       = "SetIsSortReverse",
-                    order     = 2,
-                },
+			 reverse_sort = {
+				  name      = L["Sort in reverse order"],
+				  desc      = L["Use the curent sort type in reverse order"],
+				  type      = 'toggle',
+				  get       = function() return AllPlayed:GetOption('reverse_sort') end,
+				  set       = function(v) AllPlayed:SetOption('reverse_sort',v) end,
+              order     = 2,
+           },
 			}, order = 20
 		},
         ignore = {
@@ -530,7 +530,7 @@ function AllPlayed:OnEnable()
 
 
     -- What colour should be used for Shaman?
-    if(self:GetUsePre210Colours()) then
+    if(self:GetOption('use_pre_210_shaman_colour')) then
     	CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
     else
 		CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
@@ -540,7 +540,7 @@ function AllPlayed:OnEnable()
     self.max_pc_level = 60  +  10 * GetAccountExpansionLevel()
 
     -- Set the initial table transparency
-    tablet:SetTransparency(self:GetFrame(), self:GetOpacity())
+    tablet:SetTransparency(self:GetFrame(), self:GetOption('opacity'))
 
     -- Get the values for the current character
     self:SaveVar()
@@ -710,7 +710,7 @@ function AllPlayed:ComputeTotal()
 
     -- The Grand Total varies according to the options
     if self.db.profile.options.all_realms then
-        if self.db.profile.options.all_factions then
+        if self:GetOption('all_factions') then
             -- Everything count
             self.total.time_played
                 =   self.total_faction[L["Horde"]].time_played
@@ -773,7 +773,7 @@ function AllPlayed:ComputeTotalHonor()
 
     -- The Grand Total varies according to the options
     if self.db.profile.options.all_realms then
-        if self.db.profile.options.all_factions then
+        if self:GetOption('all_factions') then
             -- Everything count
             self.total.honor_kills
                 =   self.total_faction[L["Horde"]].honor_kills
@@ -833,9 +833,9 @@ function AllPlayed:FillTablet()
 		'child_indentation', 10,
 		'hideBlankLine', false,
 		'wrap', true,
-		'child_size',  self:GetFontSize(),
-		'child_size2', self:GetFontSize(),
-		'child_size3', self:GetFontSize()
+		'child_size',  self:GetOption('font_size'),
+		'child_size2', self:GetOption('font_size'),
+		'child_size3', self:GetOption('font_size')
 
 	)
 
@@ -844,7 +844,7 @@ function AllPlayed:FillTablet()
         -- We do not print the faction if no option to select it is on
         -- and if the time played for the faction = 0 since this means
         -- all PC in the faction are ingored.
-        if ((self.db.profile.options.all_factions or self.faction == faction)
+        if ((self:GetOption('all_factions') or self.faction == faction)
             and self.total.time_played ~= 0
             and self.sort_faction_realm[self.db.profile.options.sort_type][faction]
         ) then
@@ -1030,8 +1030,8 @@ function AllPlayed:FillTablet()
     -- Print the totals
     local cat = tablet:AddCategory(
         'columns',     2,
-		'child_size',  self:GetFontSize(),
-		'child_size2', self:GetFontSize()
+		'child_size',  self:GetOption('font_size'),
+		'child_size2', self:GetOption('font_size')
     )
     cat:AddLine(
         'text',  C:Orange( L["Total Time Played: "] ),
@@ -1182,26 +1182,43 @@ end
 
 -- Get the option value
 function AllPlayed:GetOption( option )
-	--self:Debug(format("AllPlayed:GetOption(%s) = %s", option or 'nil', self.db.profile.options[option] or 'nil'))
+	self:Debug(format("AllPlayed:GetOption(%s) = %s", option or 'nil', tostring(self.db.profile.options[option] or 'nil')))
+
+	-- The sort direction is kept in the sort name
+	if option == 'reverse_sort' then
+		if string.find(self.db.profile.options.sort_type, "rev-") == 1 then
+			return true
+		else
+			return false
+		end
+	elseif option == 'sort_type' then
+		if string.find(self.db.profile.options.sort_type, "rev-") == 1 then
+			return string.sub(self.db.profile.options.sort_type, 5)
+		else
+			return self.db.profile.options.sort_type
+		end
+	end
 
 	return self.db.profile.options[option]
 end
 
 -- Set an option value
 function AllPlayed:SetOption( option, value )
-    --self:Debug(format("AllPlayed:SetOption(%s): old %s, new %s", option or 'nil', self.db.profile.options.show_progress or 'nil', value or 'nil' ))
+	self:Debug(format("AllPlayed:SetOption(%s): old %s, new %s", option or 'nil', tostring(self.db.profile.options[option] or 'nil'), tostring(value or 'nil') ))
 
-    self.db.profile.options[option] = value
+	local already_set = false
 
-    -- Do we need to recompute the totals?
-    if option == 'all_factions' or option == 'all_realms' then
-		 -- Compute the totals
-		 self:ComputeTotal()
-		 self:ComputeTotalHonor()
-    end
+	-- Do we need to recompute the totals?
+	if option == 'all_factions' or option == 'all_realms' then
+		self.db.profile.options[option] = value
+		already_set = true
+
+		-- Compute the totals
+		self:ComputeTotal()
+		self:ComputeTotalHonor()
 
 	-- Do we need to change the refresh rate?
-	if option == 'show_seconds' then
+	elseif option == 'show_seconds' then
 		if value then
 			-- If the seconds are displayed, we need to refresh every seconds
 			self.db.profile.options.refresh_rate = 1
@@ -1215,15 +1232,60 @@ function AllPlayed:SetOption( option, value )
 		if self:IsEventScheduled(self.name) then
 			self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
 		end
-	end
 
    -- Set activate or disactivate the PLAYER_MONEY event
-	if option == 'show_coins' then
+	elseif option == 'show_coins' then
 		if value then
 				self:RegisterEvent("PLAYER_MONEY", "EventHandler")
 		else
 				self:UnregisterEvent("PLAYER_MONEY")
 		end
+
+	-- Set the Shaman colour
+	elseif option == 'use_pre_210_shaman_colour' then
+		if value then
+			CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
+		else
+			CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
+		end
+
+	-- Set the opacity of the tablet frame
+	elseif option == 'opacity' then
+	    -- Update the tablet transparency
+	    tablet:SetTransparency(self:GetFrame(), value)
+
+	-- Ajust the sort type with the direction
+	elseif option == 'sort_type' then
+	    if self:GetOption('reverse_sort') then
+	    	self.db.profile.options.sort_type = "rev-" .. value
+	    else
+	    	self.db.profile.options.sort_type = value
+	    end
+
+	    already_set = true
+
+	-- Modify the direction of the sort
+	elseif option == 'reverse_sort' then
+		local sort_type
+		if self:GetOption('reverse_sort') then
+			sort_type = string.sub(self.db.profile.options.sort_type,5)
+		else
+			sort_type = self.db.profile.options.sort_type
+		end
+
+		if value then
+			self.db.profile.options.sort_type = "rev-" .. sort_type
+		else
+			self.db.profile.options.sort_type = sort_type
+		end
+
+		already_set = true
+
+	end
+
+	-- Set the value
+	if not already_set then
+		self.db.profile.options[option] = value
 	end
 
 	-- Refesh
@@ -1389,7 +1451,6 @@ function AllPlayed:SetShowRestedXP( value )
     -- Refesh
     self:Update()
 end
-]]--
 
 -- Get the value of show_arena_points
 function AllPlayed:GetShowArenaPoints()
@@ -1509,6 +1570,7 @@ function AllPlayed:SetShowWGMarks( value )
     -- Refesh
     self:Update()
 end
+]]--
 
 --[[
 -- Get the value of show_pvp_totals
@@ -1561,7 +1623,6 @@ function AllPlayed:SetShowRestedXPCountdown( value )
     -- Refesh
     self:Update()
 end
-]]--
 
 -- Get the value of show_class_name
 function AllPlayed:GetShowClassName()
@@ -1603,6 +1664,8 @@ function AllPlayed:SetUsePre210Colours( value )
     -- Refesh
     self:Update()
 end
+]]--
+--[[
 
 -- Get the value of colour_class
 function AllPlayed:GetColourClass()
@@ -1621,7 +1684,6 @@ function AllPlayed:SetColourClass( value )
     self:Update()
 end
 
---[[
 -- Get the value of show_xp_total
 function AllPlayed:GetShowXPTotal()
     --self:Debug("AllPlayed:GetShowXPTotal: ", self.db.profile.options.show_xp_total)
@@ -1654,7 +1716,6 @@ function AllPlayed:SetShowLocation( value )
     -- Refesh
     self:Update()
 end
-]]--
 
 -- Get the value of sort_type
 function AllPlayed:GetSortType()
@@ -1713,8 +1774,9 @@ function AllPlayed:SetIsSortReverse( value )
     -- Refesh
     self:Update()
 end
+]]--
 
-
+--[[
 -- Get the value of font_size
 function AllPlayed:GetFontSize()
     --self:Debug("AllPlayed:GetFontSize: ", self.db.profile.options.font_size)
@@ -1731,7 +1793,6 @@ function AllPlayed:SetFontSize( value )
     -- Refesh
     self:Update()
 end
-
 -- Get the value of opacity
 function AllPlayed:GetOpacity()
     --self:Debug("AllPlayed:GetOpacity: ", self.db.profile.options.opacity)
@@ -1751,6 +1812,7 @@ function AllPlayed:SetOpacity( value )
     -- Refesh
     self:Update()
 end
+]]--
 
 -- Vefiry if a character should be ignore when displayed and counter
 function AllPlayed:GetIsCharIgnored( realm, name )
@@ -1924,7 +1986,7 @@ end
 -- This function colorize the text based on the class
 -- If no class is defined, the text is colorized by faction
 function ClassColour( class, faction, string )
-    if class == "" or not AllPlayed:GetColourClass() then
+    if class == "" or not AllPlayed:GetOption('colorize_class') then
         return FactionColour( faction, string )
     else
         return C:Colorize( CLASS_COLOURS[class], string )
@@ -1958,7 +2020,7 @@ function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, f
 	local class_display = class_loc
 	if class_display == "" then class_display = class end
 
-	if class_display ~= "" and AllPlayed:GetShowClassName() then
+	if class_display ~= "" and AllPlayed:GetOption('show_class_name') then
 		level_string = string.format( "%s %s", class_display, level_string )
 	end
 
