@@ -574,7 +574,7 @@ function AllPlayed:OnEnable()
 
    -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
    -- or 20 seconds depending on the refresh_rate setting
-	self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
+	self:ScheduleRepeatingEvent(self.name, self.Update, self:GetOption('refresh_rate'), self)
 
 	-- Find the curent revision number from all the files revisions
 	self.revision = 0
@@ -709,7 +709,7 @@ function AllPlayed:ComputeTotal()
     end
 
     -- The Grand Total varies according to the options
-    if self.db.profile.options.all_realms then
+    if self:GetOption('all_realms') then
         if self:GetOption('all_factions') then
             -- Everything count
             self.total.time_played
@@ -772,7 +772,7 @@ function AllPlayed:ComputeTotalHonor()
     end
 
     -- The Grand Total varies according to the options
-    if self.db.profile.options.all_realms then
+    if self:GetOption('all_realms') then
         if self:GetOption('all_factions') then
             -- Everything count
             self.total.honor_kills
@@ -846,13 +846,13 @@ function AllPlayed:FillTablet()
         -- all PC in the faction are ingored.
         if ((self:GetOption('all_factions') or self.faction == faction)
             and self.total.time_played ~= 0
-            and self.sort_faction_realm[self.db.profile.options.sort_type][faction]
+            and self.sort_faction_realm[self:GetOption('sort_type')][faction]
         ) then
-            for _, realm in ipairs(self.sort_faction_realm[self.db.profile.options.sort_type][faction]) do
+            for _, realm in ipairs(self.sort_faction_realm[self:GetOption('sort_type')][faction]) do
                 -- We do not print the realm if no option to select it is on
                 -- and if the time played for the realm = 0 since this means
                 -- all PC in the realm are ingored.
-                if ((self.db.profile.options.all_realms or self.realm == realm)
+                if ((self:GetOption('all_realms') or self.realm == realm)
                     and self.total_realm[faction][realm].time_played ~= 0
                 ) then
                     ----self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
@@ -893,7 +893,7 @@ function AllPlayed:FillTablet()
                        'text', text_realm
                     )
 
-                    for _, pc in ipairs(self.sort_realm_pc[self.db.profile.options.sort_type][faction][realm]) do
+                    for _, pc in ipairs(self.sort_realm_pc[self:GetOption('sort_type')][faction][realm]) do
 --                        if (not self.db.account.data[faction][realm][pc].is_ignored) then
                         if not self:GetIsCharIgnored(realm, pc) then
                             -- Seconds played are still going up for the current PC
@@ -1181,8 +1181,8 @@ end
 --[[ Methods used for the option menu ]]--
 
 -- Get the option value
-function AllPlayed:GetOption( option )
-	self:Debug(format("AllPlayed:GetOption(%s) = %s", option or 'nil', tostring(self.db.profile.options[option] or 'nil')))
+function AllPlayed:GetOption( option, ... )
+	--self:Debug(format("AllPlayed:GetOption(%s) = %s", option or 'nil', tostring(self.db.profile.options[option] or 'nil')))
 
 	-- The sort direction is kept in the sort name
 	if option == 'reverse_sort' then
@@ -1203,14 +1203,20 @@ function AllPlayed:GetOption( option )
 end
 
 -- Set an option value
-function AllPlayed:SetOption( option, value )
-	self:Debug(format("AllPlayed:SetOption(%s): old %s, new %s", option or 'nil', tostring(self.db.profile.options[option] or 'nil'), tostring(value or 'nil') ))
+function AllPlayed:SetOption( option, value, ... )
+	--self:Debug(format("AllPlayed:SetOption(%s): old %s, new %s", option or 'nil', tostring(self.db.profile.options[option] or 'nil'), tostring(value or 'nil') ))
 
 	local already_set = false
 
 	-- Do we need to recompute the totals?
-	if option == 'all_factions' or option == 'all_realms' then
-		self.db.profile.options[option] = value
+	if option == 'all_factions' or option == 'all_realms' or option == 'is_ignored' then
+		if option == 'is_ignored' then
+			local realm, name = ...
+			self.db.profile.options.is_ignored[realm][name] = value
+		else
+			self.db.profile.options[option] = value
+		end
+
 		already_set = true
 
 		-- Compute the totals
@@ -1226,11 +1232,11 @@ function AllPlayed:SetOption( option, value )
 			-- If only the minutes are shown, 3 refreshs a minute will do nicely
 			self.db.profile.options.refresh_rate = 20
 		end
-		--self:Debug("=> refresh rate:", self.db.profile.options.refresh_rate)
+		--self:Debug("=> refresh rate:", self:GetOption('refresh_rate'))
 
 		-- If there is a timer active, we change the rate
 		if self:IsEventScheduled(self.name) then
-			self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
+			self:ScheduleRepeatingEvent(self.name, self.Update, self:GetOption('refresh_rate'), self)
 		end
 
    -- Set activate or disactivate the PLAYER_MONEY event
@@ -1291,528 +1297,6 @@ function AllPlayed:SetOption( option, value )
 	-- Refesh
 	self:Update()
 end
-
--- Get the current is_ignored value
-function AllPlayed:GetIsIgnored()
-    --self:Debug("AllPlayed:getIsIgnored: ",
-    --           self.db.account.data[self.faction][self.realm][self.pc].is_ignored
-    --)
-
-    return self.db.account.data[self.faction][self.realm][self.pc].is_ignored
-end
-
--- Set the value for is_ignored
-function AllPlayed:SetIsIgnored(value)
-    --self:Debug("AllPlayed:SetIsIgnored: ",value)
-
-    self.db.account.data[self.faction][self.realm][self.pc].is_ignored = value
-
-    -- Compute the totals
-    self:ComputeTotal()
-    self:ComputeTotalHonor()
-
-    -- Refesh
-    self:Update()
-end
-
-
---[[
--- Get the current all_factions value
-function AllPlayed:GetAllFactions()
-    --self:Debug("AllPlayed:GetAllFactions: ", self.db.profile.options.all_factions)
-
-    return self.db.profile.options.all_factions
-end
-
--- Set the value for all_factions
-function AllPlayed:SetAllFactions( value )
-    --self:Debug("AllPlayed:SetAllFactions: old %s, new %s", self.db.profile.options.all_factions, value )
-
-    self.db.profile.options.all_factions = value
-
-    -- Compute the totals
-    self:ComputeTotal()
-    self:ComputeTotalHonor()
-
-    -- Refesh
-    self:Update()
-end
-
-
--- Get the current all_realms value
-function AllPlayed:GetAllRealms()
-    --self:Debug("AllPlayed:GetAllRealms: ", self.db.profile.options.all_realms)
-
-    return self.db.profile.options.all_realms
-end
-
--- Set the value for all_realms
-function AllPlayed:SetAllRealms( value )
-    --self:Debug("AllPlayed:SetAllRealms: old %s, new %s", self.db.profile.options.all_realms, value )
-
-    self.db.profile.options.all_realms = value
-
-    -- Compute the totals
-    self:ComputeTotal()
-    self:ComputeTotalHonor()
-
-    -- Refesh
-    self:Update()
-end
--- Get the value of show_coins
-function AllPlayed:GetShowCoins()
-    --self:Debug("AllPlayed:GetShowCoins: ", self.db.profile.options.show_coins)
-
-    return self.db.profile.options.show_coins
-end
-
--- Set the value of show_coins
-function AllPlayed:SetShowCoins( value )
-    --self:Debug("AllPlayed:SetShowCoins: old %s, new %s", self.db.profile.options.show_coins, value )
-
-    self.db.profile.options.show_coins = value
-
-    -- Set activate or disactivate the PLAYER_MONEY event
-	if value then
-	   	self:RegisterEvent("PLAYER_MONEY", "EventHandler")
-	else
-	   	self:UnregisterEvent("PLAYER_MONEY")
-	end
-
-    -- Refesh
-    self:Update()
-end
-]]--
-
---[[
--- Get the value for show_seconds
-function AllPlayed:GetShowSeconds()
-    --self:Debug("AllPlayed:GetShowSeconds: ", self.db.profile.options.show_seconds)
-
-    return self.db.profile.options.show_seconds
-end
-
--- Set the value of show_seconds
--- Also set the timer refresh rate
-function AllPlayed:SetShowSeconds( value )
-    --self:Debug( "AllPlayed:SetShowSeconds: old %s, new %s", self.db.profile.options.show_seconds, value)
-
-    self.db.profile.options.show_seconds = value
-
-    if value then
-        -- If the seconds are displayed, we need to refresh every seconds
-        self.db.profile.options.refresh_rate = 1
-    else
-        -- If only the minutes are shown, 3 refreshs a minute will do nicely
-        self.db.profile.options.refresh_rate = 20
-    end
-    --self:Debug("=> refresh rate:", self.db.profile.options.refresh_rate)
-
-    -- If there is a timer active, we change the rate
-    if self:IsEventScheduled(self.name) then
-        self:ScheduleRepeatingEvent(self.name, self.Update, self.db.profile.options.refresh_rate, self)
-    end
-
-    -- Refesh
-    self:Update()
-
-end
-
--- Get the value of show_progress
-function AllPlayed:GetShowProgress()
-    --self:Debug("AllPlayed:GetShowProgress: ", self.db.profile.options.show_progress)
-
-    return self.db.profile.options.show_progress
-end
-
--- Set the value of show_progress
-function AllPlayed:SetShowProgress( value )
-    --self:Debug("AllPlayed:SetShowProgress: old %s, new %s", self.db.profile.options.show_progress, value )
-
-    self.db.profile.options.show_progress = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_rested_xp
-function AllPlayed:GetShowRestedXP()
-    --self:Debug("AllPlayed:GetShowRestedXP: ", self.db.profile.options.show_rested_xp)
-
-    return self.db.profile.options.show_rested_xp
-end
-
--- Set the value of show_rested_xp
-function AllPlayed:SetShowRestedXP( value )
-    --self:Debug("AllPlayed:SetShowRestedXP: old %s, new %s", self.db.profile.options.show_rested_xp, value )
-
-    self.db.profile.options.show_rested_xp = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_arena_points
-function AllPlayed:GetShowArenaPoints()
-    --self:Debug("AllPlayed:GetShowArenaPoints: ", self.db.profile.options.show_arena_points)
-
-    return self.db.profile.options.show_arena_points
-end
-
--- Set the value of show_arena_points
-function AllPlayed:SetShowArenaPoints( value )
-    --self:Debug("AllPlayed:SetShowArenaPoints: old %s, new %s", self.db.profile.options.show_arena_points, value )
-
-    self.db.profile.options.show_arena_points = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_honor_points
-function AllPlayed:GetShowHonorPoints()
-    --self:Debug("AllPlayed:GetShowHonorPoints: ", self.db.profile.options.show_honor_points)
-
-    return self.db.profile.options.show_honor_points
-end
-
--- Set the value of show_honor_points
-function AllPlayed:SetShowHonorPoints( value )
-    --self:Debug("AllPlayed:SetShowHonorPoints: old %s, new %s", self.db.profile.options.show_honor_points, value )
-
-    self.db.profile.options.show_honor_points = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_honor_kills
-function AllPlayed:GetShowHonorKills()
-    --self:Debug("AllPlayed:GetShowHonorKills: ", self.db.profile.options.show_honor_kills)
-
-    return self.db.profile.options.show_honor_kills
-end
-
--- Set the value of show_honor_kills
-function AllPlayed:SetShowHonorKills( value )
-    --self:Debug("AllPlayed:SetShowHonorKills: old %s, new %s", self.db.profile.options.show_honor_kills, value )
-
-    self.db.profile.options.show_honor_kills = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_badges_of_justice
-function AllPlayed:GetShowBadgesOfJustice()
-    --self:Debug("AllPlayed:GetShowBadgesOfJustice: ", self.db.profile.options.show_badges_of_justice)
-
-    return self.db.profile.options.show_badges_of_justice
-end
-
--- Set the value of show_badges_of_justice
-function AllPlayed:SetShowBadgesOfJustice( value )
-    --self:Debug("AllPlayed:SetShowBadgesOfJustice: old %s, new %s", self.db.profile.options.show_badges_of_justice, value )
-
-    self.db.profile.options.show_badges_of_justice = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_ab_marks
-function AllPlayed:GetShowABMarks()
-    --self:Debug("AllPlayed:GetShowABMarks: ", self.db.profile.options.show_ab_marks)
-
-    return self.db.profile.options.show_ab_marks
-end
-
--- Set the value of show_ab_marks
-function AllPlayed:SetShowABMarks( value )
-    --self:Debug("AllPlayed:SetShowABMarks: old %s, new %s", self.db.profile.options.show_ab_marks, value )
-
-    self.db.profile.options.show_ab_marks = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_av_marks
-function AllPlayed:GetShowAVMarks()
-    --self:Debug("AllPlayed:GetShowAVMarks: ", self.db.profile.options.show_av_marks)
-
-    return self.db.profile.options.show_av_marks
-end
-
--- Set the value of show_av_marks
-function AllPlayed:SetShowAVMarks( value )
-    --self:Debug("AllPlayed:SetShowAVMarks: old %s, new %s", self.db.profile.options.show_av_marks, value )
-
-    self.db.profile.options.show_av_marks = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_wg_marks
-function AllPlayed:GetShowWGMarks()
-    --self:Debug("AllPlayed:GetShowWGMarks: ", self.db.profile.options.show_wg_marks)
-
-    return self.db.profile.options.show_wg_marks
-end
-
--- Set the value of show_av_marks
-function AllPlayed:SetShowWGMarks( value )
-    --self:Debug("AllPlayed:SetShowWGMarks: old %s, new %s", self.db.profile.options.show_av_marks, value )
-
-    self.db.profile.options.show_av_marks = value
-
-    -- Refesh
-    self:Update()
-end
-]]--
-
---[[
--- Get the value of show_pvp_totals
-function AllPlayed:GetShowPVPTotals()
-    --self:Debug("AllPlayed:GetShowPVPTotals: ", self.db.profile.options.show_pvp_totals)
-
-    return self.db.profile.options.show_pvp_totals
-end
-
--- Set the value of show_pvp_totals
-function AllPlayed:SetShowPVPTotals( value )
-    --self:Debug("AllPlayed:SetShowPVPTotals: old %s, new %s", self.db.profile.options.show_pvp_totals, value )
-
-    self.db.profile.options.show_pvp_totals = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of percent_rest
-function AllPlayed:GetPercentRest()
-    --self:Debug("AllPlayed:GetPercentRest: ", self.db.profile.options.percent_rest)
-
-    return self.db.profile.options.percent_rest
-end
-
--- Set the value of percent_rest
-function AllPlayed:SetPercentRest( value )
-    --self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.percent_rest, value )
-
-    self.db.profile.options.percent_rest = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_rested_xp_countdown
-function AllPlayed:GetShowRestedXPCountdown()
-    --self:Debug("AllPlayed:GetShowRestedXPCountdown: ", self.db.profile.options.show_rested_xp_countdown)
-
-    return self.db.profile.options.show_rested_xp_countdown
-end
-
--- Set the value of show_rested_xp_countdown
-function AllPlayed:SetShowRestedXPCountdown( value )
-    --self:Debug("AllPlayed:SetShowRestedXPCountdown: old %s, new %s", self.db.profile.options.show_rested_xp_countdown, value )
-
-    self.db.profile.options.show_rested_xp_countdown = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_class_name
-function AllPlayed:GetShowClassName()
-    --self:Debug("AllPlayed:GetShowClassName: ", self.db.profile.options.show_class_name)
-
-    return self.db.profile.options.show_class_name
-end
-
--- Set the value of show_class_name
-function AllPlayed:SetShowClassName( value )
-    --self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.show_class_name, value )
-
-    self.db.profile.options.show_class_name = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of use_pre_210_shaman_colour
-function AllPlayed:GetUsePre210Colours()
-    --self:Debug("AllPlayed:GetUsePre210Colours: ", self.db.profile.options.use_pre_210_shaman_colour)
-
-    return self.db.profile.options.use_pre_210_shaman_colour
-end
-
--- Set the value of colour_class
-function AllPlayed:SetUsePre210Colours( value )
-    --self:Debug("AllPlayed:SetUsePre210Colours: old %s, new %s", self.db.profile.options.use_pre_210_shaman_colour, value )
-
-    self.db.profile.options.use_pre_210_shaman_colour = value
-
-    -- Set the proper colour for the shaman class
-	if(value) then
-		CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
-	else
-		CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
-	end
-
-    -- Refesh
-    self:Update()
-end
-]]--
---[[
-
--- Get the value of colour_class
-function AllPlayed:GetColourClass()
-    --self:Debug("AllPlayed:GetColourClass: ", self.db.profile.options.colour_class)
-
-    return self.db.profile.options.colour_class
-end
-
--- Set the value of colour_class
-function AllPlayed:SetColourClass( value )
-    --self:Debug("AllPlayed:SetPercentRest: old %s, new %s", self.db.profile.options.colour_class, value )
-
-    self.db.profile.options.colour_class = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of show_xp_total
-function AllPlayed:GetShowXPTotal()
-    --self:Debug("AllPlayed:GetShowXPTotal: ", self.db.profile.options.show_xp_total)
-
-    return self.db.profile.options.show_xp_total
-end
-
--- Set the value of show_xp_total
-function AllPlayed:SetShowXPTotal( value )
-    --self:Debug("AllPlayed:SetShowXPTotal: old %s, new %s", self.db.profile.options.show_xp_total, value )
-
-    self.db.profile.options.show_xp_total = value
-
-    -- Refesh
-    self:Update()
-end
--- Get the value of show_location
-function AllPlayed:GetShowLocation()
-    --self:Debug("AllPlayed:GetShowLocation: ", self.db.profile.options.show_location)
-
-    return self.db.profile.options.show_location
-end
-
--- Set the value of show_location
-function AllPlayed:SetShowLocation( value )
-    --self:Debug("AllPlayed:SetShowLocation: old %s, new %s", self.db.profile.options.show_location, value )
-
-    self.db.profile.options.show_location = value
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of sort_type
-function AllPlayed:GetSortType()
-    --self:Debug("AllPlayed:GetSortType: ", self.db.profile.options.sort_type)
-
-    if self:GetIsSortReverse() then
-    	return string.sub(self.db.profile.options.sort_type, 5)
-    else
-		return self.db.profile.options.sort_type
-    end
-
-end
-
--- Set the value of sort_type
-function AllPlayed:SetSortType( value )
-    --self:Debug("AllPlayed:SetSortType: old %s, new %s", self.db.profile.options.sort_type, value )
-
-    if self:GetIsSortReverse() then
-    	self.db.profile.options.sort_type = "rev-" .. value
-    else
-    	self.db.profile.options.sort_type = value
-    end
-
-    -- Refesh
-    self:Update()
-end
-
--- Get the value of "rev-" in sort_type
-function AllPlayed:GetIsSortReverse()
-    --self:Debug("AllPlayed:GetSortType: ", self.db.profile.options.sort_type)
-
-    if string.find(self.db.profile.options.sort_type, "rev-") == 1 then
-    	return true
-    else
-    	return false
-    end
-end
-
--- Set the value of "rev-" in sort_type
-function AllPlayed:SetIsSortReverse( value )
-    --self:Debug("AllPlayed:SetSortType: old %s, new %s", self.db.profile.options.sort_type, value )
-
-    local sort_type
-    if self:GetIsSortReverse() then
-        sort_type = string.sub(self.db.profile.options.sort_type,5)
-    else
-    	sort_type = self.db.profile.options.sort_type
-    end
-
-    if value then
-    	self.db.profile.options.sort_type = "rev-" .. sort_type
-    else
-    	self.db.profile.options.sort_type = sort_type
-    end
-
-    -- Refesh
-    self:Update()
-end
-]]--
-
---[[
--- Get the value of font_size
-function AllPlayed:GetFontSize()
-    --self:Debug("AllPlayed:GetFontSize: ", self.db.profile.options.font_size)
-
-    return self.db.profile.options.font_size
-end
-
--- Set the value of font_size
-function AllPlayed:SetFontSize( value )
-    --self:Debug("AllPlayed:SetFontSize: old %s, new %s", self.db.profile.options.font_size, value )
-
-    self.db.profile.options.font_size = value
-
-    -- Refesh
-    self:Update()
-end
--- Get the value of opacity
-function AllPlayed:GetOpacity()
-    --self:Debug("AllPlayed:GetOpacity: ", self.db.profile.options.opacity)
-
-    return self.db.profile.options.opacity
-end
-
--- Set the value of opacity
-function AllPlayed:SetOpacity( value )
-    --self:Debug("AllPlayed:SetOpacity: old %s, new %s", self.db.profile.options.opacity, value )
-
-    self.db.profile.options.opacity = value
-
-    -- Update the tablet transparency
-    tablet:SetTransparency(self:GetFrame(), value)
-
-    -- Refesh
-    self:Update()
-end
-]]--
 
 -- Vefiry if a character should be ignore when displayed and counter
 function AllPlayed:GetIsCharIgnored( realm, name )
@@ -1938,7 +1422,7 @@ local silver_icon = "|TInterface\\PVPFrame\\PVP-Currency-Alliance:0:0:0:0|t"
 local copper_icon = "|TInterface\\PVPFrame\\PVP-Currency-Horde:0:0:0:0|t"
 ]]--
 function FormatMoney(amount)
-   if true then return A:FormatMoneyFull( amount, true, false ) end
+   if not AllPlayed:GetOption('use_icons') then return A:FormatMoneyFull( amount, true, false ) end
 
 	local string = ""
 
