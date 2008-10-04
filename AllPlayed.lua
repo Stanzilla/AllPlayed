@@ -138,7 +138,7 @@ AllPlayed:RegisterDefaults('profile', {
 			show_rested_xp_countdown   = false,
 			refresh_rate               = 1,
 			show_class_name            = false,
-			colour_class               = false,
+			colour_class               = true,
 			use_pre_210_shaman_colour	= false,
 			show_location              = "none",
 			show_xp_total              = false,
@@ -168,278 +168,278 @@ AllPlayed:RegisterDefaults('profile', {
 -- Options for Waterfall, FuBar (Dewdrop) and AceConsole
 -- See AceOptions for the format
 local command_options = {
-    type = 'group',
-    args = {
-    	title	= {
-    		type = "header",
-    		name = L["AllPlayed Configuration"],
-    		order = 1
-    	},
-    	title2	= {
-    		type = "header",
-    		order = 2
-    	},
+	type = 'group',
+	args = {
+		title	= {
+			type = "header",
+			name = L["AllPlayed Configuration"],
+			order = 1
+		},
+		title2	= {
+			type = "header",
+			order = 2
+		},
 		blankLine = {
 			type = 'header',
 			order = 3,
 		},
-        display = {
-            type = 'group', name = L["Display"], desc = L["Set the display options"], args = {
-                all_factions = {
-                    name      = L["All Factions"],
-                    desc      = L["All factions will be displayed"],
-                    type      = 'toggle',
-                    get       = function() return AllPlayed:GetOption('all_factions') end,
-                    set       = function(v) AllPlayed:SetOption('all_factions',v) end,
-                    order     = 1,
-                },
-                all_realms = {
-                    name      = L["All Realms"],
-                    desc      = L["All realms will de displayed"],
-                    type      = 'toggle',
-                    get       = function() return AllPlayed:GetOption('all_realms') end,
-                    set       = function(v) AllPlayed:SetOption('all_realms',v) end,
-                    order     = 2,
-                },
-                show_seconds = {
-                    name      = L["Show Seconds"],
-                    desc      = L["Display the seconds in the time strings"],
-                    type      = 'toggle',
-                    get       = function() return AllPlayed:GetOption('show_seconds') end,
-                    set       = function(v) AllPlayed:SetOption('show_seconds',v) end,
-                    order     = 3,
-                },
-                show_coins = {
-                    name      = L["Show Gold"],
-                    desc      = L["Display the gold each character pocess"],
-                    type      = 'toggle',
-                    get       = function() return AllPlayed:GetOption('show_coins') end,
-                    set       = function(v) AllPlayed:SetOption('show_coins',v) end,
-                    order     = 4,
-                },
+		display = {
+			type = 'group', name = L["Display"], desc = L["Set the display options"], args = {
+				 all_factions = {
+					  name      = L["All Factions"],
+					  desc      = L["All factions will be displayed"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('all_factions') end,
+					  set       = function(v) AllPlayed:SetOption('all_factions',v) end,
+					  order     = 1,
+				 },
+				 all_realms = {
+					  name      = L["All Realms"],
+					  desc      = L["All realms will de displayed"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('all_realms') end,
+					  set       = function(v) AllPlayed:SetOption('all_realms',v) end,
+					  order     = 2,
+				 },
+				 show_seconds = {
+					  name      = L["Show Seconds"],
+					  desc      = L["Display the seconds in the time strings"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('show_seconds') end,
+					  set       = function(v) AllPlayed:SetOption('show_seconds',v) end,
+					  order     = 3,
+				 },
+				 show_coins = {
+					  name      = L["Show Gold"],
+					  desc      = L["Display the gold each character pocess"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('show_coins') end,
+					  set       = function(v) AllPlayed:SetOption('show_coins',v) end,
+					  order     = 4,
+				 },
 
-                show_progress = {
-                    name      = L["Show XP Progress"],
-                    desc      = L["Display the level fraction based on curent XP"],
-                    type      = 'toggle',
-                    get       = function() return AllPlayed:GetOption('show_progress') end,
-                    set       = function(v) AllPlayed:SetOption('show_progress',v) end,
-                    order     = 5,
-                },
-                show_xp_total = {
-                    name      = L["Show XP total"],
-                    desc      = L["Show the total XP for all characters"],
-                    type      = 'toggle',
-                    get       = function() return AllPlayed:GetOption('show_xp_total') end,
-                    set       = function(v) AllPlayed:SetOption('show_xp_total',v) end,
-                    order     = 6,
-                },
-                show_location = {
-                    name      = L["Show Location"],
-                    desc      = L["Show the character location"],
-                    type      = 'text',
-                    get       = function() return AllPlayed:GetOption('show_location') end,
-                    set       = function(v) AllPlayed:SetOption('show_location',v) end,
-                    validate  = { ["none"]      = L["Don't show location"],
-                                  ["loc"]       = L["Show zone"],
-                                  ["sub"]       = L["Show subzone"],
-                                  ["loc/sub"]   = L["Show zone/subzone"]
-                    },
-                    order     = 7,
-                },
-                rested_xp = {
-                    type = 'group', name = L["Rested XP"], desc = L["Set the rested XP options"], args = {
-                         show_rested_xp = {
-                            name        = L["Rested XP Total"],
-                            desc        = L["Show the character rested XP"],
-                            type        = 'toggle',
-									 get       	 = function() return AllPlayed:GetOption('show_rested_xp') end,
-									 set       	 = function(v) AllPlayed:SetOption('show_rested_xp',v) end,
-                            order = 1,
-                         },
-                         percent_rest = {
-                            name        = L["Percent Rest"],
-                            desc        = L["Set the base for % display of rested XP"],
-                            type        = 'text',
-									 get       	 = function() return AllPlayed:GetOption('percent_rest') end,
-									 set       	 = function(v) AllPlayed:SetOption('percent_rest',v) end,
-                            validate    = { ["0"] = L["None"], ["100"] = L["100%"], ["150"] = L["150%"] },
-                            order       = 2,
-                        },
-                         show_rested_xp_countdown = {
-                            name        = L["Rested XP Countdown"],
-                            desc        = L["Show the time remaining before the character is 100% rested"],
-                            type        = 'toggle',
-									 get       	 = function() return AllPlayed:GetOption('show_rested_xp_countdown') end,
-									 set       	 = function(v) AllPlayed:SetOption('show_rested_xp_countdown',v) end,
-                            order = 3,
-                         },
-                    },
-                    order     = 8,
-                },
-                pvp = {
-                	  type = 'group', name = L["PVP"], desc = L["Set the PVP options"], guiHidden = true, args = {
-									show_arena_points	= {
-										name        = L["Arena Points"],
-										desc        = L["Show the character arena points"],
-										type        = 'toggle',
-										get       	= function() return AllPlayed:GetOption('show_arena_points') end,
-										set       	= function(v) AllPlayed:SetOption('show_arena_points',v) end,
-										order = 1,
-									},
-		  						   show_honor_points= {
-										name        = L["Honor Points"],
-										desc        = L["Show the character honor points"],
-										type        = 'toggle',
-										get       	= function() return AllPlayed:GetOption('show_honor_points') end,
-										set       	= function(v) AllPlayed:SetOption('show_honor_points',v) end,
-										order = 2,
-									},
-		  							show_honor_kills= {
-										name        = L["Honor Kills"],
-										desc        = L["Show the character honor kills"],
-										type        = 'toggle',
-										get       	= function() return AllPlayed:GetOption('show_honor_kills') end,
-										set       	= function(v) AllPlayed:SetOption('show_honor_kills',v) end,
-										order = 3,
-									},
-									show_badges_of_justice = {
-										name        = L["Badges of Justice"],
-										desc        = L["Show the character badges of Justice"],
-										type        = 'toggle',
-										get       	= function() return AllPlayed:GetOption('show_badges_of_justice') end,
-										set       	= function(v) AllPlayed:SetOption('show_badges_of_justice',v) end,
-										order = 4,
-									},
-									show_ab_marks = {
-										name        = L["AB Marks"],
-										desc        = L["Show the Arathi Basin Marks"],
-										type        = 'toggle',
-										get       	= function() return AllPlayed:GetOption('show_ab_marks') end,
-										set       	= function(v) AllPlayed:SetOption('show_ab_marks',v) end,
-										order = 5,
-									},
-									show_av_marks = {
-										name        = L["AV Marks"],
-										desc        = L["Show the Alterac Valley Marks"],
-										type        = 'toggle',
-										get       	= function() return AllPlayed:GetOption('show_ab_marks') end,
-										set       	= function(v) AllPlayed:SetOption('show_ab_marks',v) end,
-										order = 6,
-									},
-									show_wg_marks = {
-										name        = L["WG Marks"],
-										desc        = L["Show the Warsong Gulch Marks"],
-										type        = 'toggle',
-										get         = function() return AllPlayed:GetOption('show_wg_marks') end,
-										set         = function(v) AllPlayed:SetOption('show_wg_marks',v) end,
-										order = 7,
-									},
-									show_eots_mark = {
-										name        = L["EotS Marks"],
-										desc        = L["Show the Eye of the Storm Marks"],
-										type        = 'toggle',
-										get         = function() return AllPlayed:GetOption('show_eots_mark') end,
-										set         = function(v) AllPlayed:SetOption('show_eots_mark',v) end,
-										order = 8,
-									},
-		  							show_pvp_totals = {
-										name        = L["Show PVP Totals"],
-										desc        = L["Show the honor related stats for all characters"],
-										type        = 'toggle',
-										get         = function() return AllPlayed:GetOption('show_pvp_totals') end,
-										set         = function(v) AllPlayed:SetOption('show_pvp_totals',v) end,
-										order = 10,
-									},
-						  },
-                    order     = 9,
-					 },
-                show_class_name = {
-                    name      = L["Show Class Name"],
-                    desc      = L["Show the character class beside the level"],
-                    type      = 'toggle',
-						  get       = function() return AllPlayed:GetOption('show_class_name') end,
-						  set       = function(v) AllPlayed:SetOption('show_class_name',v) end,
-                    order     = 10,
-                },
-                colorize_class = {
-                    name      = L["Colorize Class"],
-                    desc      = L["Colorize the character name based on class"],
-                    type      = 'toggle',
-						  get       = function() return AllPlayed:GetOption('colorize_class') end,
-						  set       = function(v) AllPlayed:SetOption('colorize_class',v) end,
-                    order     = 11,
-                },
-                use_pre_210_shaman_colour = {
-                    name      = L["Use Old Shaman Colour"],
-                    desc      = L["Use the pre-210 patch colour for the Shaman class"],
-                    type      = 'toggle',
-						  get       = function() return AllPlayed:GetOption('use_pre_210_shaman_colour') end,
-						  set       = function(v) AllPlayed:SetOption('use_pre_210_shaman_colour',v) end,
-                    order     = 12,
-                },
-                font_size = {
-                    name      = L["Font Size"],
-                    desc      = L["Select the font size"],
-                    type      = 'range',
-                    min		  = 8,
-                    max       = 20,
-                    step      = 1,
-						  get       = function() return AllPlayed:GetOption('font_size') end,
-						  set       = function(v) AllPlayed:SetOption('font_size',v) end,
-                    order     = 13,
-                },
-                opacity = {
-                    name      = L["Opacity"],
-                    desc      = L["% opacity of the tooltip background"],
-                    type      = 'range',
-                    min		  = 0,
-                    max       = 1,
-                    step      = .05,
-                    isPercent = true,
-						  get       = function() return AllPlayed:GetOption('opacity') end,
-						  set       = function(v) AllPlayed:SetOption('opacity',v) end,
-                    order     = 14,
-                },
-            }, order = 10
-        },
-        sort = {
+				 show_progress = {
+					  name      = L["Show XP Progress"],
+					  desc      = L["Display the level fraction based on curent XP"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('show_progress') end,
+					  set       = function(v) AllPlayed:SetOption('show_progress',v) end,
+					  order     = 5,
+				 },
+				 show_xp_total = {
+					  name      = L["Show XP total"],
+					  desc      = L["Show the total XP for all characters"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('show_xp_total') end,
+					  set       = function(v) AllPlayed:SetOption('show_xp_total',v) end,
+					  order     = 6,
+				 },
+				 show_location = {
+					  name      = L["Show Location"],
+					  desc      = L["Show the character location"],
+					  type      = 'text',
+					  get       = function() return AllPlayed:GetOption('show_location') end,
+					  set       = function(v) AllPlayed:SetOption('show_location',v) end,
+					  validate  = { ["none"]      = L["Don't show location"],
+										 ["loc"]       = L["Show zone"],
+										 ["sub"]       = L["Show subzone"],
+										 ["loc/sub"]   = L["Show zone/subzone"]
+					  },
+					  order     = 7,
+				 },
+				 rested_xp = {
+					  type = 'group', name = L["Rested XP"], desc = L["Set the rested XP options"], args = {
+							 show_rested_xp = {
+								 name        = L["Rested XP Total"],
+								 desc        = L["Show the character rested XP"],
+								 type        = 'toggle',
+								 get       	 = function() return AllPlayed:GetOption('show_rested_xp') end,
+								 set       	 = function(v) AllPlayed:SetOption('show_rested_xp',v) end,
+								 order = 1,
+							 },
+							 percent_rest = {
+								 name        = L["Percent Rest"],
+								 desc        = L["Set the base for % display of rested XP"],
+								 type        = 'text',
+								 get       	 = function() return AllPlayed:GetOption('percent_rest') end,
+								 set       	 = function(v) AllPlayed:SetOption('percent_rest',v) end,
+								 validate    = { ["0"] = L["None"], ["100"] = L["100%"], ["150"] = L["150%"] },
+								 order       = 2,
+							},
+							 show_rested_xp_countdown = {
+								 name        = L["Rested XP Countdown"],
+								 desc        = L["Show the time remaining before the character is 100% rested"],
+								 type        = 'toggle',
+								 get       	 = function() return AllPlayed:GetOption('show_rested_xp_countdown') end,
+								 set       	 = function(v) AllPlayed:SetOption('show_rested_xp_countdown',v) end,
+								 order = 3,
+							 },
+					  },
+					  order     = 8,
+				 },
+				 pvp = {
+					  type = 'group', name = L["PVP"], desc = L["Set the PVP options"], guiHidden = true, args = {
+								show_arena_points	= {
+									name        = L["Arena Points"],
+									desc        = L["Show the character arena points"],
+									type        = 'toggle',
+									get       	= function() return AllPlayed:GetOption('show_arena_points') end,
+									set       	= function(v) AllPlayed:SetOption('show_arena_points',v) end,
+									order = 1,
+								},
+								show_honor_points= {
+									name        = L["Honor Points"],
+									desc        = L["Show the character honor points"],
+									type        = 'toggle',
+									get       	= function() return AllPlayed:GetOption('show_honor_points') end,
+									set       	= function(v) AllPlayed:SetOption('show_honor_points',v) end,
+									order = 2,
+								},
+								show_honor_kills= {
+									name        = L["Honor Kills"],
+									desc        = L["Show the character honor kills"],
+									type        = 'toggle',
+									get       	= function() return AllPlayed:GetOption('show_honor_kills') end,
+									set       	= function(v) AllPlayed:SetOption('show_honor_kills',v) end,
+									order = 3,
+								},
+								show_badges_of_justice = {
+									name        = L["Badges of Justice"],
+									desc        = L["Show the character badges of Justice"],
+									type        = 'toggle',
+									get       	= function() return AllPlayed:GetOption('show_badges_of_justice') end,
+									set       	= function(v) AllPlayed:SetOption('show_badges_of_justice',v) end,
+									order = 4,
+								},
+								show_ab_marks = {
+									name        = L["AB Marks"],
+									desc        = L["Show the Arathi Basin Marks"],
+									type        = 'toggle',
+									get       	= function() return AllPlayed:GetOption('show_ab_marks') end,
+									set       	= function(v) AllPlayed:SetOption('show_ab_marks',v) end,
+									order = 5,
+								},
+								show_av_marks = {
+									name        = L["AV Marks"],
+									desc        = L["Show the Alterac Valley Marks"],
+									type        = 'toggle',
+									get       	= function() return AllPlayed:GetOption('show_ab_marks') end,
+									set       	= function(v) AllPlayed:SetOption('show_ab_marks',v) end,
+									order = 6,
+								},
+								show_wg_marks = {
+									name        = L["WG Marks"],
+									desc        = L["Show the Warsong Gulch Marks"],
+									type        = 'toggle',
+									get         = function() return AllPlayed:GetOption('show_wg_marks') end,
+									set         = function(v) AllPlayed:SetOption('show_wg_marks',v) end,
+									order = 7,
+								},
+								show_eots_mark = {
+									name        = L["EotS Marks"],
+									desc        = L["Show the Eye of the Storm Marks"],
+									type        = 'toggle',
+									get         = function() return AllPlayed:GetOption('show_eots_mark') end,
+									set         = function(v) AllPlayed:SetOption('show_eots_mark',v) end,
+									order = 8,
+								},
+								show_pvp_totals = {
+									name        = L["Show PVP Totals"],
+									desc        = L["Show the honor related stats for all characters"],
+									type        = 'toggle',
+									get         = function() return AllPlayed:GetOption('show_pvp_totals') end,
+									set         = function(v) AllPlayed:SetOption('show_pvp_totals',v) end,
+									order = 10,
+								},
+					  },
+					  order     = 9,
+				 },
+				 show_class_name = {
+					  name      = L["Show Class Name"],
+					  desc      = L["Show the character class beside the level"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('show_class_name') end,
+					  set       = function(v) AllPlayed:SetOption('show_class_name',v) end,
+					  order     = 10,
+				 },
+				 colorize_class = {
+					  name      = L["Colorize Class"],
+					  desc      = L["Colorize the character name based on class"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('colorize_class') end,
+					  set       = function(v) AllPlayed:SetOption('colorize_class',v) end,
+					  order     = 11,
+				 },
+				 use_pre_210_shaman_colour = {
+					  name      = L["Use Old Shaman Colour"],
+					  desc      = L["Use the pre-210 patch colour for the Shaman class"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('use_pre_210_shaman_colour') end,
+					  set       = function(v) AllPlayed:SetOption('use_pre_210_shaman_colour',v) end,
+					  order     = 12,
+				 },
+				 font_size = {
+					  name      = L["Font Size"],
+					  desc      = L["Select the font size"],
+					  type      = 'range',
+					  min		  = 8,
+					  max       = 20,
+					  step      = 1,
+					  get       = function() return AllPlayed:GetOption('font_size') end,
+					  set       = function(v) AllPlayed:SetOption('font_size',v) end,
+					  order     = 13,
+				 },
+				 opacity = {
+					  name      = L["Opacity"],
+					  desc      = L["% opacity of the tooltip background"],
+					  type      = 'range',
+					  min		  = 0,
+					  max       = 1,
+					  step      = .05,
+					  isPercent = true,
+					  get       = function() return AllPlayed:GetOption('opacity') end,
+					  set       = function(v) AllPlayed:SetOption('opacity',v) end,
+					  order     = 14,
+				 },
+			}, order = 10
+		},
+		sort = {
 			type = 'group', name = L["Sort"], desc = L["Set the sort options"], args = {
 				sort_type = {
 					name      = L["Sort Type"],
 					desc      = L["Select the sort type"],
 					type      = 'text',
-				   get       = function() return AllPlayed:GetOption('sort_type') end,
-				   set       = function(v) AllPlayed:SetOption('sort_type',v) end,
+					get       = function() return AllPlayed:GetOption('sort_type') end,
+					set       = function(v) AllPlayed:SetOption('sort_type',v) end,
 					validate  = {
 								  ["alpha"] 			= L["By name"],
 								  ["level"] 			= L["By level"],
-								  ["xp"]				= L["By experience"],
-								  ["rested_xp"]			= L["By rested XP"],
-								  ["percent_rest"]		= L["By % rested"],
+								  ["xp"]					= L["By experience"],
+								  ["rested_xp"]		= L["By rested XP"],
+								  ["percent_rest"]	= L["By % rested"],
 								  ["coin"]				= L["By money"],
 								  ["time_played"]		= L["By time played"],
 					},
 					order     = 1,
 				},
-			 reverse_sort = {
+				reverse_sort = {
 				  name      = L["Sort in reverse order"],
 				  desc      = L["Use the curent sort type in reverse order"],
 				  type      = 'toggle',
 				  get       = function() return AllPlayed:GetOption('reverse_sort') end,
 				  set       = function(v) AllPlayed:SetOption('reverse_sort',v) end,
-              order     = 2,
-           },
+				  order     = 2,
+				},
 			}, order = 20
 		},
-        ignore = {
-            name    = L["Ignore Characters"],
-            desc    = L["Hide characters from display"],
-            type    = 'group',
-            args    = {}, 			-- Will be set in OnEnable
-            order   = 30
-        },
-    }
+		ignore = {
+			name    = L["Ignore Characters"],
+			desc    = L["Hide characters from display"],
+			type    = 'group',
+			args    = {}, 			-- Will be set in OnEnable
+			order   = 30
+		},
+	}
 }
 
 
@@ -842,9 +842,9 @@ function AllPlayed:FillTablet()
         -- all PC in the faction are ingored.
         if ((self:GetOption('all_factions') or self.faction == faction)
             and self.total.time_played ~= 0
-            and self.sort_faction_realm[self:GetOption('sort_type')][faction]
+            and self.sort_faction_realm[self:GetOption('display_sort_type')][faction]
         ) then
-            for _, realm in ipairs(self.sort_faction_realm[self:GetOption('sort_type')][faction]) do
+            for _, realm in ipairs(self.sort_faction_realm[self:GetOption('display_sort_type')][faction]) do
                 -- We do not print the realm if no option to select it is on
                 -- and if the time played for the realm = 0 since this means
                 -- all PC in the realm are ingored.
@@ -889,7 +889,7 @@ function AllPlayed:FillTablet()
                        'text', text_realm
                     )
 
-                    for _, pc in ipairs(self.sort_realm_pc[self:GetOption('sort_type')][faction][realm]) do
+                    for _, pc in ipairs(self.sort_realm_pc[self:GetOption('display_sort_type')][faction][realm]) do
                         if not self:GetOption('is_ignored', realm, pc) then
                             -- Seconds played are still going up for the current PC
                             local seconds_played = self:EstimateTimePlayed(
@@ -1199,6 +1199,10 @@ function AllPlayed:GetOption( option, ... )
 		else
 			return self.db.profile.options.sort_type
 		end
+	elseif option == 'display_sort_type' then
+		-- For display, we need the complete thing
+		return self.db.profile.options.sort_type
+
 	end
 
 	return self.db.profile.options[option]
