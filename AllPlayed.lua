@@ -46,6 +46,7 @@ AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDe
 -- Local function prototypes
 local FormatXP
 local FormatMoney
+local FormatHonor
 local FactionColour
 local PercentColour
 local ClassColour
@@ -1456,7 +1457,58 @@ function FormatMoney(amount)
 	return C:White(string)
 
 end
+--[[
+			show_arena_points				= false,
+			show_honor_points				= false,
+			show_honor_kills				= false,
+			show_badges_of_justice 		= false,
+			show_wg_marks 					= false,
+			show_ab_marks 					= false,
+			show_av_marks 					= false,
+			show_eots_mark 				= false,
+			show_pvp_totals				= false,
+]]--
+local honor_strings = {
+	icons = {
+		hk 					= '%d|TInterface\\LootFrame\\LootPanel-Icon:0,0,0,0|t',
+		['hp-Alliance']	= '%d|TInterface\\LootFrame\\UI-PVP-Alliance:0,0,0,0|t',
+		['hp-Horde']		= '%d|TInterface\\LootFrame\\UI-PVP-Horde:0,0,0,0|t',
+		ap 					= '%d|TInterface\\Icons\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:0:0|t',
+		bj 					= '%d|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,0|t',
+		ab 					= '%d|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,0|t',
+		av 					= '%d|TInterface\\Icons\\INV_Jewelry_Necklace_21:0,0,0,0|t',
+		wg 					= '%d|TInterface\\Icons\\INV_Misc_Rune_07:0,0,0,0|t',
+		es 					= '%d|TInterface\\Icons\\Spell_Nature_EyeOfTheStorm:0,0,0,0|t'
+	},
+	no_icons = {
+		hk = '%d HK',
+		hp = '%d HP',
+		ap = '%d AP',
+		bj = '%d BoJ',
+		ab = '%d AB',
+		av = '%d AV',
+		wg = '%d WG',
+		es = '%d EotS'
+	}
+}
 
+-- Function that produce the honour string based on the display options
+function FormatHonor( honor_kills,	pvp_points,	arena_points,	badges,
+							 ab_marks, 		av_marks, 	wg_marks, 		eots_marks, faction )
+
+	local string = ""
+
+	if 	 AllPlayed:GetOption('show_honor_kills') 			then
+	elseif AllPlayed:GetOption('show_honor_points') 		then
+	elseif AllPlayed:GetOption('show_arena_points') 		then
+	elseif AllPlayed:GetOption('show_badges_of_justice')	then
+	elseif AllPlayed:GetOption('show_ab_marks') 				then
+	elseif AllPlayed:GetOption('show_av_marks') 				then
+	elseif AllPlayed:GetOption('show_wg_marks') 				then
+	elseif AllPlayed:GetOption('show_eots_mark')				then
+	end
+
+end
 
 -- This function colorize the text based on the faction
 function FactionColour( faction, string )
