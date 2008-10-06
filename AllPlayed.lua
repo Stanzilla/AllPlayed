@@ -279,13 +279,13 @@ local command_options = {
 					  order     = 8,
 				 },
 				 pvp = {
-					  type = 'group', name = L["PVP"], desc = L["Set the PVP options"], guiHidden = true, args = {
-								show_arena_points	= {
-									name        = L["Arena Points"],
-									desc        = L["Show the character arena points"],
+					  type = 'group', name = L["PVP"], desc = L["Set the PVP options"], guiHidden = false, args = {
+								show_honor_kills= {
+									name        = L["Honor Kills"],
+									desc        = L["Show the character honor kills"],
 									type        = 'toggle',
-									get       	= function() return AllPlayed:GetOption('show_arena_points') end,
-									set       	= function(v) AllPlayed:SetOption('show_arena_points',v) end,
+									get       	= function() return AllPlayed:GetOption('show_honor_kills') end,
+									set       	= function(v) AllPlayed:SetOption('show_honor_kills',v) end,
 									order = 1,
 								},
 								show_honor_points= {
@@ -296,12 +296,12 @@ local command_options = {
 									set       	= function(v) AllPlayed:SetOption('show_honor_points',v) end,
 									order = 2,
 								},
-								show_honor_kills= {
-									name        = L["Honor Kills"],
-									desc        = L["Show the character honor kills"],
+								show_arena_points	= {
+									name        = L["Arena Points"],
+									desc        = L["Show the character arena points"],
 									type        = 'toggle',
-									get       	= function() return AllPlayed:GetOption('show_honor_kills') end,
-									set       	= function(v) AllPlayed:SetOption('show_honor_kills',v) end,
+									get       	= function() return AllPlayed:GetOption('show_arena_points') end,
+									set       	= function(v) AllPlayed:SetOption('show_arena_points',v) end,
 									order = 3,
 								},
 								show_badges_of_justice = {
@@ -324,8 +324,8 @@ local command_options = {
 									name        = L["AV Marks"],
 									desc        = L["Show the Alterac Valley Marks"],
 									type        = 'toggle',
-									get       	= function() return AllPlayed:GetOption('show_ab_marks') end,
-									set       	= function(v) AllPlayed:SetOption('show_ab_marks',v) end,
+									get       	= function() return AllPlayed:GetOption('show_av_marks') end,
+									set       	= function(v) AllPlayed:SetOption('show_av_marks',v) end,
 									order = 6,
 								},
 								show_wg_marks = {
@@ -379,6 +379,14 @@ local command_options = {
 					  set       = function(v) AllPlayed:SetOption('use_pre_210_shaman_colour',v) end,
 					  order     = 12,
 				 },
+				 use_icons = {
+					  name      = L["Use Icons"],
+					  desc      = L["Use graphics for coin and PvP currencies"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('use_icons') end,
+					  set       = function(v) AllPlayed:SetOption('use_icons',v) end,
+					  order     = 13,
+				 },
 				 font_size = {
 					  name      = L["Font Size"],
 					  desc      = L["Select the font size"],
@@ -388,7 +396,7 @@ local command_options = {
 					  step      = 1,
 					  get       = function() return AllPlayed:GetOption('font_size') end,
 					  set       = function(v) AllPlayed:SetOption('font_size',v) end,
-					  order     = 13,
+					  order     = 14,
 				 },
 				 opacity = {
 					  name      = L["Opacity"],
@@ -400,7 +408,7 @@ local command_options = {
 					  isPercent = true,
 					  get       = function() return AllPlayed:GetOption('opacity') end,
 					  set       = function(v) AllPlayed:SetOption('opacity',v) end,
-					  order     = 14,
+					  order     = 15,
 				 },
 			}, order = 10
 		},
@@ -733,17 +741,34 @@ function AllPlayed:ComputeTotal()
 end
 
 function AllPlayed:ComputeTotalHonor()
-    --self:Debug("AllPlayed:ComputeTotalHonor()")
+	--self:Debug("AllPlayed:ComputeTotalHonor()")
 
-    self.total_faction[L["Horde"]].honor_kills      = 0
-    self.total_faction[L["Horde"]].honor_points     = 0
-    self.total_faction[L["Horde"]].arena_points     = 0
-    self.total_faction[L["Alliance"]].honor_kills   = 0
-    self.total_faction[L["Alliance"]].honor_points  = 0
-    self.total_faction[L["Alliance"]].arena_points  = 0
-    self.total.honor_kills                          = 0
-    self.total.honor_points                         = 0
-    self.total.arena_points                         = 0
+	self.total_faction[L["Horde"]].honor_kills      			= 0
+	self.total_faction[L["Horde"]].honor_points     			= 0
+	self.total_faction[L["Horde"]].arena_points     			= 0
+	self.total_faction[L["Horde"]].nb_badges_of_justice   	= 0
+	self.total_faction[L["Horde"]].nb_wg_marks     				= 0
+	self.total_faction[L["Horde"]].nb_ab_marks     				= 0
+	self.total_faction[L["Horde"]].nb_av_marks      			= 0
+	self.total_faction[L["Horde"]].nb_eots_marks    			= 0
+
+	self.total_faction[L["Alliance"]].honor_kills   			= 0
+	self.total_faction[L["Alliance"]].honor_points  			= 0
+	self.total_faction[L["Alliance"]].arena_points  			= 0
+	self.total_faction[L["Alliance"]].nb_badges_of_justice	= 0
+	self.total_faction[L["Alliance"]].nb_wg_marks     			= 0
+	self.total_faction[L["Alliance"]].nb_ab_marks     			= 0
+	self.total_faction[L["Alliance"]].nb_av_marks      		= 0
+	self.total_faction[L["Alliance"]].nb_eots_marks    		= 0
+
+	self.total.honor_kills                          			= 0
+	self.total.honor_points                         			= 0
+	self.total.arena_points                        				= 0
+	self.total.nb_badges_of_justice									= 0
+	self.total.nb_wg_marks												= 0
+	self.total.nb_ab_marks			         						= 0
+	self.total.nb_av_marks												= 0
+	self.total.nb_eots_marks											= 0
 
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.account.data) do
@@ -752,17 +777,35 @@ function AllPlayed:ComputeTotalHonor()
 
             if not self.total_realm[faction] then self.total_realm[faction] = {} end
             if not self.total_realm[faction][realm] then self.total_realm[faction][realm] = {} end
+
             self.total_realm[faction][realm].honor_kills = 0
             self.total_realm[faction][realm].honor_points = 0
             self.total_realm[faction][realm].arena_points = 0
+            self.total_realm[faction][realm].nb_badges_of_justice = 0
+            self.total_realm[faction][realm].nb_wg_marks = 0
+            self.total_realm[faction][realm].nb_ab_marks = 0
+            self.total_realm[faction][realm].nb_av_marks = 0
+            self.total_realm[faction][realm].nb_eots_marks = 0
+
             for pc, pc_table in pairs(realm_table) do
                 if not self:GetOption('is_ignored', realm, pc) then
-						self.total_faction[faction].honor_kills         = self.total_faction[faction].honor_kills       + (pc_table.honor_kills or 0)
-						self.total_faction[faction].honor_points        = self.total_faction[faction].honor_points      + (pc_table.honor_points or 0)
-						self.total_faction[faction].arena_points        = self.total_faction[faction].arena_points      + (pc_table.arena_points or 0)
-						self.total_realm[faction][realm].honor_kills    = self.total_realm[faction][realm].honor_kills  + (pc_table.honor_kills or 0)
-						self.total_realm[faction][realm].honor_points   = self.total_realm[faction][realm].honor_points + (pc_table.honor_points or 0)
-						self.total_realm[faction][realm].arena_points   = self.total_realm[faction][realm].arena_points + (pc_table.arena_points or 0)
+						self.total_faction[faction].honor_kills         	= self.total_faction[faction].honor_kills       	+ (pc_table.honor_kills or 0)
+						self.total_faction[faction].honor_points        	= self.total_faction[faction].honor_points      	+ (pc_table.honor_points or 0)
+						self.total_faction[faction].arena_points        	= self.total_faction[faction].arena_points      	+ (pc_table.arena_points or 0)
+						self.total_faction[faction].nb_badges_of_justice	= self.total_faction[faction].nb_badges_of_justice	+ (pc_table.nb_badges_of_justice or 0)
+						self.total_faction[faction].nb_wg_marks        		= self.total_faction[faction].nb_wg_marks      		+ (pc_table.nb_wg_marks or 0)
+						self.total_faction[faction].nb_ab_marks        		= self.total_faction[faction].nb_ab_marks      		+ (pc_table.nb_ab_marks or 0)
+						self.total_faction[faction].nb_av_marks        		= self.total_faction[faction].nb_av_marks       	+ (pc_table.nb_av_marks or 0)
+						self.total_faction[faction].nb_eots_marks        	= self.total_faction[faction].nb_eots_marks      	+ (pc_table.nb_eots_marks or 0)
+
+						self.total_realm[faction][realm].honor_kills    		= self.total_realm[faction][realm].honor_kills  			+ (pc_table.honor_kills or 0)
+						self.total_realm[faction][realm].honor_points   		= self.total_realm[faction][realm].honor_points 			+ (pc_table.honor_points or 0)
+						self.total_realm[faction][realm].arena_points   		= self.total_realm[faction][realm].arena_points 			+ (pc_table.arena_points or 0)
+						self.total_realm[faction][realm].nb_badges_of_justice	= self.total_realm[faction][realm].nb_badges_of_justice	+ (pc_table.nb_badges_of_justice or 0)
+						self.total_realm[faction][realm].nb_wg_marks        	= self.total_realm[faction][realm].nb_wg_marks      		+ (pc_table.nb_wg_marks or 0)
+						self.total_realm[faction][realm].nb_ab_marks        	= self.total_realm[faction][realm].nb_ab_marks      		+ (pc_table.nb_ab_marks or 0)
+						self.total_realm[faction][realm].nb_av_marks        	= self.total_realm[faction][realm].nb_av_marks       		+ (pc_table.nb_av_marks or 0)
+						self.total_realm[faction][realm].nb_eots_marks        = self.total_realm[faction][realm].nb_eots_marks      	+ (pc_table.nb_eots_marks or 0)
                 end
             end
         end
@@ -781,17 +824,42 @@ function AllPlayed:ComputeTotalHonor()
             self.total.arena_points
                 =   self.total_faction[L["Horde"]].arena_points
                   + self.total_faction[L["Alliance"]].arena_points
+            self.total.nb_badges_of_justice
+                =   self.total_faction[L["Horde"]].nb_badges_of_justice
+                  + self.total_faction[L["Alliance"]].nb_badges_of_justice
+            self.total.nb_wg_marks
+                =   self.total_faction[L["Horde"]].nb_wg_marks
+                  + self.total_faction[L["Alliance"]].nb_wg_marks
+            self.total.nb_ab_marks
+                =   self.total_faction[L["Horde"]].nb_ab_marks
+                  + self.total_faction[L["Alliance"]].nb_ab_marks
+            self.total.nb_av_marks
+                =   self.total_faction[L["Horde"]].nb_av_marks
+                  + self.total_faction[L["Alliance"]].nb_av_marks
+            self.total.nb_eots_marks
+                =   self.total_faction[L["Horde"]].nb_eots_marks
+                  + self.total_faction[L["Alliance"]].nb_eots_marks
         else
             -- Only the current faction count
-            self.total.honor_kills 	= self.total_faction[self.faction].honor_kills
-            self.total.honor_points = self.total_faction[self.faction].honor_points
-            self.total.arena_points = self.total_faction[self.faction].arena_points
+            self.total.honor_kills 				= self.total_faction[self.faction].honor_kills
+            self.total.honor_points 			= self.total_faction[self.faction].honor_points
+            self.total.arena_points 			= self.total_faction[self.faction].arena_points
+            self.total.nb_badges_of_justice	= self.total_faction[self.faction].nb_badges_of_justice
+            self.total.nb_wg_marks 				= self.total_faction[self.faction].nb_wg_marks
+            self.total.nb_ab_marks 				= self.total_faction[self.faction].nb_ab_marks
+            self.total.nb_av_marks 				= self.total_faction[self.faction].nb_av_marks
+            self.total.nb_eots_marks 			= self.total_faction[self.faction].nb_eots_marks
         end
     else
         -- Only the current realm count (all_factions is ignore)
-        self.total.honor_kills 	= self.total_realm[self.faction][self.realm].honor_kills
-        self.total.honor_points  = self.total_realm[self.faction][self.realm].honor_points
-        self.total.arena_points  = self.total_realm[self.faction][self.realm].arena_points
+        self.total.honor_kills 				= self.total_realm[self.faction][self.realm].honor_kills
+        self.total.honor_points  			= self.total_realm[self.faction][self.realm].honor_points
+        self.total.arena_points  			= self.total_realm[self.faction][self.realm].arena_points
+        self.total.nb_badges_of_justice	= self.total_realm[self.faction][self.realm].nb_badges_of_justice
+        self.total.nb_wg_marks  				= self.total_realm[self.faction][self.realm].nb_wg_marks
+        self.total.nb_ab_marks  				= self.total_realm[self.faction][self.realm].nb_ab_marks
+        self.total.nb_av_marks  				= self.total_realm[self.faction][self.realm].nb_av_marks
+        self.total.nb_eots_marks  			= self.total_realm[self.faction][self.realm].nb_eots_marks
     end
 end
 
@@ -800,26 +868,38 @@ function AllPlayed:FillTablet()
     --self:Debug("AllPlayed:FillTablet()")
     --self:Debug("=>self.total.time_played: ", self.total.time_played)
 
-    -- Update the sort tables
+	-- Update the sort tables
 	self:BuildSortTables()
 
 --    local estimated_rested_xp 	= 0
-    local first_category 		= true
-    local nb_columns = 1
+	local first_category 		= true
+	local nb_columns = 1
 
-    -- Is the Location column needed?
-    if self:GetOption('show_location') ~= "none" then
-        nb_columns = nb_columns + 1
-    end
+	-- Is the Location column needed?
+	if self:GetOption('show_location') ~= "none" then
+	  nb_columns = nb_columns + 1
+	end
 
-    -- Is the gold/rested XP column needed?
-    if self:GetOption('show_coins')
-       	or self:GetOption('show_xp_total')
-       	or self:GetOption('show_rested_xp')
-       	or self:GetOption('show_rested_xp_countdown')
-       	or self:GetOption('percent_rest') ~= "0" then
-        nb_columns = nb_columns + 1
-    end
+	-- Do we have a PvP column?
+	local need_pvp = self:GetOption('show_arena_points') or
+						self:GetOption('show_honor_points') or
+						self:GetOption('show_honor_kills') or
+						self:GetOption('show_badges_of_justice') or
+						self:GetOption('show_wg_marks') or
+						self:GetOption('show_ab_marks') or
+						self:GetOption('show_av_marks') or
+						self:GetOption('show_eots_mark')
+
+	if need_pvp then nb_columns = nb_columns + 1 end
+
+	-- Is the gold/rested XP column needed?
+	if self:GetOption('show_coins')
+		or self:GetOption('show_xp_total')
+		or self:GetOption('show_rested_xp')
+		or self:GetOption('show_rested_xp_countdown')
+		or self:GetOption('percent_rest') ~= "0" then
+	  nb_columns = nb_columns + 1
+	end
 
     -- Set the title for the table (just when using FuBar
     tablet:SetTitle(C:White(L["All Played Breakdown"]))
@@ -832,7 +912,8 @@ function AllPlayed:FillTablet()
 		'wrap', true,
 		'child_size',  self:GetOption('font_size'),
 		'child_size2', self:GetOption('font_size'),
-		'child_size3', self:GetOption('font_size')
+		'child_size3', self:GetOption('font_size'),
+		'child_size4', self:GetOption('font_size')
 
 	)
 
@@ -892,89 +973,114 @@ function AllPlayed:FillTablet()
 
                     for _, pc in ipairs(self.sort_realm_pc[self:GetOption('display_sort_type')][faction][realm]) do
                         if not self:GetOption('is_ignored', realm, pc) then
+                        	local pc_data = self.db.account.data[faction][realm][pc]
+
+                        	local col_text = {}
+                        	local col_no = 1
+
                             -- Seconds played are still going up for the current PC
                             local seconds_played = self:EstimateTimePlayed(
                                                         pc,
                                                         realm,
-                                                        self.db.account.data[faction][realm][pc].seconds_played,
-                                                        self.db.account.data[faction][realm][pc].seconds_played_last_update
+                                                        pc_data.seconds_played,
+                                                        pc_data.seconds_played_last_update
                                                    )
 
-                            local text_pc = FormatCharacterName( pc,
-                                                                 self.db.account.data[faction][realm][pc].level,
-                                                                 self.db.account.data[faction][realm][pc].xp,
-                                                                 seconds_played,
-                                                                 self.db.account.data[faction][realm][pc].class,
-                                                                 self.db.account.data[faction][realm][pc].class_loc,
-                                                                 faction
-                                            )
+                           col_text[col_no] = FormatCharacterName(
+																	pc,
+																	pc_data.level,
+																	pc_data.xp,
+																	seconds_played,
+																	pc_data.class,
+																	pc_data.class_loc,
+																	faction
+                           )
+                           col_no = col_no + 1
 
-							local text_location = ""
-							if self:GetOption('show_location') ~= "none" then
-								 if self:GetOption('show_location') == "loc"
-                                    or
-                                    self.db.account.data[faction][realm][pc].zone_text == L["Unknown"]
-                                    or
-                                    (self:GetOption('show_location') == "loc/sub" and
-                                     self.db.account.data[faction][realm][pc].subzone_text == "")
-                                 then
-								 	text_location = FactionColour(
-								 						faction,
-								 						self.db.account.data[faction][realm][pc].zone_text
-								 					)
-								 elseif self:GetOption('show_location') == "sub" then
-								 	text_location = FactionColour(
-								 						faction,
-								 						self.db.account.data[faction][realm][pc].subzone_text
-								 					)
-								 else
-								 	text_location = FactionColour(
-								 						faction,
-								 						self.db.account.data[faction][realm][pc].zone_text
-								 						.. '/' .. self.db.account.data[faction][realm][pc].subzone_text
-								 					)
-								 end
-							end
+									--local text_location = ""
+									if self:GetOption('show_location') ~= "none" then
+										 if self:GetOption('show_location') == "loc"
+														or
+														pc_data.zone_text == L["Unknown"]
+														or
+														(self:GetOption('show_location') == "loc/sub" and
+														 pc_data.subzone_text == "")
+													then
+											col_text[col_no] = FactionColour(
+																faction,
+																pc_data.zone_text
+															)
+										 elseif self:GetOption('show_location') == "sub" then
+											col_text[col_no] = FactionColour(
+																faction,
+																pc_data.subzone_text
+															)
+										 else
+											col_text[col_no] = FactionColour(
+																faction,
+																pc_data.zone_text
+																.. '/' .. pc_data.subzone_text
+															)
+										 end
+										 col_no = col_no + 1
+									end
 
+									--local text_pvp = ""
+									if need_pvp then
+										col_text[col_no] = FormatHonor(
+												faction,
+												pc_data.honor_kills,
+												pc_data.honor_points,
+												pc_data.arena_points,
+												pc_data.nb_badges_of_justice,
+												pc_data.nb_ab_marks,
+												pc_data.nb_av_marks,
+												pc_data.nb_wg_marks,
+												pc_data.nb_eots_marks
+										)
+										col_no = col_no + 1
+									end
 
-                            local text_coin = ""
+                            --local text_coin = ""
                             if self:GetOption('show_coins') then
-                            	text_coin = FormatMoney(self.db.account.data[faction][realm][pc].coin)
+                            	col_text[col_no] = FormatMoney(pc_data.coin)
                             end
 
-                            if self.db.account.data[faction][realm][pc].level < self.max_pc_level and
-                               (self.db.account.data[faction][realm][pc].level > 1 or
-                                self.db.account.data[faction][realm][pc].xp > 0)
+                            if pc_data.level < self.max_pc_level and
+                               (pc_data.level > 1 or
+                                pc_data.xp > 0)
                             then
                                 -- How must rested XP do we have?
                                 local estimated_rested_xp = self:EstimateRestedXP(
                                                             pc,
                                                             realm,
-                                                            self.db.account.data[faction][realm][pc].level,
-                                                            self.db.account.data[faction][realm][pc].rested_xp,
-                                                            self.db.account.data[faction][realm][pc].max_rested_xp,
-                                                            self.db.account.data[faction][realm][pc].last_update,
-                                                            self.db.account.data[faction][realm][pc].is_resting
+                                                            pc_data.level,
+                                                            pc_data.rested_xp,
+                                                            pc_data.max_rested_xp,
+                                                            pc_data.last_update,
+                                                            pc_data.is_resting
                                                       )
 
                                 -- Do we need to show the rested XP for the character?
                                 if self:GetOption('show_rested_xp') then
-                                	if text_coin ~= "" then text_coin = text_coin .. FactionColour( faction, " : " ) end
-                                    text_coin = text_coin .. string.format( FactionColour( faction, L["%d rested XP"] ),
+                                	if col_text[col_no] ~= "" then
+                                		col_text[col_no] = col_text[col_no] .. FactionColour( faction, " : " )
+                                	end
+                                    col_text[col_no] = col_text[col_no] .. string.format( FactionColour( faction, L["%d rested XP"] ),
                                                                             estimated_rested_xp
                                                              )
                                 end
 
-                                local percent_for_colour = estimated_rested_xp/self.db.account.data[faction][realm][pc].max_rested_xp
+                                local percent_for_colour = estimated_rested_xp / pc_data.max_rested_xp
                                 local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
 
                                 -- The time to rest is way more if not in an inn or a major city
-                                if not self.db.account.data[faction][realm][pc].is_resting then
+                                if not pc_data.is_resting then
                                     countdown_seconds = countdown_seconds * 4
                                 end
 
                                 local text_countdown = ""
-                                if percent_for_colour < 1 and ( self.db.account.data[faction][realm][pc].is_resting or
+                                if percent_for_colour < 1 and ( pc_data.is_resting or
                                                                 pc ~= self.pc or realm ~= self.realm
                                                               )
                                 then
@@ -983,27 +1089,46 @@ function AllPlayed:FillTablet()
 
                                 -- Do we show the percent XP rested and/or the countdown until 100% rested?
                                 if self:GetOption('percent_rest') ~= "0" and self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
-                                    text_coin = text_coin .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
+                                    col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
                                                                             self:GetOption('percent_rest') * percent_for_colour,
                                                                             L["rested"],
                                                                             text_countdown
                                                              )
                                 elseif self:GetOption('percent_rest') ~= "0" then
-                                    text_coin = text_coin .. string.format( PercentColour(percent_for_colour, " (%d%% %s)"),
+                                    col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s)"),
                                                                             self:GetOption('percent_rest') * percent_for_colour,
                                                                             L["rested"]
                                                              )
                                 elseif self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
-                                    text_coin = text_coin .. PercentColour( percent_for_colour, " (-" .. text_countdown .. ")" )
+                                    col_text[col_no] = col_text[col_no] .. PercentColour( percent_for_colour, " (-" .. text_countdown .. ")" )
                                 end
                             end
 
-                            if text_location ~= "" and text_coin ~= "" then
+									if nb_columns == 2 then
+										cat:AddLine( 'text',  col_text[1],
+													 	 'text2', col_text[2]
+										)
+									elseif nb_columns == 3 then
+										cat:AddLine( 'text',  col_text[1],
+													 	 'text2', col_text[2],
+													 	 'text3', col_text[3]
+										)
+									else
+										cat:AddLine( 'text',  col_text[1],
+													 	 'text2', col_text[2],
+													 	 'text3', col_text[3],
+													 	 'text4', col_text[4]
+										)
+									end
+
+--[[
+                            if text_location ~= "" and text_pvp ~= "" and text_coin ~= "" then
                             	cat:AddLine( 'text',  text_pc,
                             				 'text2', text_location,
+                            				 'text3', text_pvp,
                             				 'text3', text_coin
                         		)
-                        	elseif text_location ~= "" and text_coin == "" then
+                        	 elseif text_location ~= "" and text_coin == "" then
                             	cat:AddLine( 'text',  text_pc,
                             				 'text2', text_location
                                 )
@@ -1016,6 +1141,7 @@ function AllPlayed:FillTablet()
 --                            	             'text2', ''
                             	)
                             end
+]]--
                         end
                     end
                 end
@@ -1038,6 +1164,21 @@ function AllPlayed:FillTablet()
 		cat:AddLine(
 			'text',  C:Orange( L["Total Cash Value: "] ),
 			'text2', FormatMoney(self.total.coin)
+		)
+    end
+
+    if self:GetOption('show_pvp_totals') and need_pvp then
+		cat:AddLine(
+			'text',  C:Orange( L["Total PvP: "] ),
+			'text2', FormatHonor(self.faction,
+										self.total.honor_kills,
+										self.total.honor_points,
+										self.total.arena_points,
+										self.total.nb_badges_of_justice,
+										self.total.nb_ab_marks,
+										self.total.nb_av_marks,
+										self.total.nb_wg_marks,
+										self.total.nb_eots_marks)
 		)
     end
 
@@ -1305,33 +1446,6 @@ function AllPlayed:SetOption( option, value, ... )
 	self:Update()
 end
 
---[[
--- Vefiry if a character should be ignore when displayed and counter
-function AllPlayed:GetIsCharIgnored( realm, name )
-    --self:Debug("AllPlayed:GetIsCharIgnored: %s, %s, %s",
-    --			realm,
-    --			name,
-    --			self.db.profile.options.is_ignored[realm][name]
-    --)
-
-	return self.db.profile.options.is_ignored[realm][name]
-end
-
--- Set the value the is_ignored value for a particular character
-function AllPlayed:SetIsCharIgnored( realm, name, value )
-    --self:Debug("AllPlayed:GetIsCharIgnored: %s, %s, %s",
-    --			realm,
-    --			name,
-    --			self.db.profile.options.is_ignored[realm][name]
-    --)
-
-	self.db.profile.options.is_ignored[realm][name] = value
-
-    -- Refesh
-	self:Update()
-end
-]]--
-
 --[[ ================================================================= ]]--
 --[[                         Hook function                             ]]--
 --[[ ================================================================= ]]--
@@ -1470,43 +1584,68 @@ end
 ]]--
 local honor_strings = {
 	icons = {
-		hk 					= '%d|TInterface\\LootFrame\\LootPanel-Icon:0,0,0,0|t',
-		['hp-Alliance']	= '%d|TInterface\\LootFrame\\UI-PVP-Alliance:0,0,0,0|t',
-		['hp-Horde']		= '%d|TInterface\\LootFrame\\UI-PVP-Horde:0,0,0,0|t',
-		ap 					= '%d|TInterface\\Icons\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:0:0|t',
-		bj 					= '%d|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,0|t',
-		ab 					= '%d|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,0|t',
-		av 					= '%d|TInterface\\Icons\\INV_Jewelry_Necklace_21:0,0,0,0|t',
-		wg 					= '%d|TInterface\\Icons\\INV_Misc_Rune_07:0,0,0,0|t',
-		es 					= '%d|TInterface\\Icons\\Spell_Nature_EyeOfTheStorm:0,0,0,0|t'
+		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0,0,0,0|t',
+		['hp-Alliance']	= '%s|TInterface\\TargetingFrame\\UI-PVP-Alliance:0,0,0,0|t',
+		['hp-Horde']		= '%s|TInterface\\TargetingFrame\\UI-PVP-Horde:0,0,0,0|t',
+		ap 					= '%s|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:0:0|t',
+		bj 					= '%s|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,-1|t',
+		ab 					= '%s|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,1|t',
+		av 					= '%s|TInterface\\Icons\\INV_Jewelry_Necklace_21:0,0,0,0|t',
+		wg 					= '%s|TInterface\\Icons\\INV_Misc_Rune_07:0,0,0,0|t',
+		es 					= '%s|TInterface\\Icons\\Spell_Nature_EyeOfTheStorm:0,0,0,0|t'
 	},
 	no_icons = {
-		hk = '%d HK',
-		hp = '%d HP',
-		ap = '%d AP',
-		bj = '%d BoJ',
-		ab = '%d AB',
-		av = '%d AV',
-		wg = '%d WG',
-		es = '%d EotS'
+		hk 					= '%s HK',
+		['hp-Alliance']	= '%s HP',
+		['hp-Horde'] 		= '%s HP',
+		ap 					= '%s AP',
+		bj 					= '%s BoJ',
+		ab 					= '%s AB',
+		av 					= '%s AV',
+		wg 					= '%s WG',
+		es 					= '%s EotS'
 	}
 }
 
 -- Function that produce the honour string based on the display options
-function FormatHonor( honor_kills,	pvp_points,	arena_points,	badges,
-							 ab_marks, 		av_marks, 	wg_marks, 		eots_marks, faction )
+function FormatHonor( faction,	honor_kills,	pvp_points,	arena_points,	badges,
+							 ab_marks, 	av_marks, 		wg_marks, 	eots_marks  				)
 
-	local string = ""
-
-	if 	 AllPlayed:GetOption('show_honor_kills') 			then
-	elseif AllPlayed:GetOption('show_honor_points') 		then
-	elseif AllPlayed:GetOption('show_arena_points') 		then
-	elseif AllPlayed:GetOption('show_badges_of_justice')	then
-	elseif AllPlayed:GetOption('show_ab_marks') 				then
-	elseif AllPlayed:GetOption('show_av_marks') 				then
-	elseif AllPlayed:GetOption('show_wg_marks') 				then
-	elseif AllPlayed:GetOption('show_eots_mark')				then
+	local honor_string, fmt = ""
+	if AllPlayed:GetOption('use_icons') then
+		fmt = honor_strings.icons
+	else
+		fmt = honor_strings.no_icons
 	end
+
+
+	if AllPlayed:GetOption('show_honor_kills') then
+		honor_string = honor_string .. format(fmt.hk, C:White(tostring(honor_kills))) .. ' '
+	end
+	if AllPlayed:GetOption('show_honor_points') 		then
+		honor_string = honor_string .. format(fmt['hp-' .. faction], C:White(tostring(pvp_points))) .. ' '
+	end
+	if AllPlayed:GetOption('show_arena_points') 		then
+		honor_string = honor_string .. format(fmt.ap, C:White(tostring(arena_points))) .. ' '
+	end
+	if AllPlayed:GetOption('show_badges_of_justice')	then
+		honor_string = honor_string .. format(fmt.bj, C:White(tostring(badges))) .. ' '
+	end
+	if AllPlayed:GetOption('show_ab_marks') 				then
+		honor_string = honor_string .. format(fmt.ab, C:White(tostring(ab_marks))) .. ' '
+	end
+	if AllPlayed:GetOption('show_av_marks') 				then
+		honor_string = honor_string .. format(fmt.av, C:White(tostring(av_marks))) .. ' '
+	end
+	if AllPlayed:GetOption('show_wg_marks') 				then
+		honor_string = honor_string .. format(fmt.wg, C:White(tostring(wg_marks))) .. ' '
+	end
+	if AllPlayed:GetOption('show_eots_mark')				then
+		honor_string = honor_string .. format(fmt.es, C:White(tostring(eots_marks))) .. ' '
+	end
+
+	-- Return the string minus the last space
+	return (string.gsub(honor_string, "^%s*(.-)%s*$", "%1"))
 
 end
 
