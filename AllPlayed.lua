@@ -1538,11 +1538,6 @@ end
 local gold_icon 	= "|TInterface\\AddOns\\AllPlayed\\Gold:0:0:0:0|t"
 local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:0:0|t"
 local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:0:0|t"
---[[
-local gold_icon 	= "|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:0:0|t"
-local silver_icon = "|TInterface\\PVPFrame\\PVP-Currency-Alliance:0:0:0:0|t"
-local copper_icon = "|TInterface\\PVPFrame\\PVP-Currency-Horde:0:0:0:0|t"
-]]--
 function FormatMoney(amount)
    if not AllPlayed:GetOption('use_icons') then return A:FormatMoneyFull( amount, true, false ) end
 
@@ -1571,22 +1566,12 @@ function FormatMoney(amount)
 	return C:White(string)
 
 end
---[[
-			show_arena_points				= false,
-			show_honor_points				= false,
-			show_honor_kills				= false,
-			show_badges_of_justice 		= false,
-			show_wg_marks 					= false,
-			show_ab_marks 					= false,
-			show_av_marks 					= false,
-			show_eots_mark 				= false,
-			show_pvp_totals				= false,
-]]--
+
 local honor_strings = {
 	icons = {
 		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0,0,0,0|t',
-		['hp-Alliance']	= '%s|TInterface\\TargetingFrame\\UI-PVP-Alliance:0,0,0,0|t',
-		['hp-Horde']		= '%s|TInterface\\TargetingFrame\\UI-PVP-Horde:0,0,0,0|t',
+		['hp-Alliance']	= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Alliance:0,0,0,0|t',
+		['hp-Horde']		= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Horde:0,0,0,0|t',
 		ap 					= '%s|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:0:0|t',
 		bj 					= '%s|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,-1|t',
 		ab 					= '%s|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,1|t',
@@ -1595,15 +1580,15 @@ local honor_strings = {
 		es 					= '%s|TInterface\\Icons\\Spell_Nature_EyeOfTheStorm:0,0,0,0|t'
 	},
 	no_icons = {
-		hk 					= '%s HK',
-		['hp-Alliance']	= '%s HP',
-		['hp-Horde'] 		= '%s HP',
-		ap 					= '%s AP',
-		bj 					= '%s BoJ',
-		ab 					= '%s AB',
-		av 					= '%s AV',
-		wg 					= '%s WG',
-		es 					= '%s EotS'
+		hk 					= L['%s HK'],
+		['hp-Alliance']	= L['%s HP'],
+		['hp-Horde'] 		= L['%s HP'],
+		ap 					= L['%s AP'],
+		bj 					= L['%s BoJ'],
+		ab 					= L['%s AB'],
+		av 					= L['%s AV'],
+		wg 					= L['%s WG'],
+		es 					= L['%s EotS']
 	}
 }
 
