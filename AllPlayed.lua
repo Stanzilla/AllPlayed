@@ -139,7 +139,7 @@ AllPlayed:RegisterDefaults('profile', {
 			show_rested_xp_countdown   = false,
 			refresh_rate               = 1,
 			show_class_name            = false,
-			colour_class               = true,
+			colorize_class             = true,
 			use_pre_210_shaman_colour	= false,
 			show_location              = "none",
 			show_xp_total              = false,
@@ -996,6 +996,7 @@ function AllPlayed:FillTablet()
 																	faction
                            )
                            col_no = col_no + 1
+                           col_text[col_no] = ''
 
 									--local text_location = ""
 									if self:GetOption('show_location') ~= "none" then
@@ -1023,6 +1024,7 @@ function AllPlayed:FillTablet()
 															)
 										 end
 										 col_no = col_no + 1
+                           	 col_text[col_no] = ''
 									end
 
 									--local text_pvp = ""
@@ -1039,6 +1041,7 @@ function AllPlayed:FillTablet()
 												pc_data.nb_eots_marks
 										)
 										col_no = col_no + 1
+                           	col_text[col_no] = ''
 									end
 
                             --local text_coin = ""
