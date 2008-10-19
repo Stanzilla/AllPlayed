@@ -132,6 +132,7 @@ AllPlayed:RegisterDefaults('profile', {
 			all_factions               = true,
 			all_realms                 = true,
 			show_coins						= true,
+			show_played_time				= true,
 			show_seconds               = true,
 			show_progress              = true,
 			show_rested_xp             = true,
@@ -202,13 +203,21 @@ local command_options = {
 					  set       = function(v) AllPlayed:SetOption('all_realms',v) end,
 					  order     = 2,
 				 },
+				 show_played_time = {
+					  name      = L["Show Played Time"],
+					  desc      = L["Display the played time and the total time played"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('show_played_time') end,
+					  set       = function(v) AllPlayed:SetOption('show_played_time',v) end,
+					  order     = 3,
+				 },
 				 show_seconds = {
 					  name      = L["Show Seconds"],
 					  desc      = L["Display the seconds in the time strings"],
 					  type      = 'toggle',
 					  get       = function() return AllPlayed:GetOption('show_seconds') end,
 					  set       = function(v) AllPlayed:SetOption('show_seconds',v) end,
-					  order     = 3,
+					  order     = 4,
 				 },
 				 show_coins = {
 					  name      = L["Show Gold"],
@@ -216,7 +225,7 @@ local command_options = {
 					  type      = 'toggle',
 					  get       = function() return AllPlayed:GetOption('show_coins') end,
 					  set       = function(v) AllPlayed:SetOption('show_coins',v) end,
-					  order     = 4,
+					  order     = 5,
 				 },
 
 				 show_progress = {
@@ -225,7 +234,7 @@ local command_options = {
 					  type      = 'toggle',
 					  get       = function() return AllPlayed:GetOption('show_progress') end,
 					  set       = function(v) AllPlayed:SetOption('show_progress',v) end,
-					  order     = 5,
+					  order     = 6,
 				 },
 				 show_xp_total = {
 					  name      = L["Show XP total"],
@@ -233,7 +242,7 @@ local command_options = {
 					  type      = 'toggle',
 					  get       = function() return AllPlayed:GetOption('show_xp_total') end,
 					  set       = function(v) AllPlayed:SetOption('show_xp_total',v) end,
-					  order     = 6,
+					  order     = 7,
 				 },
 				 show_location = {
 					  name      = L["Show Location"],
@@ -246,7 +255,7 @@ local command_options = {
 										 ["sub"]       = L["Show subzone"],
 										 ["loc/sub"]   = L["Show zone/subzone"]
 					  },
-					  order     = 7,
+					  order     = 8,
 				 },
 				 rested_xp = {
 					  type = 'group', name = L["Rested XP"], desc = L["Set the rested XP options"], args = {
@@ -865,8 +874,8 @@ end
 
 -- Fill the tablet with the All Played information
 function AllPlayed:FillTablet()
-    --self:Debug("AllPlayed:FillTablet()")
-    --self:Debug("=>self.total.time_played: ", self.total.time_played)
+	--self:Debug("AllPlayed:FillTablet()")
+	--self:Debug("=>self.total.time_played: ", self.total.time_played)
 
 	-- Update the sort tables
 	self:BuildSortTables()
@@ -877,18 +886,18 @@ function AllPlayed:FillTablet()
 
 	-- Is the Location column needed?
 	if self:GetOption('show_location') ~= "none" then
-	  nb_columns = nb_columns + 1
+		nb_columns = nb_columns + 1
 	end
 
 	-- Do we have a PvP column?
-	local need_pvp = self:GetOption('show_arena_points') or
-						self:GetOption('show_honor_points') or
-						self:GetOption('show_honor_kills') or
-						self:GetOption('show_badges_of_justice') or
-						self:GetOption('show_wg_marks') or
-						self:GetOption('show_ab_marks') or
-						self:GetOption('show_av_marks') or
-						self:GetOption('show_eots_mark')
+	local need_pvp =	self:GetOption('show_arena_points') or
+							self:GetOption('show_honor_points') or
+							self:GetOption('show_honor_kills') or
+							self:GetOption('show_badges_of_justice') or
+							self:GetOption('show_wg_marks') or
+							self:GetOption('show_ab_marks') or
+							self:GetOption('show_av_marks') or
+							self:GetOption('show_eots_mark')
 
 	if need_pvp then nb_columns = nb_columns + 1 end
 
@@ -898,11 +907,11 @@ function AllPlayed:FillTablet()
 		or self:GetOption('show_rested_xp')
 		or self:GetOption('show_rested_xp_countdown')
 		or self:GetOption('percent_rest') ~= "0" then
-	  nb_columns = nb_columns + 1
+		nb_columns = nb_columns + 1
 	end
 
-    -- Set the title for the table (just when using FuBar
-    tablet:SetTitle(C:White(L["All Played Breakdown"]))
+	-- Set the title for the table (just when using FuBar
+	tablet:SetTitle(C:White(L["All Played Breakdown"]))
 
 	local cat = tablet:AddCategory(
 		'id', 'Normal Line',
@@ -917,260 +926,262 @@ function AllPlayed:FillTablet()
 
 	)
 
-    -- We group by factions, then by realm, then by PC
-    for _, faction in ipairs (self.sort_faction) do
-        -- We do not print the faction if no option to select it is on
-        -- and if the time played for the faction = 0 since this means
-        -- all PC in the faction are ingored.
-        if ((self:GetOption('all_factions') or self.faction == faction)
-            and self.total.time_played ~= 0
-            and self.sort_faction_realm[self:GetOption('display_sort_type')][faction]
-        ) then
-            for _, realm in ipairs(self.sort_faction_realm[self:GetOption('display_sort_type')][faction]) do
-                -- We do not print the realm if no option to select it is on
-                -- and if the time played for the realm = 0 since this means
-                -- all PC in the realm are ingored.
-                if ((self:GetOption('all_realms') or self.realm == realm)
-                    and self.total_realm[faction][realm].time_played ~= 0
-                ) then
-                    ----self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
+	-- We group by factions, then by realm, then by PC
+	for _, faction in ipairs (self.sort_faction) do
+		-- We do not print the faction if no option to select it is on
+		-- and if the time played for the faction = 0 since this means
+		-- all PC in the faction are ingored.
+		if ((self:GetOption('all_factions') or self.faction == faction)
+			  and self.total.time_played ~= 0
+			  and self.sort_faction_realm[self:GetOption('display_sort_type')][faction]
+		) then
+			for _, realm in ipairs(self.sort_faction_realm[self:GetOption('display_sort_type')][faction]) do
+				-- We do not print the realm if no option to select it is on
+				-- and if the time played for the realm = 0 since this means
+				-- all PC in the realm are ingored.
+				if ( (self:GetOption('all_realms') or self.realm == realm) and
+					  self.total_realm[faction][realm].time_played ~= 0 ) then
+					----self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
 
-                    -- Build the Realm aggregated line
-                    local text_realm = string.format( C:Yellow(L["%s characters "]) .. C:Green("[%s"),
-                                                      realm,
-                                                      self:FormatTime(self.total_realm[faction][realm].time_played)
-                                      )
-                    if self:GetOption('show_coins') then
-                    	text_realm = string.format( "%s " .. C:Green(" : ") .. "%s",
-                    								text_realm,
-                    								FormatMoney(self.total_realm[faction][realm].coin)
-                    				 )
-                    end
-                    if self:GetOption('show_xp_total') then
-                        text_realm = string.format( "%s " .. C:Green(" : %s"),
-                                                    text_realm,
-                                                    FormatXP(self.total_realm[faction][realm].xp)
-                                     )
-                    end
+					-- Build the Realm aggregated line
+					local text_realm = string.format( C:Yellow(L["%s characters "]), realm )
 
-                    text_realm = text_realm .. C:Green("]")
+					local text_realm_optional = ""
+					local first_option = true
 
-                    if first_category then
-                    	first_category = false
-                    else
+					if self:GetOption('show_played_time') then
+						text_realm_optional = self:FormatTime(self.total_realm[faction][realm].time_played)
+						first_option = false
+					end
+
+					if self:GetOption('show_coins') then
+						if first_option then
+							text_realm_optional = FormatMoney(self.total_realm[faction][realm].coin)
+							first_option = false
+						else
+							text_realm_optional = string.format(
+										"%s " .. C:Green(" : ") .. "%s",
+										text_realm_optional,
+										FormatMoney(self.total_realm[faction][realm].coin)
+							)
+						end
+					end
+
+					if self:GetOption('show_xp_total') then
+						if first_option then
+							text_realm_optional = FormatXP(self.total_realm[faction][realm].xp)
+							first_option = false
+						else
+							text_realm_optional = string.format(
+									"%s " .. C:Green(" : %s"),
+									text_realm_optional,
+									FormatXP(self.total_realm[faction][realm].xp)
+							)
+						end
+					end
+
+					if text_realm_optional ~= "" then
+						text_realm = text_realm .. C:Green("[") .. text_realm_optional .. C:Green("]")
+					end
+
+					if first_category then
+						first_category = false
+					else
 						cat:AddLine(
-						   'columns', 1,
+						   'columns', 		1,
 						   'indentation', 0,
-						   'text', " "
+						   'text', 			" "
 						)
-                    end
+					end
 
-                    cat:AddLine(
-                       'columns', 1,
-                       'indentation', 0,
-                       'text', text_realm
-                    )
+					cat:AddLine(
+						'columns', 		1,
+						'indentation', 0,
+						'text', 			text_realm
+					)
 
-                    for _, pc in ipairs(self.sort_realm_pc[self:GetOption('display_sort_type')][faction][realm]) do
-                        if not self:GetOption('is_ignored', realm, pc) then
-                        	local pc_data = self.db.account.data[faction][realm][pc]
+					for _, pc in ipairs(self.sort_realm_pc[self:GetOption('display_sort_type')][faction][realm]) do
+						if not self:GetOption('is_ignored', realm, pc) then
+							local pc_data = self.db.account.data[faction][realm][pc]
 
-                        	local col_text = {}
-                        	local col_no = 1
+							local col_text = {}
+							local col_no = 1
 
-                            -- Seconds played are still going up for the current PC
-                            local seconds_played = self:EstimateTimePlayed(
-                                                        pc,
-                                                        realm,
-                                                        pc_data.seconds_played,
-                                                        pc_data.seconds_played_last_update
-                                                   )
+							-- Seconds played are still going up for the current PC
+							local seconds_played = self:EstimateTimePlayed(
+															  pc,
+															  realm,
+															  pc_data.seconds_played,
+															  pc_data.seconds_played_last_update
+														  )
 
-                           col_text[col_no] = FormatCharacterName(
+							col_text[col_no] = FormatCharacterName(
+															pc,
+															pc_data.level,
+															pc_data.xp,
+															seconds_played,
+															pc_data.class,
+															pc_data.class_loc,
+															faction
+							                   )
+
+							col_no = col_no + 1
+							col_text[col_no] = ''
+
+							--local text_location = ""
+							if self:GetOption('show_location') ~= "none" then
+								if self:GetOption('show_location') == "loc" or
+									pc_data.zone_text == L["Unknown"] or
+									(self:GetOption('show_location') == "loc/sub" and
+									 pc_data.subzone_text == "") then
+
+									col_text[col_no] = FactionColour(
+														faction,
+														pc_data.zone_text
+													)
+								elseif self:GetOption('show_location') == "sub" then
+
+									col_text[col_no] = FactionColour(
+														faction,
+														pc_data.subzone_text
+													)
+								else
+									col_text[col_no] = FactionColour(
+														faction,
+														pc_data.zone_text
+														.. '/' .. pc_data.subzone_text
+													)
+								end
+
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							--local text_pvp = ""
+							if need_pvp then
+								col_text[col_no] = FormatHonor(
+										faction,
+										pc_data.honor_kills,
+										pc_data.honor_points,
+										pc_data.arena_points,
+										pc_data.nb_badges_of_justice,
+										pc_data.nb_ab_marks,
+										pc_data.nb_av_marks,
+										pc_data.nb_wg_marks,
+										pc_data.nb_eots_marks
+								)
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							--local text_coin = ""
+							if self:GetOption('show_coins') then
+								col_text[col_no] = FormatMoney(pc_data.coin)
+							end
+
+							if (pc_data.level < self.max_pc_level) and
+							   (pc_data.level > 1 or pc_data.xp > 0)
+							then
+								-- How must rested XP do we have?
+								local estimated_rested_xp = self:EstimateRestedXP(
 																	pc,
+																	realm,
 																	pc_data.level,
-																	pc_data.xp,
-																	seconds_played,
-																	pc_data.class,
-																	pc_data.class_loc,
-																	faction
-                           )
-                           col_no = col_no + 1
-                           col_text[col_no] = ''
-
-									--local text_location = ""
-									if self:GetOption('show_location') ~= "none" then
-										 if self:GetOption('show_location') == "loc"
-														or
-														pc_data.zone_text == L["Unknown"]
-														or
-														(self:GetOption('show_location') == "loc/sub" and
-														 pc_data.subzone_text == "")
-													then
-											col_text[col_no] = FactionColour(
-																faction,
-																pc_data.zone_text
+																	pc_data.rested_xp,
+																	pc_data.max_rested_xp,
+																	pc_data.last_update,
+																	pc_data.is_resting
 															)
-										 elseif self:GetOption('show_location') == "sub" then
-											col_text[col_no] = FactionColour(
-																faction,
-																pc_data.subzone_text
-															)
-										 else
-											col_text[col_no] = FactionColour(
-																faction,
-																pc_data.zone_text
-																.. '/' .. pc_data.subzone_text
-															)
-										 end
-										 col_no = col_no + 1
-                           	 col_text[col_no] = ''
+
+								-- Do we need to show the rested XP for the character?
+								if self:GetOption('show_rested_xp') then
+									if col_text[col_no] ~= "" then
+										col_text[col_no] = col_text[col_no] .. FactionColour( faction, " : " )
 									end
+									col_text[col_no] = col_text[col_no] .. string.format(
+																	FactionColour( faction, L["%d rested XP"] ),
+																	estimated_rested_xp
+															 )
+								end
 
-									--local text_pvp = ""
-									if need_pvp then
-										col_text[col_no] = FormatHonor(
-												faction,
-												pc_data.honor_kills,
-												pc_data.honor_points,
-												pc_data.arena_points,
-												pc_data.nb_badges_of_justice,
-												pc_data.nb_ab_marks,
-												pc_data.nb_av_marks,
-												pc_data.nb_wg_marks,
-												pc_data.nb_eots_marks
-										)
-										col_no = col_no + 1
-                           	col_text[col_no] = ''
-									end
+								local percent_for_colour = estimated_rested_xp / pc_data.max_rested_xp
+								local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
 
-                            --local text_coin = ""
-                            if self:GetOption('show_coins') then
-                            	col_text[col_no] = FormatMoney(pc_data.coin)
-                            end
+								-- The time to rest is way more if not in an inn or a major city
+								if not pc_data.is_resting then
+									countdown_seconds = countdown_seconds * 4
+								end
 
-                            if pc_data.level < self.max_pc_level and
-                               (pc_data.level > 1 or
-                                pc_data.xp > 0)
-                            then
-                                -- How must rested XP do we have?
-                                local estimated_rested_xp = self:EstimateRestedXP(
-                                                            pc,
-                                                            realm,
-                                                            pc_data.level,
-                                                            pc_data.rested_xp,
-                                                            pc_data.max_rested_xp,
-                                                            pc_data.last_update,
-                                                            pc_data.is_resting
-                                                      )
+								local text_countdown = ""
+								if percent_for_colour < 1 and ( pc_data.is_resting or
+																		 pc ~= self.pc or realm ~= self.realm
+																	  )
+								then
+									text_countdown = self:FormatTime(countdown_seconds)
+								end
 
-                                -- Do we need to show the rested XP for the character?
-                                if self:GetOption('show_rested_xp') then
-                                	if col_text[col_no] ~= "" then
-                                		col_text[col_no] = col_text[col_no] .. FactionColour( faction, " : " )
-                                	end
-                                    col_text[col_no] = col_text[col_no] .. string.format( FactionColour( faction, L["%d rested XP"] ),
-                                                                            estimated_rested_xp
-                                                             )
-                                end
+								-- Do we show the percent XP rested and/or the countdown until 100% rested?
+								if self:GetOption('percent_rest') ~= "0" and self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
+									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
+																						 self:GetOption('percent_rest') * percent_for_colour,
+																						 L["rested"],
+																						 text_countdown
+																	 )
+								elseif self:GetOption('percent_rest') ~= "0" then
+									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s)"),
+																						 self:GetOption('percent_rest') * percent_for_colour,
+																						 L["rested"]
+																	 )
+								elseif self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
+									col_text[col_no] = col_text[col_no] .. PercentColour( percent_for_colour, " (-" .. text_countdown .. ")" )
+								end
+							end
 
-                                local percent_for_colour = estimated_rested_xp / pc_data.max_rested_xp
-                                local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
+							if nb_columns == 2 then
+								cat:AddLine( 'text',  col_text[1],
+												 'text2', col_text[2]
+								)
+							elseif nb_columns == 3 then
+								cat:AddLine( 'text',  col_text[1],
+												 'text2', col_text[2],
+												 'text3', col_text[3]
+								)
+							else
+								cat:AddLine( 'text',  col_text[1],
+												 'text2', col_text[2],
+												 'text3', col_text[3],
+												 'text4', col_text[4]
+								)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
 
-                                -- The time to rest is way more if not in an inn or a major city
-                                if not pc_data.is_resting then
-                                    countdown_seconds = countdown_seconds * 4
-                                end
-
-                                local text_countdown = ""
-                                if percent_for_colour < 1 and ( pc_data.is_resting or
-                                                                pc ~= self.pc or realm ~= self.realm
-                                                              )
-                                then
-                                    text_countdown = self:FormatTime(countdown_seconds)
-                                end
-
-                                -- Do we show the percent XP rested and/or the countdown until 100% rested?
-                                if self:GetOption('percent_rest') ~= "0" and self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
-                                    col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
-                                                                            self:GetOption('percent_rest') * percent_for_colour,
-                                                                            L["rested"],
-                                                                            text_countdown
-                                                             )
-                                elseif self:GetOption('percent_rest') ~= "0" then
-                                    col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s)"),
-                                                                            self:GetOption('percent_rest') * percent_for_colour,
-                                                                            L["rested"]
-                                                             )
-                                elseif self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
-                                    col_text[col_no] = col_text[col_no] .. PercentColour( percent_for_colour, " (-" .. text_countdown .. ")" )
-                                end
-                            end
-
-									if nb_columns == 2 then
-										cat:AddLine( 'text',  col_text[1],
-													 	 'text2', col_text[2]
-										)
-									elseif nb_columns == 3 then
-										cat:AddLine( 'text',  col_text[1],
-													 	 'text2', col_text[2],
-													 	 'text3', col_text[3]
-										)
-									else
-										cat:AddLine( 'text',  col_text[1],
-													 	 'text2', col_text[2],
-													 	 'text3', col_text[3],
-													 	 'text4', col_text[4]
-										)
-									end
-
---[[
-                            if text_location ~= "" and text_pvp ~= "" and text_coin ~= "" then
-                            	cat:AddLine( 'text',  text_pc,
-                            				 'text2', text_location,
-                            				 'text3', text_pvp,
-                            				 'text3', text_coin
-                        		)
-                        	 elseif text_location ~= "" and text_coin == "" then
-                            	cat:AddLine( 'text',  text_pc,
-                            				 'text2', text_location
-                                )
-                            elseif text_location == "" and text_coin ~= "" then
-                            	cat:AddLine( 'text',  text_pc,
-                            	             'text2', text_coin
-                            	)
-                            else
-                            	cat:AddLine( 'text',  text_pc
---                            	             'text2', ''
-                            	)
-                            end
-]]--
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    -- Print the totals
-    local cat = tablet:AddCategory(
-        'columns',     2,
+	-- Print the totals
+	local cat = tablet:AddCategory(
+		'columns',     2,
 		'child_size',  self:GetOption('font_size'),
 		'child_size2', self:GetOption('font_size')
-    )
-    cat:AddLine(
-        'text',  C:Orange( L["Total Time Played: "] ),
-        'text2', C:Yellow( self:FormatTime(self.total.time_played) )
-    )
+	)
 
-    if self:GetOption('show_coins') then
+	if self:GetOption('show_played_time') then
+		cat:AddLine(
+		  'text',  C:Orange( L["Total Time Played: "] ),
+		  'text2', C:Yellow( self:FormatTime(self.total.time_played) )
+		)
+	end
+
+	if self:GetOption('show_coins') then
 		cat:AddLine(
 			'text',  C:Orange( L["Total Cash Value: "] ),
 			'text2', FormatMoney(self.total.coin)
 		)
-    end
+	end
 
-    if self:GetOption('show_pvp_totals') and need_pvp then
+	if self:GetOption('show_pvp_totals') and need_pvp then
 		cat:AddLine(
 			'text',  C:Orange( L["Total PvP: "] ),
 			'text2', FormatHonor(self.faction,
@@ -1183,17 +1194,17 @@ function AllPlayed:FillTablet()
 										self.total.nb_wg_marks,
 										self.total.nb_eots_marks)
 		)
-    end
+	end
 
-    if self:GetOption('show_xp_total') then
-       cat:AddLine(
-           'text',  C:Orange( L["Total XP: "] ),
-           'text2', C:Yellow( FormatXP(self.total.xp) )
-       )
-    end
+	if self:GetOption('show_xp_total') then
+		cat:AddLine(
+			'text',  C:Orange( L["Total XP: "] ),
+			'text2', C:Yellow( FormatXP(self.total.xp) )
+		)
+	end
 
-    --tablet:SetHint("Click to do something")
-    -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
+	--tablet:SetHint("Click to do something")
+	-- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
 end
 
 
@@ -1666,7 +1677,7 @@ end
 -- This function format and colorize the Character name and level
 -- based on the options selected by the user
 function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, faction )
-	AllPlayed:Debug("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
+	--AllPlayed:Debug("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
 
 	local result_string     = ""
 	local level_string      = ""
@@ -1694,11 +1705,17 @@ function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, f
 		level_string = string.format( "%s %s", class_display, level_string )
 	end
 
-	result_string =  string.format( ClassColour( class, faction, "%s (%s)" ) .. FactionColour( faction, " : %s" ),
+	result_string = string.format( ClassColour( class, faction, "%s (%s)" ),
 											  pc,
-											  level_string,
-											  AllPlayed:FormatTime(seconds_played)
-					  )
+											  level_string
+					  	 )
+
+	if AllPlayed:GetOption('show_played_time') then
+		result_string = result_string .. string.format(
+														FactionColour( faction, " : %s" ),
+														AllPlayed:FormatTime(seconds_played)
+													)
+	end
 
 	-- Do we need to show the total XP
 	if AllPlayed:GetOption('show_xp_total') and xp ~= -1 then

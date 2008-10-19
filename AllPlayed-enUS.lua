@@ -26,6 +26,8 @@ L:RegisterTranslations("enUS", function()
 		["All factions will be displayed"]                      				= true,
 		["All Realms"]                                          				= true,
 		["All realms will de displayed"]                        				= true,
+		["Show Played Time"]																= true,
+		["Display the played time and the total time played"]					= true,
 		["Show Seconds"]                                        				= true,
 		["Display the seconds in the time strings"]             				= true,
 		["Show Gold"]                                    						= true,
