@@ -29,6 +29,7 @@ embeds.xml
 
 AllPlayed-enUS.lua
 AllPlayed-deDE.lua
+AllPlayed-frFR.lua
 AllPlayed-koKR.lua
 AllPlayed-zhCN.lua
 AllPlayed-zhTW.lua
