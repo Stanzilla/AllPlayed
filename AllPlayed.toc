@@ -2,11 +2,12 @@
 ## Author: LaoTseu
 ## Title: AllPlayed
 ## Notes: Track time played, rested XP and money for all characters
+## Notes-frFR: Suivi du temps jou�, de l'XP avant level et de l'argent pour tous les personnages de son compte.
 ## Notes-zhCN: 显示同账号下所有角色游戏时间、经验以及金钱等讯息。
 ## Notes-zhTW: 顯示同賬號下所有角色遊戲時間、經驗以及金錢等訊息。
 ## Version: 30000-2 $Revision$
 
-## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96 for the koKR, kuja for deDE, RoyalHawk for zhZN and s8095324 for zhTW localizations.
+## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96 for the koKR, kuja for deDE, RoyalHawk for zhZN, s8095324 for zhTW and Orbital Digital for frFR localizations.
 ## X-Website: http://www.wowace.com/wiki/AllPlayed
 ## X-Beta-Download: http://files.wowace.com/AllPlayed/
 ## X-AceForum: http://www.wowace.com/forums/index.php?topic=2042.0
