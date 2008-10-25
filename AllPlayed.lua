@@ -29,6 +29,9 @@ local C = LibStub("LibCrayon-3.0")
 local tablet = AceLibrary("Tablet-2.0")
 -- dewdrop is for the menu functions (only needed if FuBar is not there)
 local dewdrop = AceLibrary("Dewdrop-2.0")
+-- LibDataBroker
+local ldb = LibStub:GetLibrary("LibDataBroker-1.1", true)
+if not ldb then lib = {} end
 
 -- Class colours
 CLASS_COLOURS = {}
@@ -590,7 +593,7 @@ function AllPlayed:OnEnable()
 
    -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
    -- or 20 seconds depending on the refresh_rate setting
-	self:ScheduleRepeatingEvent(self.name, self.Update, self:GetOption('refresh_rate'), self)
+	self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
 
 	-- Find the curent revision number from all the files revisions
 	self.revision = 0
@@ -633,6 +636,16 @@ AllPlayed.hideWithoutStandby = true
 AllPlayed.clickableTooltip = false
 AllPlayed.hideMenuTitle = true			-- The menu title is provided in the command_options table
 
+function AllPlayed:MyUpdate(...)
+	self:Update(...)
+
+	if self.LDBFrame and self.LDBFrame:IsShown() then
+		self:OnDataUpdate()
+		self:OnTextUpdate()
+		APLDB:RegisterTablet(self.LDBFrame)
+	end
+end
+
 function AllPlayed:OnDataUpdate()
     --self:Debug("AllPlayed:OnDataUpdate()")
 
@@ -647,6 +660,7 @@ function AllPlayed:OnTextUpdate()
     --self:Debug("AllPlayed:OnTextUpdate()")
 
     self:SetText( self:FormatTime(self.total.time_played) )
+    if ldb then ldb.text = self:FormatTime(self.total.time_played) end
 end
 
 function AllPlayed:OnTooltipUpdate()
@@ -925,6 +939,7 @@ function AllPlayed:FillTablet()
 		'child_size4', self:GetOption('font_size')
 
 	)
+	AllPlayed.tablet = tablet
 
 	-- We group by factions, then by realm, then by PC
 	for _, faction in ipairs (self.sort_faction) do
@@ -2212,6 +2227,16 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[57]    = 159900
 	XPToNextLevelCache[58]    = 165800
 	XPToNextLevelCache[59]    = 172000
+	XPToNextLevelCache[60]	  = 290000
+	XPToNextLevelCache[61]	  = 317000
+	XPToNextLevelCache[62]	  = 349000
+	XPToNextLevelCache[63]	  = 386000
+	XPToNextLevelCache[64]	  = 428000
+	XPToNextLevelCache[65]	  = 475000
+	XPToNextLevelCache[66]	  = 527000
+	XPToNextLevelCache[67]	  = 585000
+	XPToNextLevelCache[68]	  = 648000
+	XPToNextLevelCache[69]	  = 717000
 	XPToNextLevelCache[70] 	  = 1523800
 	XPToNextLevelCache[71] 	  = 1539600
 	XPToNextLevelCache[72] 	  = 1555700
@@ -2222,20 +2247,6 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[77] 	  = 1637400
 	XPToNextLevelCache[78] 	  = 1653900
 	XPToNextLevelCache[79] 	  = 1670800
-
-	-- values for the 3.0.2 patch and WotLK
-	if toc_number and toc_number >= 30000 then
-		XPToNextLevelCache[60]	= 290000
-		XPToNextLevelCache[61]	= 317000
-		XPToNextLevelCache[62]	= 349000
-		XPToNextLevelCache[63]	= 386000
-		XPToNextLevelCache[64]	= 428000
-		XPToNextLevelCache[65]	= 475000
-		XPToNextLevelCache[66]	= 527000
-		XPToNextLevelCache[67]	= 585000
-		XPToNextLevelCache[68]	= 648000
-		XPToNextLevelCache[69]	= 717000
-	end
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
@@ -2357,3 +2368,97 @@ function AllPlayed.GetClassHexColour(class)
 end
 
 -- Deathknight : b=0.23, g=0.12, r=0.77
+
+-- #################################################################################
+-- #################################################################################
+-- ##
+-- ## LibDataBroker section
+-- ##
+-- #################################################################################
+-- #################################################################################
+
+APLDB = ldb:NewDataObject("AllPlayed-LDB", {
+	type = "data source",
+	text = "AllPlayed",
+	icon = AllPlayed.hasIcon,
+})
+
+APLDB = APLDB or {}
+
+function APLDB:OnClick(button)
+	if button == "RightButton" then
+		dewdrop:Open(self, 'children', function()
+			dewdrop:FeedAceOptionsTable(command_options)
+		end)
+	end
+end
+
+function APLDB:OnEnter(frame)
+	frame = frame or GetMouseFocus()
+	if not tablet:IsRegistered(frame) then
+		APLDB:RegisterTablet(frame)
+	end
+	tablet:Open(frame)
+end
+
+function APLDB:OnLeave()
+	tablet:Close()
+end
+
+function APLDB:RegisterTablet(frame)
+	tablet:Register(frame,
+		'children', function()
+			AllPlayed:FillTablet()
+		end,
+	--			'clickable', self.clickableTooltip,
+	--			'data', CheckFuBar() and FuBar.db.profile.tooltip or self.db and self.db.profile.detachedTooltip or {},
+	--			'detachedData', self.db and self.db.profile.detachedTooltip or {},
+		'data', {},
+		'point', function(frame)
+			if frame:GetTop() > GetScreenHeight() / 2 then
+				local x = frame:GetCenter()
+				if x < GetScreenWidth() / 3 then
+					return "TOPLEFT", "BOTTOMLEFT"
+				elseif x < GetScreenWidth() * 2 / 3 then
+					return "TOP", "BOTTOM"
+				else
+					return "TOPRIGHT", "BOTTOMRIGHT"
+				end
+			else
+				local x = frame:GetCenter()
+				if x < GetScreenWidth() / 3 then
+					return "BOTTOMLEFT", "TOPLEFT"
+				elseif x < GetScreenWidth() * 2 / 3 then
+					return "BOTTOM", "TOP"
+				else
+					return "BOTTOMRIGHT", "TOPRIGHT"
+				end
+			end
+		end
+		--[[
+		'menu', self.OnMenuRequest and function(level, value, valueN_1, valueN_2, valueN_3, valueN_4)
+			if level == 1 then
+				local name = tostring(self)
+				if not name:find('^table:') then
+					name = name:gsub("|c%x%x%x%x%x%x%x%x(.-)|r", "%1")
+					Dewdrop:AddLine(
+						'text', name,
+						'isTitle', true
+					)
+				end
+			end
+			if type(self.OnMenuRequest) == "function" then
+				self:OnMenuRequest(level, value, true, valueN_1, valueN_2, valueN_3, valueN_4)
+			elseif type(self.OnMenuRequest) == "table" then
+				Dewdrop:FeedAceOptionsTable(self.OnMenuRequest)
+			end
+		end,
+		'hideWhenEmpty', self.tooltipHiddenWhenEmpty) end
+		]]--
+	)
+	AllPlayed.LDBFrame = frame
+--	AllPlayed:FillTablet()
+
+end
+
+--APLDB.tooltip = AllPlayed.tablet

@@ -27,6 +27,8 @@
 ## SavedVariables: AllPlayedDB
 
 embeds.xml
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 
 AllPlayed-enUS.lua
 AllPlayed-deDE.lua
