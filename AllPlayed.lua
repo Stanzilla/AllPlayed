@@ -460,6 +460,19 @@ local command_options = {
 			args    = {}, 			-- Will be set in OnEnable
 			order   = 30
 		},
+		--[[
+		fubarSpacer = {
+			order = 40,
+			type = "header",
+		},
+		fubar = {
+			order 	= 50,
+			type 		= "group",
+			name 		= L["FuBarPlugin Config"],
+			desc 		= L["Configure the FuBar Plugin"],
+			args 		= {},
+		},
+		]]--
 	}
 }
 
@@ -582,6 +595,10 @@ function AllPlayed:OnEnable()
         end
     end
 
+    -- Initialise the FuBar menu options
+    --dewdrop:InjectAceOptionsTable(self, command_options.args.fubar)
+    self.OnMenuRequest = command_options
+
     -- Compute Honor at least once (it will be computed only if it change afterward
     self:ComputeTotalHonor()
 
@@ -624,9 +641,6 @@ function AllPlayed:SetDebugging(debugging) self.db.profile.debugging = debugging
 --[[                          Fubar part                               ]]--
 --[[ ================================================================= ]]--
 
--- FuBar configuration
--- Defining these even if FuBar is not present doesn't cause any problem so I don't
--- check self.is_fubar_loaded
 AllPlayed.OnMenuRequest = command_options
 AllPlayed.hasIcon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp"
 AllPlayed.defaultPosition = "LEFT"
@@ -642,7 +656,7 @@ function AllPlayed:MyUpdate(...)
 	if self.LDBFrame and self.LDBFrame:IsShown() then
 		self:OnDataUpdate()
 		self:OnTextUpdate()
-		APLDB:RegisterTablet(self.LDBFrame)
+		AllPlayedLDB:RegisterTablet(self.LDBFrame)
 	end
 end
 
@@ -660,7 +674,7 @@ function AllPlayed:OnTextUpdate()
     --self:Debug("AllPlayed:OnTextUpdate()")
 
     self:SetText( self:FormatTime(self.total.time_played) )
-    if APLDB then APLDB.text = self:FormatTime(self.total.time_played) end
+    if AllPlayedLDB then AllPlayedLDB.text = self:FormatTime(self.total.time_played) end
 end
 
 function AllPlayed:OnTooltipUpdate()
@@ -2377,42 +2391,46 @@ end
 -- #################################################################################
 -- #################################################################################
 
-APLDB = ldb:NewDataObject("AllPlayed-LDB", {
+AllPlayedLDB = ldb:NewDataObject("AllPlayed-LDB", {
 	type = "data source",
 	text = "***AllPlayed***",
 	icon = AllPlayed.hasIcon,
 })
 
-APLDB = APLDB or {}
+AllPlayedLDB = AllPlayedLDB or {}
 
-function APLDB:OnClick(button)
+local ldb_options = { type = 'group' }
+function AllPlayedLDB:OnClick(button)
 	if button == "RightButton" then
+		if not ldb_options.args then
+			ldb_options.args = {}
+			for _,key in ipairs({'title','title2','blankLine','display','sort','ignore'}) do
+				ldb_options.args[key] = command_options.args[key]
+			end
+		end
 		dewdrop:Open(self, 'children', function()
-			dewdrop:FeedAceOptionsTable(command_options)
+			dewdrop:FeedAceOptionsTable(ldb_options)
 		end)
 	end
 end
 
-function APLDB:OnEnter(frame)
+function AllPlayedLDB:OnEnter(frame)
 	frame = frame or GetMouseFocus()
 	if not tablet:IsRegistered(frame) then
-		APLDB:RegisterTablet(frame)
+		AllPlayedLDB:RegisterTablet(frame)
 	end
 	tablet:Open(frame)
 end
 
-function APLDB:OnLeave()
+function AllPlayedLDB:OnLeave()
 	tablet:Close()
 end
 
-function APLDB:RegisterTablet(frame)
+function AllPlayedLDB:RegisterTablet(frame)
 	tablet:Register(frame,
 		'children', function()
 			AllPlayed:FillTablet()
 		end,
-	--			'clickable', self.clickableTooltip,
-	--			'data', CheckFuBar() and FuBar.db.profile.tooltip or self.db and self.db.profile.detachedTooltip or {},
-	--			'detachedData', self.db and self.db.profile.detachedTooltip or {},
 		'data', {},
 		'point', function(frame)
 			if frame:GetTop() > GetScreenHeight() / 2 then
@@ -2435,30 +2453,10 @@ function APLDB:RegisterTablet(frame)
 				end
 			end
 		end
-		--[[
-		'menu', self.OnMenuRequest and function(level, value, valueN_1, valueN_2, valueN_3, valueN_4)
-			if level == 1 then
-				local name = tostring(self)
-				if not name:find('^table:') then
-					name = name:gsub("|c%x%x%x%x%x%x%x%x(.-)|r", "%1")
-					Dewdrop:AddLine(
-						'text', name,
-						'isTitle', true
-					)
-				end
-			end
-			if type(self.OnMenuRequest) == "function" then
-				self:OnMenuRequest(level, value, true, valueN_1, valueN_2, valueN_3, valueN_4)
-			elseif type(self.OnMenuRequest) == "table" then
-				Dewdrop:FeedAceOptionsTable(self.OnMenuRequest)
-			end
-		end,
-		'hideWhenEmpty', self.tooltipHiddenWhenEmpty) end
-		]]--
 	)
 	AllPlayed.LDBFrame = frame
 --	AllPlayed:FillTablet()
 
 end
 
---APLDB.tooltip = AllPlayed.tablet
+--AllPlayedLDB.tooltip = AllPlayed.tablet
