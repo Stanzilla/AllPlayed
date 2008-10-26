@@ -43,7 +43,7 @@ local tabletParent = "AllPlayedTabletParent"
 
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
 AllPlayed = {}
-AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","FuBarPlugin-2.0")
+AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","APFuBarPlugin-2.0")
 
 
 -- Local function prototypes
@@ -460,19 +460,6 @@ local command_options = {
 			args    = {}, 			-- Will be set in OnEnable
 			order   = 30
 		},
-		--[[
-		fubarSpacer = {
-			order = 40,
-			type = "header",
-		},
-		fubar = {
-			order 	= 50,
-			type 		= "group",
-			name 		= L["FuBarPlugin Config"],
-			desc 		= L["Configure the FuBar Plugin"],
-			args 		= {},
-		},
-		]]--
 	}
 }
 
