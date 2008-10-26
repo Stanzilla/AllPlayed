@@ -660,7 +660,7 @@ function AllPlayed:OnTextUpdate()
     --self:Debug("AllPlayed:OnTextUpdate()")
 
     self:SetText( self:FormatTime(self.total.time_played) )
-    if ldb then ldb.text = self:FormatTime(self.total.time_played) end
+    if APLDB then APLDB.text = self:FormatTime(self.total.time_played) end
 end
 
 function AllPlayed:OnTooltipUpdate()
@@ -2379,7 +2379,7 @@ end
 
 APLDB = ldb:NewDataObject("AllPlayed-LDB", {
 	type = "data source",
-	text = "AllPlayed",
+	text = "***AllPlayed***",
 	icon = AllPlayed.hasIcon,
 })
 
