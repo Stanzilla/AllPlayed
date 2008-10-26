@@ -29,7 +29,7 @@ L:RegisterTranslations("deDE", function()
         ["Show Gold"]                                       			= "Zeige Gold",
         ["Display the gold each character pocess"]     		    	= "Zeigt das Gold an was jeder Charakter besitzt",
         ["Show XP Progress"]                                    		= "Zeige XP Verlauf",
-        ["Display the level fraction based on curent XP"]       		= "Zeige Levelbruchteil basierend auf den aktuellen XP",
+        ["Display the level fraction based on current XP"]       		= "Zeige Levelbruchteil basierend auf den aktuellen XP",
         ["Show XP total"]							 	= "Zeige Gesamt XP",
         ["Show the total XP for all characters"]				= "Zeige XP aller Charaktere insgesamt",
         ["Rested XP"]                                           		= "Erholt-XP",

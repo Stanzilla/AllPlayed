@@ -33,7 +33,7 @@ L:RegisterTranslations("enUS", function()
 		["Show Gold"]                                    						= true,
 		["Display the gold each character pocess"]     							= true,
 		["Show XP Progress"]                                    				= true,
-		["Display the level fraction based on curent XP"]       				= true,
+		["Display the level fraction based on current XP"]      				= true,
 		["Show XP total"]																	= true,
 		["Show the total XP for all characters"]									= true,
 		["Rested XP"]                                           				= true,

@@ -29,7 +29,7 @@ L:RegisterTranslations("zhCN", function()
         ["Show Gold"]                                    		= "显示金钱",
         ["Display the gold each character pocess"]     			= "显示所有角色的金钱",
         ["Show XP Progress"]                                    	= "显示经验值",
-        ["Display the level fraction based on curent XP"]       	= "显示升级所需经验值",
+        ["Display the level fraction based on current XP"]       	= "显示升级所需经验值",
         ["Show XP total"]						= "显示全部经验值",
         ["Show the total XP for all characters"]			= "显示所有角色的全部经验值",
         ["Rested XP"]                                           	= "双倍经验值",
