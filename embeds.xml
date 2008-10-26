@@ -26,7 +26,6 @@
 <Script file="libs\Tablet-2.0\Tablet-2.0.lua"/>
 <Script file="libs\LibAbacus-3.0\LibAbacus-3.0.lua"/>
 <Script file="libs\LibCrayon-3.0\LibCrayon-3.0.lua"/>
-<!--<Script file="libs\FuBarPlugin-2.0\FuBarPlugin-2.0.lua"/>-->
 <Script file="libs\APFuBarPlugin-2.0\FuBarPlugin-2.0.lua"/>
 
 </Ui>
