@@ -28,7 +28,7 @@ L:RegisterTranslations("zhTW", function()
 	["Show Gold"]								= "顯示金錢",
 	["Display the gold each character pocess"]     				= "顯示所有角色的金錢",
 	["Show XP Progress"]							= "顯示經驗值",
-	["Display the level fraction based on current XP"]       		= "顯示升級所需經驗值",
+	["Display XP progress as a decimal value appended to the level"]       		= "顯示升級所需經驗值",
 	["Show XP total"]							= "顯示全部經驗值",
 	["Show the total XP for all characters"]				= "顯示所有角色的全部經驗值",
 	["Rested XP"]								= "雙倍經驗值",

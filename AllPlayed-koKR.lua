@@ -31,7 +31,7 @@ L:RegisterTranslations("koKR", function()
         ["Show Gold"]                                    			= "금액 보기",
         ["Display the gold each character pocess"]     				= "각 캐릭터의 소지 금액을 표시합니다.",
         ["Show XP Progress"]                                    		= "현재 레벨 경험치 보기",
-        ["Display the level fraction based on current XP"]       		= "현재 레벨에서의 경험치를 표시합니다.",
+        ["Display XP progress as a decimal value appended to the level"]       		= "현재 레벨에서의 경험치를 표시합니다.",
         ["Show XP total"]							= "총 경험치 보기",
         ["Show the total XP for all characters"]				= "모든 캐릭터의 총 경험치를 표시합니다.",
         ["Rested XP"]                                           		= "휴식 경험치",

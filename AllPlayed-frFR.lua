@@ -30,7 +30,7 @@ L:RegisterTranslations("frFR", function()
         ["Show Gold"]                                       			= "Voir son Or",
         ["Display the gold each character pocess"]     		    		= "Voir Total Or avec tous ses persos",
         ["Show XP Progress"]                                    		= "Voir progression de son XP",
-        ["Display the level fraction based on current XP"]       		= "Afficher le niveau actuel de son XP",
+        ["Display XP progress as a decimal value appended to the level"]       		= "Afficher le niveau actuel de son XP",
         ["Show XP total"]							 					= "Voir XP Total",
         ["Show the total XP for all characters"]						= "Voir XP Total de ts ses persos",
         ["Rested XP"]                                           		= "XP avant level",

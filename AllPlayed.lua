@@ -233,7 +233,7 @@ local command_options = {
 
 				 show_progress = {
 					  name      = L["Show XP Progress"],
-					  desc      = L["Display the level fraction based on current XP"],
+					  desc      = L["Display XP progress as a decimal value appended to the level"],
 					  type      = 'toggle',
 					  get       = function() return AllPlayed:GetOption('show_progress') end,
 					  set       = function(v) AllPlayed:SetOption('show_progress',v) end,
