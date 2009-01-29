@@ -1,6 +1,7 @@
 ﻿-- AllPlayed.lua
 -- $Id$
 
+
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.main	= ("$Revision$"):match("(%d+)")
 AllPlayed_revision.toc  = GetAddOnMetadata("AllPlayed", "Version"):match("%$Revision:%s(%d+)")
