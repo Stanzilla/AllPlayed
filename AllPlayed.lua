@@ -34,7 +34,7 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1", true)
 if not ldb then lib = {} end
 
 -- Class colours
-CLASS_COLOURS = {}
+local CLASS_COLOURS = {}
 
 -- Local cache
 local XPToNextLevelCache = {}
@@ -594,6 +594,23 @@ function AllPlayed:OnEnable()
 
     -- Request the time played so we can populate seconds_played
     self:RequestTimePlayed()
+
+	-- Set the callback for !ClassColor if present
+	if CUSTOM_CLASS_COLORS then
+		CUSTOM_CLASS_COLORS:RegisterCallback(function()
+			for class in pairs(CUSTOM_CLASS_COLORS) do
+				 CLASS_COLOURS[class] = AllPlayed.GetClassHexColour(class)
+			end
+
+			-- Check again for the Shamy colour
+			if(AllPlayed:GetOption('use_pre_210_shaman_colour')) then
+				CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
+			else
+				CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
+			end
+
+		end)
+	end
 
    -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
    -- or 20 seconds depending on the refresh_rate setting
@@ -2361,8 +2378,16 @@ end
 -- #################################################################################
 
 function AllPlayed.GetClassHexColour(class)
-	if RAID_CLASS_COLORS and RAID_CLASS_COLORS[class] then
-		return string.format("%02x%02x%02x",RAID_CLASS_COLORS[class].r*255, RAID_CLASS_COLORS[class].g*255, RAID_CLASS_COLORS[class].b*255)
+	if (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class]) then
+		return string.format("%02x%02x%02x",
+									CUSTOM_CLASS_COLORS[class].r*255,
+									CUSTOM_CLASS_COLORS[class].g*255,
+									CUSTOM_CLASS_COLORS[class].b*255)
+	elseif (RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]) then
+		return string.format("%02x%02x%02x",
+									RAID_CLASS_COLORS[class].r*255,
+									RAID_CLASS_COLORS[class].g*255,
+									RAID_CLASS_COLORS[class].b*255)
 	else
 		return "a1a1a1"
 	end
