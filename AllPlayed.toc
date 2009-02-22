@@ -26,8 +26,11 @@
 ## SavedVariables: AllPlayedDB
 
 embeds.xml
+
+# Libraries that should not be de-embeded
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+libs\APFuBarPlugin-2.0\FuBarPlugin-2.0.lua
 
 AllPlayed-enUS.lua
 AllPlayed-deDE.lua

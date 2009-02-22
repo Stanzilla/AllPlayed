@@ -1582,9 +1582,9 @@ end
 
 -- Fonction that format the money string
 -- The result is a string with embeded coin icons
-local gold_icon 	= "|TInterface\\AddOns\\AllPlayed\\Gold:0:0:0:0|t"
-local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:0:0|t"
-local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:0:0|t"
+local gold_icon 	= "|TInterface\\AddOns\\AllPlayed\\Gold:0|t"
+local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0|t"
+local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0|t"
 function FormatMoney(amount)
    if not AllPlayed:GetOption('use_icons') then return A:FormatMoneyFull( amount, true, false ) end
 
@@ -1616,15 +1616,15 @@ end
 
 local honor_strings = {
 	icons = {
-		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0,0,0,0|t',
-		['hp-Alliance']	= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Alliance:0,0,0,0|t',
-		['hp-Horde']		= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Horde:0,0,0,0|t',
-		ap 					= '%s|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:0:0|t',
+		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0|t',
+		['hp-Alliance']	= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Alliance:0|t',
+		['hp-Horde']		= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Horde:0|t',
+		ap 					= '%s|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0|t',
 		bj 					= '%s|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,-1|t',
 		ab 					= '%s|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,1|t',
-		av 					= '%s|TInterface\\Icons\\INV_Jewelry_Necklace_21:0,0,0,0|t',
-		wg 					= '%s|TInterface\\Icons\\INV_Misc_Rune_07:0,0,0,0|t',
-		es 					= '%s|TInterface\\Icons\\Spell_Nature_EyeOfTheStorm:0,0,0,0|t'
+		av 					= '%s|TInterface\\Icons\\INV_Jewelry_Necklace_21:0|t',
+		wg 					= '%s|TInterface\\Icons\\INV_Misc_Rune_07:0|t',
+		es 					= '%s|TInterface\\Icons\\Spell_Nature_EyeOfTheStorm:0|t'
 	},
 	no_icons = {
 		hk 					= L['%s HK'],
