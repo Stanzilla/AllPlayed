@@ -1,4 +1,4 @@
-## Interface: 30000
+## Interface: 30100
 ## Author: LaoTseu
 ## Title: AllPlayed
 ## Notes: Track time played, rested XP and money for all characters
