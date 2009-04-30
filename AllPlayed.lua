@@ -2426,12 +2426,20 @@ function AllPlayedLDB:OnClick(button)
 	end
 end
 
+--[[
 function AllPlayedLDB:OnEnter(frame)
 	frame = frame or GetMouseFocus()
 	if not tablet:IsRegistered(frame) then
 		AllPlayedLDB:RegisterTablet(frame)
 	end
 	tablet:Open(frame)
+end
+]]--
+function AllPlayedLDB:OnEnter()
+	if not tablet:IsRegistered(self) then
+		AllPlayedLDB:RegisterTablet(self)
+	end
+	tablet:Open(self)
 end
 
 function AllPlayedLDB:OnLeave()
