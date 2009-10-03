@@ -1123,7 +1123,8 @@ function AllPlayed:FillTablet()
 																	pc_data.rested_xp,
 																	pc_data.max_rested_xp,
 																	pc_data.last_update,
-																	pc_data.is_resting
+																	pc_data.is_resting,
+																	pc_data.xp
 															)
 
 								-- Do we need to show the rested XP for the character?
@@ -1138,6 +1139,12 @@ function AllPlayed:FillTablet()
 								end
 
 								local percent_for_colour = estimated_rested_xp / pc_data.max_rested_xp
+								if pc_data.level == self.max_pc_level - 1 then
+									-- Last level before max
+									percent_for_colour 
+										= estimated_rested_xp / 
+											(XPToNextLevelCache[self.max_pc_level - 1] - pc_data.xp)
+								end
 								local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
 
 								-- The time to rest is way more if not in an inn or a major city
@@ -1529,7 +1536,7 @@ end
 -- This function tries to estimate the total rested XP for a character based
 -- on the last time the data were updated and whether or not the character
 -- was in an Inn
-function AllPlayed:EstimateRestedXP( pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting )
+function AllPlayed:EstimateRestedXP( pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting, curent_xp )
     --self:Debug("AllPlayed:EstimateRestedXP: %s, %s, %s, %s, %s, %s, %s",pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting)
     -- I'm putting level as a parameter even though I don't use it for now. I need to find
     -- out at what level do a character start to gain rested XP
@@ -1541,11 +1548,20 @@ function AllPlayed:EstimateRestedXP( pc, realm, level, rested_xp, max_rested_xp,
 
     -- It takes 10 days to for a character to be fully rested if he is in an Inn,
     -- otherwise it takes 40 days.
+    local estimated_rested_xp
     if is_resting then
-        return math.min( rested_xp + math.floor( ( time()-last_update ) * ( max_rested_xp/TEN_DAYS ) ), max_rested_xp )
+        estimated_rested_xp = math.min( rested_xp + math.floor( ( time()-last_update ) * ( max_rested_xp/TEN_DAYS ) ), max_rested_xp )
     else
-        return math.min( rested_xp + math.floor( ( time()-last_update ) * ( max_rested_xp/(4 * TEN_DAYS) ) ), max_rested_xp )
+        estimated_rested_xp = math.min( rested_xp + math.floor( ( time()-last_update ) * ( max_rested_xp/(4 * TEN_DAYS) ) ), max_rested_xp )
     end
+    
+    -- If the character is at the last level before max level, he cannot have more rest 
+    -- then what remains to level
+    if level == self.max_pc_level - 1 then 
+    	estimated_rested_xp = math.min( estimated_rested_xp, XPToNextLevelCache[self.max_pc_level - 1] - curent_xp )
+    end
+    
+    return estimated_rested_xp
 end
 
 -- Function that Send a request to the server to get an update of the time played.
@@ -1984,7 +2000,8 @@ function PCSortByRestedXP(a,b)
 										table_to_sort[a].rested_xp,
 										table_to_sort[a].max_rested_xp,
 										table_to_sort[a].last_update,
-										table_to_sort[a].is_resting
+										table_to_sort[a].is_resting,
+										table_to_sort[a].xp
         )
     end
 
@@ -1996,7 +2013,8 @@ function PCSortByRestedXP(a,b)
 										table_to_sort[b].rested_xp,
 										table_to_sort[b].max_rested_xp,
 										table_to_sort[b].last_update,
-										table_to_sort[b].is_resting
+										table_to_sort[b].is_resting,
+										table_to_sort[b].xp
         )
     end
 
@@ -2022,7 +2040,8 @@ function PCSortByRevRestedXP(a,b)
 										table_to_sort[a].rested_xp,
 										table_to_sort[a].max_rested_xp,
 										table_to_sort[a].last_update,
-										table_to_sort[a].is_resting
+										table_to_sort[a].is_resting,
+										table_to_sort[a].xp
         )
     end
 
@@ -2034,7 +2053,8 @@ function PCSortByRevRestedXP(a,b)
 										table_to_sort[b].rested_xp,
 										table_to_sort[b].max_rested_xp,
 										table_to_sort[b].last_update,
-										table_to_sort[b].is_resting
+										table_to_sort[b].is_resting,
+										table_to_sort[b].xp
         )
     end
 
@@ -2060,7 +2080,8 @@ function PCSortByPercentRest(a,b)
 										table_to_sort[a].rested_xp,
 										table_to_sort[a].max_rested_xp,
 										table_to_sort[a].last_update,
-										table_to_sort[a].is_resting
+										table_to_sort[a].is_resting,
+										table_to_sort[a].xp
         )
     end
 
@@ -2072,7 +2093,8 @@ function PCSortByPercentRest(a,b)
 										table_to_sort[b].rested_xp,
 										table_to_sort[b].max_rested_xp,
 										table_to_sort[b].last_update,
-										table_to_sort[b].is_resting
+										table_to_sort[b].is_resting,
+										table_to_sort[b].xp
         )
     end
 
@@ -2102,7 +2124,8 @@ function PCSortByRevPercentRest(a,b)
 										table_to_sort[a].rested_xp,
 										table_to_sort[a].max_rested_xp,
 										table_to_sort[a].last_update,
-										table_to_sort[a].is_resting
+										table_to_sort[a].is_resting,
+										table_to_sort[a].xp
         )
     end
 
@@ -2114,7 +2137,8 @@ function PCSortByRevPercentRest(a,b)
 										table_to_sort[b].rested_xp,
 										table_to_sort[b].max_rested_xp,
 										table_to_sort[b].last_update,
-										table_to_sort[b].is_resting
+										table_to_sort[b].is_resting,
+										table_to_sort[b].xp
         )
     end
 
