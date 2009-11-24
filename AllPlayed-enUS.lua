@@ -1,4 +1,4 @@
-﻿-- AllPlayed-enUS.lua
+-- AllPlayed-enUS.lua
 -- $Id$
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.enUS	= ("$Revision$"):match("(%d+)")
@@ -123,7 +123,6 @@ L:RegisterTranslations("enUS", function()
 		["%.1f K XP"]																		= true,
 		["%d XP"]																			= true,
 		['%s HK']																			= true,
-		['%s HP']																			= true,
 		['%s HP']																			= true,
 		['%s AP']																			= true,
 		['%s BoJ']																			= true,
