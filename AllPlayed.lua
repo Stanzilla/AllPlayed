@@ -110,11 +110,18 @@ AllPlayed:RegisterDefaults('account', {
                     honor_points						= 0,
                     highest_rank						= nil,
                     honor_kills						= 0,
+                    --[[
 						  nb_badges_of_justice			= 0,
+						  nb_emblems_of_conquest		= 0,
+						  nb_emblems_of_heroism			= 0,
+						  nb_emblems_of_valor			= 0,
+						  nb_emblems_of_triumph			= 0,
 						  nb_wg_marks						= 0,
 						  nb_ab_marks			         = 0,
 						  nb_av_marks						= 0,
 						  nb_eots_marks					= 0,
+						  nb_wg_marks_of_honor			= 0,
+						  ]]--
 
                 }
             }
@@ -150,11 +157,11 @@ AllPlayed:RegisterDefaults('profile', {
 			show_arena_points				= false,
 			show_honor_points				= false,
 			show_honor_kills				= false,
-			show_badges_of_justice 		= false,
-			show_wg_marks 					= false,
-			show_ab_marks 					= false,
-			show_av_marks 					= false,
-			show_eots_mark 				= false,
+			--show_badges_of_justice 		= false,
+			--show_wg_marks 					= false,
+			--show_ab_marks 					= false,
+			--show_av_marks 					= false,
+			--show_eots_mark 				= false,
 			show_pvp_totals				= false,
 			font_size						= 12,
 			opacity							= .8,
@@ -316,6 +323,7 @@ local command_options = {
 									set       	= function(v) AllPlayed:SetOption('show_arena_points',v) end,
 									order = 3,
 								},
+								--[[
 								show_badges_of_justice = {
 									name        = L["Badges of Justice"],
 									desc        = L["Show the character badges of Justice"],
@@ -356,6 +364,7 @@ local command_options = {
 									set         = function(v) AllPlayed:SetOption('show_eots_mark',v) end,
 									order = 8,
 								},
+								]]--
 								show_pvp_totals = {
 									name        = L["Show PVP Totals"],
 									desc        = L["Show the honor related stats for all characters"],
@@ -787,29 +796,29 @@ function AllPlayed:ComputeTotalHonor()
 	self.total_faction[L["Horde"]].honor_kills      			= 0
 	self.total_faction[L["Horde"]].honor_points     			= 0
 	self.total_faction[L["Horde"]].arena_points     			= 0
-	self.total_faction[L["Horde"]].nb_badges_of_justice   	= 0
-	self.total_faction[L["Horde"]].nb_wg_marks     				= 0
-	self.total_faction[L["Horde"]].nb_ab_marks     				= 0
-	self.total_faction[L["Horde"]].nb_av_marks      			= 0
-	self.total_faction[L["Horde"]].nb_eots_marks    			= 0
+	--self.total_faction[L["Horde"]].nb_badges_of_justice   	= 0
+	--self.total_faction[L["Horde"]].nb_wg_marks     				= 0
+	--self.total_faction[L["Horde"]].nb_ab_marks     				= 0
+	--self.total_faction[L["Horde"]].nb_av_marks      			= 0
+	--self.total_faction[L["Horde"]].nb_eots_marks    			= 0
 
 	self.total_faction[L["Alliance"]].honor_kills   			= 0
 	self.total_faction[L["Alliance"]].honor_points  			= 0
 	self.total_faction[L["Alliance"]].arena_points  			= 0
-	self.total_faction[L["Alliance"]].nb_badges_of_justice	= 0
-	self.total_faction[L["Alliance"]].nb_wg_marks     			= 0
-	self.total_faction[L["Alliance"]].nb_ab_marks     			= 0
-	self.total_faction[L["Alliance"]].nb_av_marks      		= 0
-	self.total_faction[L["Alliance"]].nb_eots_marks    		= 0
+	--self.total_faction[L["Alliance"]].nb_badges_of_justice	= 0
+	--self.total_faction[L["Alliance"]].nb_wg_marks     			= 0
+	--self.total_faction[L["Alliance"]].nb_ab_marks     			= 0
+	--self.total_faction[L["Alliance"]].nb_av_marks      		= 0
+	--self.total_faction[L["Alliance"]].nb_eots_marks    		= 0
 
 	self.total.honor_kills                          			= 0
 	self.total.honor_points                         			= 0
 	self.total.arena_points                        				= 0
-	self.total.nb_badges_of_justice									= 0
-	self.total.nb_wg_marks												= 0
-	self.total.nb_ab_marks			         						= 0
-	self.total.nb_av_marks												= 0
-	self.total.nb_eots_marks											= 0
+	--self.total.nb_badges_of_justice									= 0
+	--self.total.nb_wg_marks												= 0
+	--self.total.nb_ab_marks			         						= 0
+	--self.total.nb_av_marks												= 0
+	--self.total.nb_eots_marks											= 0
 
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.account.data) do
@@ -822,31 +831,31 @@ function AllPlayed:ComputeTotalHonor()
             self.total_realm[faction][realm].honor_kills = 0
             self.total_realm[faction][realm].honor_points = 0
             self.total_realm[faction][realm].arena_points = 0
-            self.total_realm[faction][realm].nb_badges_of_justice = 0
-            self.total_realm[faction][realm].nb_wg_marks = 0
-            self.total_realm[faction][realm].nb_ab_marks = 0
-            self.total_realm[faction][realm].nb_av_marks = 0
-            self.total_realm[faction][realm].nb_eots_marks = 0
+            --self.total_realm[faction][realm].nb_badges_of_justice = 0
+            --self.total_realm[faction][realm].nb_wg_marks = 0
+            --self.total_realm[faction][realm].nb_ab_marks = 0
+            --self.total_realm[faction][realm].nb_av_marks = 0
+            --self.total_realm[faction][realm].nb_eots_marks = 0
 
             for pc, pc_table in pairs(realm_table) do
                 if not self:GetOption('is_ignored', realm, pc) then
 						self.total_faction[faction].honor_kills         	= self.total_faction[faction].honor_kills       	+ (pc_table.honor_kills or 0)
 						self.total_faction[faction].honor_points        	= self.total_faction[faction].honor_points      	+ (pc_table.honor_points or 0)
 						self.total_faction[faction].arena_points        	= self.total_faction[faction].arena_points      	+ (pc_table.arena_points or 0)
-						self.total_faction[faction].nb_badges_of_justice	= self.total_faction[faction].nb_badges_of_justice	+ (pc_table.nb_badges_of_justice or 0)
-						self.total_faction[faction].nb_wg_marks        		= self.total_faction[faction].nb_wg_marks      		+ (pc_table.nb_wg_marks or 0)
-						self.total_faction[faction].nb_ab_marks        		= self.total_faction[faction].nb_ab_marks      		+ (pc_table.nb_ab_marks or 0)
-						self.total_faction[faction].nb_av_marks        		= self.total_faction[faction].nb_av_marks       	+ (pc_table.nb_av_marks or 0)
-						self.total_faction[faction].nb_eots_marks        	= self.total_faction[faction].nb_eots_marks      	+ (pc_table.nb_eots_marks or 0)
+						--self.total_faction[faction].nb_badges_of_justice	= self.total_faction[faction].nb_badges_of_justice	+ (pc_table.nb_badges_of_justice or 0)
+						--self.total_faction[faction].nb_wg_marks        		= self.total_faction[faction].nb_wg_marks      		+ (pc_table.nb_wg_marks or 0)
+						--self.total_faction[faction].nb_ab_marks        		= self.total_faction[faction].nb_ab_marks      		+ (pc_table.nb_ab_marks or 0)
+						--self.total_faction[faction].nb_av_marks        		= self.total_faction[faction].nb_av_marks       	+ (pc_table.nb_av_marks or 0)
+						--self.total_faction[faction].nb_eots_marks        	= self.total_faction[faction].nb_eots_marks      	+ (pc_table.nb_eots_marks or 0)
 
 						self.total_realm[faction][realm].honor_kills    		= self.total_realm[faction][realm].honor_kills  			+ (pc_table.honor_kills or 0)
 						self.total_realm[faction][realm].honor_points   		= self.total_realm[faction][realm].honor_points 			+ (pc_table.honor_points or 0)
 						self.total_realm[faction][realm].arena_points   		= self.total_realm[faction][realm].arena_points 			+ (pc_table.arena_points or 0)
-						self.total_realm[faction][realm].nb_badges_of_justice	= self.total_realm[faction][realm].nb_badges_of_justice	+ (pc_table.nb_badges_of_justice or 0)
-						self.total_realm[faction][realm].nb_wg_marks        	= self.total_realm[faction][realm].nb_wg_marks      		+ (pc_table.nb_wg_marks or 0)
-						self.total_realm[faction][realm].nb_ab_marks        	= self.total_realm[faction][realm].nb_ab_marks      		+ (pc_table.nb_ab_marks or 0)
-						self.total_realm[faction][realm].nb_av_marks        	= self.total_realm[faction][realm].nb_av_marks       		+ (pc_table.nb_av_marks or 0)
-						self.total_realm[faction][realm].nb_eots_marks        = self.total_realm[faction][realm].nb_eots_marks      	+ (pc_table.nb_eots_marks or 0)
+						--self.total_realm[faction][realm].nb_badges_of_justice	= self.total_realm[faction][realm].nb_badges_of_justice	+ (pc_table.nb_badges_of_justice or 0)
+						--self.total_realm[faction][realm].nb_wg_marks        	= self.total_realm[faction][realm].nb_wg_marks      		+ (pc_table.nb_wg_marks or 0)
+						--self.total_realm[faction][realm].nb_ab_marks        	= self.total_realm[faction][realm].nb_ab_marks      		+ (pc_table.nb_ab_marks or 0)
+						--self.total_realm[faction][realm].nb_av_marks        	= self.total_realm[faction][realm].nb_av_marks       		+ (pc_table.nb_av_marks or 0)
+						--self.total_realm[faction][realm].nb_eots_marks        = self.total_realm[faction][realm].nb_eots_marks      	+ (pc_table.nb_eots_marks or 0)
                 end
             end
         end
@@ -865,42 +874,42 @@ function AllPlayed:ComputeTotalHonor()
             self.total.arena_points
                 =   self.total_faction[L["Horde"]].arena_points
                   + self.total_faction[L["Alliance"]].arena_points
-            self.total.nb_badges_of_justice
-                =   self.total_faction[L["Horde"]].nb_badges_of_justice
-                  + self.total_faction[L["Alliance"]].nb_badges_of_justice
-            self.total.nb_wg_marks
-                =   self.total_faction[L["Horde"]].nb_wg_marks
-                  + self.total_faction[L["Alliance"]].nb_wg_marks
-            self.total.nb_ab_marks
-                =   self.total_faction[L["Horde"]].nb_ab_marks
-                  + self.total_faction[L["Alliance"]].nb_ab_marks
-            self.total.nb_av_marks
-                =   self.total_faction[L["Horde"]].nb_av_marks
-                  + self.total_faction[L["Alliance"]].nb_av_marks
-            self.total.nb_eots_marks
-                =   self.total_faction[L["Horde"]].nb_eots_marks
-                  + self.total_faction[L["Alliance"]].nb_eots_marks
+            --self.total.nb_badges_of_justice
+            --    =   self.total_faction[L["Horde"]].nb_badges_of_justice
+            --      + self.total_faction[L["Alliance"]].nb_badges_of_justice
+            --self.total.nb_wg_marks
+            --    =   self.total_faction[L["Horde"]].nb_wg_marks
+            --      + self.total_faction[L["Alliance"]].nb_wg_marks
+            --self.total.nb_ab_marks
+            --    =   self.total_faction[L["Horde"]].nb_ab_marks
+            --      + self.total_faction[L["Alliance"]].nb_ab_marks
+            --self.total.nb_av_marks
+            --    =   self.total_faction[L["Horde"]].nb_av_marks
+            --      + self.total_faction[L["Alliance"]].nb_av_marks
+            --self.total.nb_eots_marks
+            --    =   self.total_faction[L["Horde"]].nb_eots_marks
+            --      + self.total_faction[L["Alliance"]].nb_eots_marks
         else
             -- Only the current faction count
             self.total.honor_kills 				= self.total_faction[self.faction].honor_kills
             self.total.honor_points 			= self.total_faction[self.faction].honor_points
             self.total.arena_points 			= self.total_faction[self.faction].arena_points
-            self.total.nb_badges_of_justice	= self.total_faction[self.faction].nb_badges_of_justice
-            self.total.nb_wg_marks 				= self.total_faction[self.faction].nb_wg_marks
-            self.total.nb_ab_marks 				= self.total_faction[self.faction].nb_ab_marks
-            self.total.nb_av_marks 				= self.total_faction[self.faction].nb_av_marks
-            self.total.nb_eots_marks 			= self.total_faction[self.faction].nb_eots_marks
+            --self.total.nb_badges_of_justice	= self.total_faction[self.faction].nb_badges_of_justice
+            --self.total.nb_wg_marks 				= self.total_faction[self.faction].nb_wg_marks
+            --self.total.nb_ab_marks 				= self.total_faction[self.faction].nb_ab_marks
+            --self.total.nb_av_marks 				= self.total_faction[self.faction].nb_av_marks
+            --self.total.nb_eots_marks 			= self.total_faction[self.faction].nb_eots_marks
         end
     else
         -- Only the current realm count (all_factions is ignore)
         self.total.honor_kills 				= self.total_realm[self.faction][self.realm].honor_kills
         self.total.honor_points  			= self.total_realm[self.faction][self.realm].honor_points
         self.total.arena_points  			= self.total_realm[self.faction][self.realm].arena_points
-        self.total.nb_badges_of_justice	= self.total_realm[self.faction][self.realm].nb_badges_of_justice
-        self.total.nb_wg_marks  				= self.total_realm[self.faction][self.realm].nb_wg_marks
-        self.total.nb_ab_marks  				= self.total_realm[self.faction][self.realm].nb_ab_marks
-        self.total.nb_av_marks  				= self.total_realm[self.faction][self.realm].nb_av_marks
-        self.total.nb_eots_marks  			= self.total_realm[self.faction][self.realm].nb_eots_marks
+        --self.total.nb_badges_of_justice	= self.total_realm[self.faction][self.realm].nb_badges_of_justice
+        --self.total.nb_wg_marks  				= self.total_realm[self.faction][self.realm].nb_wg_marks
+        --self.total.nb_ab_marks  				= self.total_realm[self.faction][self.realm].nb_ab_marks
+        --self.total.nb_av_marks  				= self.total_realm[self.faction][self.realm].nb_av_marks
+        --self.total.nb_eots_marks  			= self.total_realm[self.faction][self.realm].nb_eots_marks
     end
 end
 
@@ -924,12 +933,14 @@ function AllPlayed:FillTablet()
 	-- Do we have a PvP column?
 	local need_pvp =	self:GetOption('show_arena_points') or
 							self:GetOption('show_honor_points') or
-							self:GetOption('show_honor_kills') or
+							self:GetOption('show_honor_kills')
+							--[[
 							self:GetOption('show_badges_of_justice') or
 							self:GetOption('show_wg_marks') or
 							self:GetOption('show_ab_marks') or
 							self:GetOption('show_av_marks') or
 							self:GetOption('show_eots_mark')
+							]]--
 
 	if need_pvp then nb_columns = nb_columns + 1 end
 
@@ -1096,12 +1107,14 @@ function AllPlayed:FillTablet()
 										faction,
 										pc_data.honor_kills,
 										pc_data.honor_points,
-										pc_data.arena_points,
+										pc_data.arena_points
+										--[[
 										pc_data.nb_badges_of_justice,
 										pc_data.nb_ab_marks,
 										pc_data.nb_av_marks,
 										pc_data.nb_wg_marks,
 										pc_data.nb_eots_marks
+										]]--
 								)
 								col_no = col_no + 1
 								col_text[col_no] = ''
@@ -1227,12 +1240,15 @@ function AllPlayed:FillTablet()
 			'text2', FormatHonor(self.faction,
 										self.total.honor_kills,
 										self.total.honor_points,
-										self.total.arena_points,
+										self.total.arena_points
+										--[[
 										self.total.nb_badges_of_justice,
 										self.total.nb_ab_marks,
 										self.total.nb_av_marks,
 										self.total.nb_wg_marks,
-										self.total.nb_eots_marks)
+										self.total.nb_eots_marks
+										]]--
+						)
 		)
 	end
 
@@ -1315,6 +1331,9 @@ function AllPlayed:SaveVar()
     pc.zone_text       		= GetZoneText()
     pc.subzone_text    		= GetSubZoneText()
 	 pc.arena_points    		= GetArenaCurrency()
+	 
+	 -- Statistical stuff
+	 
 
     -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
     if UnitXPMax("player") ~= XPToNextLevel(UnitLevel("player")) then
@@ -1332,7 +1351,7 @@ function AllPlayed:SaveVar()
 
 	 -- PvPstuff
 	 self:SaveVarHonor()
-	 self:SaveVarMarks()
+	 --self:SaveVarMarks()
 end
 
 -- Save only the honor portion of the deal (for the honor gain event)
@@ -1346,6 +1365,7 @@ function AllPlayed:SaveVarHonor()
 end
 
 -- Save the PvP badge and mark counts
+--[[
 function AllPlayed:SaveVarMarks()
 	--self:Debug("SaveVarMarks()")
 
@@ -1357,6 +1377,7 @@ function AllPlayed:SaveVarMarks()
 	pc.nb_av_marks					= GetItemCount(20560, true)
 	pc.nb_eots_marks				= GetItemCount(29024, true)
 end
+]]--
 
 -- Set the value seconds_played that will be saved in the save variables
 function AllPlayed:SetSecondsPlayed(seconds_played)
@@ -1598,16 +1619,20 @@ end
 
 -- Fonction that format the money string
 -- The result is a string with embeded coin icons
-local gold_icon 	= "|TInterface\\AddOns\\AllPlayed\\Gold:0|t"
-local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0|t"
-local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0|t"
+local gold_icon 	= "|TInterface\\AddOns\\AllPlayed\\Gold:0:0:2:0|t"
+local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:2:0|t"
+local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:2:0|t"
+--> "6996|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t 38|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t 2|TInterface\MoneyFrame\UI-CopperIcon:0:0:2:0|t"
+--local gold_icon 	= "|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t"
+--local silver_icon = "|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t"
+--local copper_icon = "|TInterface\MoneyFrame\UI-CopperIcon:0:0:2:0|t"
 function FormatMoney(amount)
    if not AllPlayed:GetOption('use_icons') then return A:FormatMoneyFull( amount, true, false ) end
 
 	local string = ""
 
 	if amount >= 10000 then
-		string = format("%d%s%d%s%d%s",
+		string = format("%d%s %d%s %d%s",
 							 amount / 10000,
 							 gold_icon,
 							 (amount % 10000) / 100,
@@ -1615,7 +1640,7 @@ function FormatMoney(amount)
 							 (amount % 100),
 							 copper_icon)
 	elseif amount >= 100 then
-		string = format("%d%s%d%s",
+		string = format("%d%s %d%s",
 							 (amount % 10000) / 100,
 							 silver_icon,
 							 (amount % 100),
@@ -1676,6 +1701,7 @@ function FormatHonor( faction,	honor_kills,	pvp_points,	arena_points,	badges,
 	if AllPlayed:GetOption('show_arena_points') 		then
 		honor_string = honor_string .. format(fmt.ap, C:White(tostring(arena_points))) .. ' '
 	end
+	--[[
 	if AllPlayed:GetOption('show_badges_of_justice')	then
 		honor_string = honor_string .. format(fmt.bj, C:White(tostring(badges))) .. ' '
 	end
@@ -1691,6 +1717,7 @@ function FormatHonor( faction,	honor_kills,	pvp_points,	arena_points,	badges,
 	if AllPlayed:GetOption('show_eots_mark')				then
 		honor_string = honor_string .. format(fmt.es, C:White(tostring(eots_marks))) .. ' '
 	end
+	]]--
 
 	-- Return the string minus the last space
 	return (string.gsub(honor_string, "^%s*(.-)%s*$", "%1"))
@@ -2504,3 +2531,34 @@ function AllPlayedLDB:RegisterTablet(frame)
 end
 
 --AllPlayedLDB.tooltip = AllPlayed.tablet
+
+
+-- test stuff
+function GSId(CategoryTitle, StatisticTitle)
+	local str = ""
+	for _, CategoryId in pairs(GetStatisticsCategoryList()) do
+		local Title, ParentCategoryId, Something
+		Title, ParentCategoryId, Something = GetCategoryInfo(CategoryId)
+		
+		if Title == CategoryTitle then
+			local i
+			local statisticCount = GetCategoryNumAchievements(CategoryId)
+			for i = 1, statisticCount do
+				local IDNumber, Name, Points, Completed, Month, Day, Year, Description, Flags, Image, RewardText
+				IDNumber, Name, Points, Completed, Month, Day, Year, Description, Flags, Image, RewardText = GetAchievementInfo(CategoryId, i)
+				if Name == StatisticTitle then
+					return IDNumber
+				end
+			end
+		end
+	end
+	return -1
+end
+
+--Total gold aquired = 328
+--Gold looted = 333
+--Gold from quest rewards = 326
+--Gold earned from auctions = 919
+--Gold from vendors = 921
+--> "6996|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t 38|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t 2|TInterface\MoneyFrame\UI-CopperIcon:0:0:2:0|t"
+
