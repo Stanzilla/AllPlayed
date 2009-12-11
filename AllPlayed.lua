@@ -703,6 +703,9 @@ end
 function AllPlayed:OnClick()
     -- do something
     --self:Update()
+	AceLibrary("Dewdrop-2.0"):Open(FuBarPluginAllPlayedFrameMinimapButton, 'children', function()
+		AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
+	end)
 end
 
 
@@ -2464,7 +2467,7 @@ AllPlayedLDB = AllPlayedLDB or {}
 
 local ldb_options = { type = 'group' }
 function AllPlayedLDB:OnClick(button)
-	if button == "RightButton" then
+	--if button == "RightButton" then
 		if not ldb_options.args then
 			ldb_options.args = {}
 			for _,key in ipairs({'title','title2','blankLine','display','sort','ignore'}) do
@@ -2474,7 +2477,7 @@ function AllPlayedLDB:OnClick(button)
 		dewdrop:Open(self, 'children', function()
 			dewdrop:FeedAceOptionsTable(ldb_options)
 		end)
-	end
+	--end
 end
 
 --[[
