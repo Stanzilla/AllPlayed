@@ -143,7 +143,7 @@ AllPlayed:RegisterDefaults('profile', {
 			show_honor_points				= false,
 			show_honor_kills				= false,
 			show_pvp_totals				= false,
-			font_size						= 12,
+			tooltip_scale					= 1,
 			opacity							= .9,
 			sort_type						= "alpha",
 			use_icons						= false,
@@ -349,6 +349,18 @@ local command_options = {
 					  set       = function(v) AllPlayed:SetOption('use_icons',v) end,
 					  order     = 13,
 				 },
+				 tooltip_scale = {
+					  name      = L["Scale"],
+					  desc      = L["Scale the tooltip (70% to 150%)"],
+					  type      = 'range',
+					  min		  = .7,
+					  max       = 1.5,
+					  step      = .05,
+					  isPercent = true,
+					  get       = function() return AllPlayed:GetOption('tooltip_scale') end,
+					  set       = function(v) AllPlayed:SetOption('tooltip_scale',v) end,
+					  order     = 14,
+				 },
 				 opacity = {
 					  name      = L["Opacity"],
 					  desc      = L["% opacity of the tooltip background"],
@@ -359,7 +371,7 @@ local command_options = {
 					  isPercent = true,
 					  get       = function() return AllPlayed:GetOption('opacity') end,
 					  set       = function(v) AllPlayed:SetOption('opacity',v) end,
-					  order     = 14,
+					  order     = 15,
 				 },
 			}, order = 10
 		},
@@ -409,6 +421,7 @@ local command_options = {
 		}
 	}
 }
+
 
 
 -- This function is called by the ACE2 framework one time after the addon is loaded
@@ -822,9 +835,11 @@ function AllPlayed:DrawTooltip(anchor)
 	local tooltip = self.tooltip
 	
 	tooltip:Clear()
+
+	-- Set the scale
+	tooltip:SetScale(self:GetOption('tooltip_scale'))
+
 	tooltip:SmartAnchorTo(self.tooltip_anchor)
-	tooltip:SetScale(1)
-	--tooltip:SetAlpha(1 - self:GetOption('opacity'))
 	
 	local line, column = tooltip:AddHeader()
 	tooltip:SetCell(line, 1, C:White(L["All Played Breakdown"]), "CENTER", nb_columns)
@@ -1106,7 +1121,10 @@ function AllPlayed:DrawTooltip(anchor)
 	-- Set the opacity
 	self:SetTTOpacity(self:GetOption('opacity'))
 
+	-- Adjust the hight of the tooltip so that it fits in the screen
 	tooltip:UpdateScrolling(GetScreenHeight() - 30)
+	
+	
 	tooltip:Show()
 	self.OnUpdate_frame:Show() -- Start the OnUpdate script
 end
@@ -1312,6 +1330,10 @@ function AllPlayed:SetOption( option, value, ... )
 			CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
 		end
 
+	-- Set the scale of the tooltip
+	elseif option == 'tooltip_scale' and self.tooltip then
+		self.tooltip:SetScale(value)
+	
 	-- Set the opacity of the tablet frame
 	elseif option == 'opacity' then
 		self:SetTTOpacity(value)
