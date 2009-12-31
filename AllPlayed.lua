@@ -46,7 +46,6 @@ local tabletParent = "AllPlayedTabletParent"
 
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
 AllPlayed = {}
---AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","APFuBarPlugin-2.0")
 AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1")
 
 AllPlayed.version      	= GetAddOnMetadata("AllPlayed", "Version"):match("([^ ]+)")
@@ -77,15 +76,6 @@ local XPToLevel
 local InitXPToLevelCache
 local XPToNextLevel
 local MXP
-
--- Keep track if FuBar is present
---[[
-if IsAddOnLoaded("Fubar") then
-    AllPlayed.is_fubar_loaded = true
-else
-    AllPlayed.is_fubar_loaded = false
-end
-]]--
 
 -- The data will be saved in WTF\{account name}\SaveVariables\AllPlayedDB.lua
 AllPlayed:RegisterDB("AllPlayedDB")
@@ -154,7 +144,7 @@ AllPlayed:RegisterDefaults('profile', {
 			show_honor_kills				= false,
 			show_pvp_totals				= false,
 			font_size						= 12,
-			opacity							= .8,
+			opacity							= .9,
 			sort_type						= "alpha",
 			use_icons						= false,
 			is_ignored = {
@@ -359,17 +349,6 @@ local command_options = {
 					  set       = function(v) AllPlayed:SetOption('use_icons',v) end,
 					  order     = 13,
 				 },
-				 font_size = {
-					  name      = L["Font Size"],
-					  desc      = L["Select the font size"],
-					  type      = 'range',
-					  min		  = 8,
-					  max       = 20,
-					  step      = 1,
-					  get       = function() return AllPlayed:GetOption('font_size') end,
-					  set       = function(v) AllPlayed:SetOption('font_size',v) end,
-					  order     = 15,
-				 },
 				 opacity = {
 					  name      = L["Opacity"],
 					  desc      = L["% opacity of the tooltip background"],
@@ -380,7 +359,7 @@ local command_options = {
 					  isPercent = true,
 					  get       = function() return AllPlayed:GetOption('opacity') end,
 					  set       = function(v) AllPlayed:SetOption('opacity',v) end,
-					  order     = 16,
+					  order     = 14,
 				 },
 			}, order = 10
 		},
@@ -420,13 +399,17 @@ local command_options = {
 			args    = {}, 			-- Will be set in OnEnable
 			order   = 30
 		},
+		show_minimap_icon = {
+			name      = L["Minimap Icon"],
+			desc      = L["Show Minimap Icon"],
+			type      = 'toggle',
+			get       = function() return AllPlayed:GetOption('show_minimap_icon') end,
+			set       = function(v) AllPlayed:SetOption('show_minimap_icon',v) end,
+			order     = -5,
+		}
 	}
 }
 
-
--- Register the chat commands
--- :RegisterChatCommand takes the slash commands and an AceOptions data table
---AllPlayed:RegisterChatCommand({ L["/ap"], L["/allplayed"] }, command_options)
 
 -- This function is called by the ACE2 framework one time after the addon is loaded
 function AllPlayed:OnInitialize()
@@ -458,7 +441,6 @@ function AllPlayed:OnInitialize()
 
 	-- Initialize the cache
 	local build_version
---	self.game_version, build_version = GetBuildInfo()
 	InitXPToLevelCache()
 end
 
@@ -519,9 +501,6 @@ function AllPlayed:OnEnable()
     -- Find the max level
     self.max_pc_level = 60  +  10 * GetAccountExpansionLevel()
 
-    -- Set the initial table transparency
-    --tablet:SetTransparency(self:GetFrame(), self:GetOption('opacity'))
-
     -- Get the values for the current character
     self:SaveVar()
 
@@ -541,9 +520,6 @@ function AllPlayed:OnEnable()
         	end
         end
     end
-
-    -- Initialise the FuBar menu options
-    --self.OnMenuRequest = command_options
 
     -- Compute Honor at least once (it will be computed only if it change afterward
     self:ComputeTotalHonor()
@@ -614,11 +590,6 @@ end
 
 function AllPlayed:OnDisable()
 	self:CancelScheduledEvent(self.name)
-	--[[
-	if not self.is_fubar_loaded then
-		--tablet:Close(tabletParent)
-	end
-	]]--
 end
 
 function AllPlayed:IsDebugging() return self.db.profile.debugging end
@@ -626,33 +597,12 @@ function AllPlayed:SetDebugging(debugging) self.db.profile.debugging = debugging
 
 
 --[[ ================================================================= ]]--
---[[                          Fubar part                               ]]--
+--[[                       Update Functions                            ]]--
 --[[ ================================================================= ]]--
 
---AllPlayed.OnMenuRequest = command_options
---AllPlayed.hasIcon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp"
---AllPlayed.defaultPosition = "LEFT"
---AllPlayed.defaultMinimapPosition = 200
---AllPlayed.cannotDetachTooltip = false
---AllPlayed.hideWithoutStandby = true
---AllPlayed.clickableTooltip = false
---AllPlayed.hideMenuTitle = true			-- The menu title is provided in the command_options table
-
 function AllPlayed:MyUpdate(...)
-	--self:Update(...)
-
-	--[[
-	if self.LDBFrame and self.LDBFrame:IsShown() then
-		self:OnDataUpdate()
-		self:OnTextUpdate()
-		AllPlayedLDB:RegisterTablet(self.LDBFrame)
-	end
-	]]--
-	
 	self:OnDataUpdate()
-	--self:OnTextUpdate()
    AllPlayedLDB.text = self:FormatTime(self.total.time_played)
-	
 	
 	if self.tooltip then
 		self:DrawTooltip()		
@@ -669,38 +619,6 @@ function AllPlayed:OnDataUpdate()
     -- Recompute the totals
     self:ComputeTotal()
 end
-
---[[
-function AllPlayed:OnTextUpdate()
-    --self:Debug("AllPlayed:OnTextUpdate()")
-
-    --self:SetText( self:FormatTime(self.total.time_played) )
-    AllPlayedLDB.text = self:FormatTime(self.total.time_played)
-end
-]]--
-
---[[
-function AllPlayed:OnTooltipUpdate()
-    --self:Debug("OnTooltipUpdate()")
-    --self:Debug("=>self.total.time_played: ", self.total.time_played)
-
-    self:FillTablet()
-
-    --tablet:SetHint("Click to do something")
-    -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
-end
-]]--
-
---[[
-function AllPlayed:OnClick()
-    -- do something
-    --self:Update()
-	AceLibrary("Dewdrop-2.0"):Open(FuBarPluginAllPlayedFrameMinimapButton, 'children', function()
-		AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
-	end)
-end
-]]--
-
 
 --[[ ================================================================= ]]--
 --[[              Functions specific to the addon                      ]]--
@@ -853,336 +771,16 @@ function AllPlayed:ComputeTotalHonor()
     end
 end
 
--- Fill the tablet with the All Played information
---[[
-function AllPlayed:FillTablet()
-	--self:Debug("AllPlayed:FillTablet()")
-	--self:Debug("=>self.total.time_played: ", self.total.time_played)
-
-	-- Update the sort tables
-	self:BuildSortTables()
-
---    local estimated_rested_xp 	= 0
-	local first_category 		= true
-	local nb_columns = 1
-
-	-- Is the Location column needed?
-	if self:GetOption('show_location') ~= "none" then
-		nb_columns = nb_columns + 1
-	end
-
-	-- Do we have a PvP column?
-	local need_pvp =	self:GetOption('show_arena_points') or
-							self:GetOption('show_honor_points') or
-							self:GetOption('show_honor_kills')
-
-	if need_pvp then nb_columns = nb_columns + 1 end
-
-	-- Is the gold/rested XP column needed?
-	if self:GetOption('show_coins')
-		or self:GetOption('show_xp_total')
-		or self:GetOption('show_rested_xp')
-		or self:GetOption('show_rested_xp_countdown')
-		or self:GetOption('percent_rest') ~= "0" then
-		nb_columns = nb_columns + 1
-	end
-
-	-- Set the title for the table (just when using FuBar
-	tablet:SetTitle(C:White(L["All Played Breakdown"]))
-
-	local cat = tablet:AddCategory(
-		'id', 'Normal Line',
-		'columns', nb_columns,
-		'child_indentation', 10,
-		'hideBlankLine', false,
-		'wrap', true,
-		'child_size',  self:GetOption('font_size'),
-		'child_size2', self:GetOption('font_size'),
-		'child_size3', self:GetOption('font_size'),
-		'child_size4', self:GetOption('font_size')
-
-	)
-	AllPlayed.tablet = tablet
-
-	-- We group by factions, then by realm, then by PC
-	for _, faction in ipairs (self.sort_faction) do
-		-- We do not print the faction if no option to select it is on
-		-- and if the time played for the faction = 0 since this means
-		-- all PC in the faction are ingored.
-		if ((self:GetOption('all_factions') or self.faction == faction)
-			  and self.total.time_played ~= 0
-			  and self.sort_faction_realm[self:GetOption('display_sort_type')][faction]
-		) then
-			for _, realm in ipairs(self.sort_faction_realm[self:GetOption('display_sort_type')][faction]) do
-				-- We do not print the realm if no option to select it is on
-				-- and if the time played for the realm = 0 since this means
-				-- all PC in the realm are ingored.
-				if ( (self:GetOption('all_realms') or self.realm == realm) and
-					  self.total_realm[faction][realm].time_played ~= 0 ) then
-					----self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
-
-					-- Build the Realm aggregated line
-					local text_realm = string.format( C:Yellow(L["%s characters "]), realm )
-
-					local text_realm_optional = ""
-					local first_option = true
-
-					if self:GetOption('show_played_time') then
-						text_realm_optional = self:FormatTime(self.total_realm[faction][realm].time_played)
-						first_option = false
-					end
-
-					if self:GetOption('show_coins') then
-						if first_option then
-							text_realm_optional = FormatMoney(self.total_realm[faction][realm].coin)
-							first_option = false
-						else
-							text_realm_optional = string.format(
-										"%s " .. C:Green(" : ") .. "%s",
-										text_realm_optional,
-										FormatMoney(self.total_realm[faction][realm].coin)
-							)
-						end
-					end
-
-					if self:GetOption('show_xp_total') then
-						if first_option then
-							text_realm_optional = FormatXP(self.total_realm[faction][realm].xp)
-							first_option = false
-						else
-							text_realm_optional = string.format(
-									"%s " .. C:Green(" : %s"),
-									text_realm_optional,
-									FormatXP(self.total_realm[faction][realm].xp)
-							)
-						end
-					end
-
-					if text_realm_optional ~= "" then
-						text_realm = text_realm .. C:Green("[") .. text_realm_optional .. C:Green("]")
-					end
-
-					if first_category then
-						first_category = false
-					else
-						cat:AddLine(
-						   'columns', 		1,
-						   'indentation', 0,
-						   'text', 			" "
-						)
-					end
-
-					cat:AddLine(
-						'columns', 		1,
-						'indentation', 0,
-						'text', 			text_realm
-					)
-
-					for _, pc in ipairs(self.sort_realm_pc[self:GetOption('display_sort_type')][faction][realm]) do
-						if not self:GetOption('is_ignored', realm, pc) then
-							local pc_data = self.db.account.data[faction][realm][pc]
-
-							local col_text = {}
-							local col_no = 1
-
-							-- Seconds played are still going up for the current PC
-							local seconds_played = self:EstimateTimePlayed(
-															  pc,
-															  realm,
-															  pc_data.seconds_played,
-															  pc_data.seconds_played_last_update
-														  )
-
-							col_text[col_no] = FormatCharacterName(
-															pc,
-															pc_data.level,
-															pc_data.xp,
-															seconds_played,
-															pc_data.class,
-															pc_data.class_loc,
-															faction
-							                   )
-
-							col_no = col_no + 1
-							col_text[col_no] = ''
-
-							--local text_location = ""
-							if self:GetOption('show_location') ~= "none" then
-								if self:GetOption('show_location') == "loc" or
-									pc_data.zone_text == L["Unknown"] or
-									(self:GetOption('show_location') == "loc/sub" and
-									 pc_data.subzone_text == "") then
-
-									col_text[col_no] = FactionColour(
-														faction,
-														pc_data.zone_text
-													)
-								elseif self:GetOption('show_location') == "sub" then
-
-									col_text[col_no] = FactionColour(
-														faction,
-														pc_data.subzone_text
-													)
-								else
-									col_text[col_no] = FactionColour(
-														faction,
-														pc_data.zone_text
-														.. '/' .. pc_data.subzone_text
-													)
-								end
-
-								col_no = col_no + 1
-								col_text[col_no] = ''
-							end
-
-							--local text_pvp = ""
-							if need_pvp then
-								col_text[col_no] = FormatHonor(
-										faction,
-										pc_data.honor_kills,
-										pc_data.honor_points,
-										pc_data.arena_points
-								)
-								col_no = col_no + 1
-								col_text[col_no] = ''
-							end
-
-							--local text_coin = ""
-							if self:GetOption('show_coins') then
-								col_text[col_no] = FormatMoney(pc_data.coin)
-							end
-
-							if (pc_data.level < self.max_pc_level) and
-							   (pc_data.level > 1 or pc_data.xp > 0)
-							then
-								-- How must rested XP do we have?
-								local estimated_rested_xp = self:EstimateRestedXP(
-																	pc,
-																	realm,
-																	pc_data.level,
-																	pc_data.rested_xp,
-																	pc_data.max_rested_xp,
-																	pc_data.last_update,
-																	pc_data.is_resting,
-																	pc_data.xp
-															)
-
-								-- Do we need to show the rested XP for the character?
-								if self:GetOption('show_rested_xp') then
-									if col_text[col_no] ~= "" then
-										col_text[col_no] = col_text[col_no] .. FactionColour( faction, " : " )
-									end
-									col_text[col_no] = col_text[col_no] .. string.format(
-																	FactionColour( faction, L["%d rested XP"] ),
-																	estimated_rested_xp
-															 )
-								end
-
-								local percent_for_colour = estimated_rested_xp / pc_data.max_rested_xp
-								if pc_data.level == self.max_pc_level - 1 then
-									-- Last level before max
-									percent_for_colour 
-										= estimated_rested_xp / 
-											(XPToNextLevelCache[self.max_pc_level - 1] - pc_data.xp)
-								end
-								local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
-
-								-- The time to rest is way more if not in an inn or a major city
-								if not pc_data.is_resting then
-									countdown_seconds = countdown_seconds * 4
-								end
-
-								local text_countdown = ""
-								if percent_for_colour < 1 and ( pc_data.is_resting or
-																		 pc ~= self.pc or realm ~= self.realm
-																	  )
-								then
-									text_countdown = self:FormatTime(countdown_seconds)
-								end
-
-								-- Do we show the percent XP rested and/or the countdown until 100% rested?
-								if self:GetOption('percent_rest') ~= "0" and self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
-									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
-																						 self:GetOption('percent_rest') * percent_for_colour,
-																						 L["rested"],
-																						 text_countdown
-																	 )
-								elseif self:GetOption('percent_rest') ~= "0" then
-									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s)"),
-																						 self:GetOption('percent_rest') * percent_for_colour,
-																						 L["rested"]
-																	 )
-								elseif self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
-									col_text[col_no] = col_text[col_no] .. PercentColour( percent_for_colour, " (-" .. text_countdown .. ")" )
-								end
-							end
-
-							if nb_columns == 2 then
-								cat:AddLine( 'text',  col_text[1],
-												 'text2', col_text[2]
-								)
-							elseif nb_columns == 3 then
-								cat:AddLine( 'text',  col_text[1],
-												 'text2', col_text[2],
-												 'text3', col_text[3]
-								)
-							else
-								cat:AddLine( 'text',  col_text[1],
-												 'text2', col_text[2],
-												 'text3', col_text[3],
-												 'text4', col_text[4]
-								)
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-
-	-- Print the totals
-	local cat = tablet:AddCategory(
-		'columns',     2,
-		'child_size',  self:GetOption('font_size'),
-		'child_size2', self:GetOption('font_size')
-	)
-
-	if self:GetOption('show_played_time') then
-		cat:AddLine(
-		  'text',  C:Orange( L["Total Time Played: "] ),
-		  'text2', C:Yellow( self:FormatTime(self.total.time_played) )
-		)
-	end
-
-	if self:GetOption('show_coins') then
-		cat:AddLine(
-			'text',  C:Orange( L["Total Cash Value: "] ),
-			'text2', FormatMoney(self.total.coin)
-		)
-	end
-
-	if self:GetOption('show_pvp_totals') and need_pvp then
-		cat:AddLine(
-			'text',  C:Orange( L["Total PvP: "] ),
-			'text2', FormatHonor(self.faction,
-										self.total.honor_kills,
-										self.total.honor_points,
-										self.total.arena_points
-						)
-		)
-	end
-
-	if self:GetOption('show_xp_total') then
-		cat:AddLine(
-			'text',  C:Orange( L["Total XP: "] ),
-			'text2', C:Yellow( FormatXP(self.total.xp) )
-		)
-	end
-
-	--tablet:SetHint("Click to do something")
-	-- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
+-- Utility function to set the tooltip alpha
+function AllPlayed:SetTTOpacity(opacity)
+	if not self.tooltip then return end
+	
+	--for i=1,self.tooltip:GetColumnCount() do
+	--	self.tooltip:SetColumnColor(i,0,0,0,opacity)
+	--end
+	
+	self.tooltip:SetBackdropColor(0,0,0,opacity)
 end
-]]--
 
 -- Fill the QTip witl the information
 function AllPlayed:DrawTooltip(anchor)
@@ -1504,6 +1102,9 @@ function AllPlayed:DrawTooltip(anchor)
 		tooltip:SetCell(line, 1, C:Orange( L["Total XP: "] ), "LEFT", nb_columns - 1)
 		tooltip:SetCell(line, nb_columns, C:Yellow( FormatXP(self.total.xp) ), "RIGHT")
 	end
+	
+	-- Set the opacity
+	self:SetTTOpacity(self:GetOption('opacity'))
 
 	tooltip:UpdateScrolling(GetScreenHeight() - 30)
 	tooltip:Show()
@@ -1610,21 +1211,6 @@ function AllPlayed:SaveVarHonor()
 	pc.honor_kills, pc.highest_rank = GetPVPLifetimeStats()
 end
 
--- Save the PvP badge and mark counts
---[[
-function AllPlayed:SaveVarMarks()
-	--self:Debug("SaveVarMarks()")
-
-	local pc = self.db.account.data[self.faction][self.realm][self.pc]
-
-	pc.nb_badges_of_justice 	= GetItemCount(29434, true)
-	pc.nb_wg_marks					= GetItemCount(20558, true)
-	pc.nb_ab_marks					= GetItemCount(20559, true)
-	pc.nb_av_marks					= GetItemCount(20560, true)
-	pc.nb_eots_marks				= GetItemCount(29024, true)
-end
-]]--
-
 -- Set the value seconds_played that will be saved in the save variables
 function AllPlayed:SetSecondsPlayed(seconds_played)
 	--self:Debug("SetSecondsPlayed(): ",seconds_played)
@@ -1728,12 +1314,8 @@ function AllPlayed:SetOption( option, value, ... )
 
 	-- Set the opacity of the tablet frame
 	elseif option == 'opacity' then
-		-- Update the tablet transparency
-		--tablet:SetTransparency(self:GetFrame(), value)
-		if AllPlayed.tooltip then
-			AllPlayed.tooltip:SetAlpha(1-value)
-		end
-
+		self:SetTTOpacity(value)
+		
 	-- Ajust the sort type with the direction
 	elseif option == 'sort_type' then
 	    if self:GetOption('reverse_sort') then
@@ -1962,23 +1544,6 @@ function FormatHonor( faction,	honor_kills,	pvp_points,	arena_points,	badges,
 	if AllPlayed:GetOption('show_arena_points') 		then
 		honor_string = honor_string .. format(fmt.ap, C:White(tostring(arena_points))) .. ' '
 	end
-	--[[
-	if AllPlayed:GetOption('show_badges_of_justice')	then
-		honor_string = honor_string .. format(fmt.bj, C:White(tostring(badges))) .. ' '
-	end
-	if AllPlayed:GetOption('show_ab_marks') 				then
-		honor_string = honor_string .. format(fmt.ab, C:White(tostring(ab_marks))) .. ' '
-	end
-	if AllPlayed:GetOption('show_av_marks') 				then
-		honor_string = honor_string .. format(fmt.av, C:White(tostring(av_marks))) .. ' '
-	end
-	if AllPlayed:GetOption('show_wg_marks') 				then
-		honor_string = honor_string .. format(fmt.wg, C:White(tostring(wg_marks))) .. ' '
-	end
-	if AllPlayed:GetOption('show_eots_mark')				then
-		honor_string = honor_string .. format(fmt.es, C:White(tostring(eots_marks))) .. ' '
-	end
-	]]--
 
 	-- Return the string minus the last space
 	return (string.gsub(honor_string, "^%s*(.-)%s*$", "%1"))
@@ -2707,6 +2272,7 @@ end
 
 -- Deathknight : b=0.23, g=0.12, r=0.77
 
+
 -- #################################################################################
 -- #################################################################################
 -- ##
@@ -2725,22 +2291,13 @@ local ldb_options = { type = 'group' }
 function AllPlayedLDB:OnClick(button)
 	if not ldb_options.args then
 		ldb_options.args = {}
-		for _,key in ipairs({'title','title2','blankLine','display','sort','ignore'}) do
+		for _,key in ipairs({'title','title2','blankLine','display','sort','ignore','show_minimap_icon'}) do
 			ldb_options.args[key] = command_options.args[key]
 		end
 		dewdrop:InjectAceOptionsTable(AllPlayed, ldb_options)
 		ldb_options.args.about = nil
 		ldb_options.args.standby = nil
 		ldb_options.args.debug = nil
-		
-		ldb_options.args.show_minimap_icon = {
-			name      = L["Minimap Icon"],
-			desc      = L["Show Minimap Icon"],
-			type      = 'toggle',
-			get       = function() return AllPlayed:GetOption('show_minimap_icon') end,
-			set       = function(v) AllPlayed:SetOption('show_minimap_icon',v) end,
-			order     = -5,
-		}
 	end
 	dewdrop:Open(self, 'children', function()
 		dewdrop:FeedAceOptionsTable(ldb_options)
@@ -2753,54 +2310,13 @@ function AllPlayedLDB:OnClick(button)
 end
 
 function AllPlayedLDB:OnEnter(motion)
-	--if not tablet:IsRegistered(self) then
-	--	AllPlayedLDB:RegisterTablet(self)
-	--end
-	--tablet:Open(self)
 	AllPlayed:DrawTooltip(self)
 
 end
 
---[[
 function AllPlayedLDB:OnLeave()
-	AllPlayed.hide_tooltip = true
+	-- Nothing to so, the update frame take care of the tooltip disposal
 end
-]]--
-
---[[
-function AllPlayedLDB:RegisterTablet(frame)
-	tablet:Register(frame,
-		'children', function()
-			AllPlayed:FillTablet()
-		end,
-		'data', {},
-		'point', function(frame)
-			if frame:GetTop() > GetScreenHeight() / 2 then
-				local x = frame:GetCenter()
-				if x < GetScreenWidth() / 3 then
-					return "TOPLEFT", "BOTTOMLEFT"
-				elseif x < GetScreenWidth() * 2 / 3 then
-					return "TOP", "BOTTOM"
-				else
-					return "TOPRIGHT", "BOTTOMRIGHT"
-				end
-			else
-				local x = frame:GetCenter()
-				if x < GetScreenWidth() / 3 then
-					return "BOTTOMLEFT", "TOPLEFT"
-				elseif x < GetScreenWidth() * 2 / 3 then
-					return "BOTTOM", "TOP"
-				else
-					return "BOTTOMRIGHT", "TOPRIGHT"
-				end
-			end
-		end
-	)
-	AllPlayed.LDBFrame = frame
---	AllPlayed:FillTablet()
-
-end
-]]--
 
 --AllPlayedLDB.tooltip = AllPlayed.tablet
 

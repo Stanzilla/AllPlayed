@@ -35,8 +35,6 @@ libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 
 embeds.xml
 
-libs\APFuBarPlugin-2.0\FuBarPlugin-2.0.lua
-
 AllPlayed-enUS.lua
 AllPlayed-deDE.lua
 AllPlayed-frFR.lua
