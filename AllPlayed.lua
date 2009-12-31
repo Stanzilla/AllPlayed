@@ -32,6 +32,8 @@ local dewdrop = AceLibrary("Dewdrop-2.0")
 -- LibDataBroker
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1", true)
 if not ldb then lib = {} end
+-- LibQTip
+local lqt = LibStub("LibQTip-1.0")
 
 -- Class colours
 local CLASS_COLOURS = {}
@@ -110,18 +112,6 @@ AllPlayed:RegisterDefaults('account', {
                     honor_points						= 0,
                     highest_rank						= nil,
                     honor_kills						= 0,
-                    --[[
-						  nb_badges_of_justice			= 0,
-						  nb_emblems_of_conquest		= 0,
-						  nb_emblems_of_heroism			= 0,
-						  nb_emblems_of_valor			= 0,
-						  nb_emblems_of_triumph			= 0,
-						  nb_wg_marks						= 0,
-						  nb_ab_marks			         = 0,
-						  nb_av_marks						= 0,
-						  nb_eots_marks					= 0,
-						  nb_wg_marks_of_honor			= 0,
-						  ]]--
 
                 }
             }
@@ -157,11 +147,6 @@ AllPlayed:RegisterDefaults('profile', {
 			show_arena_points				= false,
 			show_honor_points				= false,
 			show_honor_kills				= false,
-			--show_badges_of_justice 		= false,
-			--show_wg_marks 					= false,
-			--show_ab_marks 					= false,
-			--show_av_marks 					= false,
-			--show_eots_mark 				= false,
 			show_pvp_totals				= false,
 			font_size						= 12,
 			opacity							= .8,
@@ -323,48 +308,6 @@ local command_options = {
 									set       	= function(v) AllPlayed:SetOption('show_arena_points',v) end,
 									order = 3,
 								},
-								--[[
-								show_badges_of_justice = {
-									name        = L["Badges of Justice"],
-									desc        = L["Show the character badges of Justice"],
-									type        = 'toggle',
-									get       	= function() return AllPlayed:GetOption('show_badges_of_justice') end,
-									set       	= function(v) AllPlayed:SetOption('show_badges_of_justice',v) end,
-									order = 4,
-								},
-								show_ab_marks = {
-									name        = L["AB Marks"],
-									desc        = L["Show the Arathi Basin Marks"],
-									type        = 'toggle',
-									get       	= function() return AllPlayed:GetOption('show_ab_marks') end,
-									set       	= function(v) AllPlayed:SetOption('show_ab_marks',v) end,
-									order = 5,
-								},
-								show_av_marks = {
-									name        = L["AV Marks"],
-									desc        = L["Show the Alterac Valley Marks"],
-									type        = 'toggle',
-									get       	= function() return AllPlayed:GetOption('show_av_marks') end,
-									set       	= function(v) AllPlayed:SetOption('show_av_marks',v) end,
-									order = 6,
-								},
-								show_wg_marks = {
-									name        = L["WG Marks"],
-									desc        = L["Show the Warsong Gulch Marks"],
-									type        = 'toggle',
-									get         = function() return AllPlayed:GetOption('show_wg_marks') end,
-									set         = function(v) AllPlayed:SetOption('show_wg_marks',v) end,
-									order = 7,
-								},
-								show_eots_mark = {
-									name        = L["EotS Marks"],
-									desc        = L["Show the Eye of the Storm Marks"],
-									type        = 'toggle',
-									get         = function() return AllPlayed:GetOption('show_eots_mark') end,
-									set         = function(v) AllPlayed:SetOption('show_eots_mark',v) end,
-									order = 8,
-								},
-								]]--
 								show_pvp_totals = {
 									name        = L["Show PVP Totals"],
 									desc        = L["Show the honor related stats for all characters"],
@@ -636,7 +579,26 @@ function AllPlayed:OnEnable()
 		assert(false,"No AllPlayed_revision")
 	end
 	command_options.args.title2.name = string.format(L["Revision %s"], self.revision)
+	
+	self.OnUpdate_frame = CreateFrame("frame")
+	self.OnUpdate_frame:Hide() -- to prevent the OnUpdate until it is needed.
+	self.elapsed = 0
+	self.OnUpdate_frame:SetScript("OnUpdate", function(self, elap)
+		AllPlayed.elapsed = AllPlayed.elapsed + elap
+		
+		if AllPlayed.elapsed < .2 then return end
+		if (AllPlayed.tooltip and AllPlayed.tooltip:IsMouseOver()) or
+		   (AllPlayed.tooltip_anchor and AllPlayed.tooltip_anchor:IsMouseOver()) then
+		   AllPlayed.elapsed = 0
+		   return
+		end
+		   
+		AllPlayed.tooltip = lqt:Release(AllPlayed.tooltip)
+		AllPlayed.tooltip_anchor = nil
+		AllPlayed.OnUpdate_frame:Hide()
+	end)
 
+	self:MyUpdate()
 end
 
 function AllPlayed:OnDisable()
@@ -834,31 +796,16 @@ function AllPlayed:ComputeTotalHonor()
             self.total_realm[faction][realm].honor_kills = 0
             self.total_realm[faction][realm].honor_points = 0
             self.total_realm[faction][realm].arena_points = 0
-            --self.total_realm[faction][realm].nb_badges_of_justice = 0
-            --self.total_realm[faction][realm].nb_wg_marks = 0
-            --self.total_realm[faction][realm].nb_ab_marks = 0
-            --self.total_realm[faction][realm].nb_av_marks = 0
-            --self.total_realm[faction][realm].nb_eots_marks = 0
 
             for pc, pc_table in pairs(realm_table) do
                 if not self:GetOption('is_ignored', realm, pc) then
 						self.total_faction[faction].honor_kills         	= self.total_faction[faction].honor_kills       	+ (pc_table.honor_kills or 0)
 						self.total_faction[faction].honor_points        	= self.total_faction[faction].honor_points      	+ (pc_table.honor_points or 0)
 						self.total_faction[faction].arena_points        	= self.total_faction[faction].arena_points      	+ (pc_table.arena_points or 0)
-						--self.total_faction[faction].nb_badges_of_justice	= self.total_faction[faction].nb_badges_of_justice	+ (pc_table.nb_badges_of_justice or 0)
-						--self.total_faction[faction].nb_wg_marks        		= self.total_faction[faction].nb_wg_marks      		+ (pc_table.nb_wg_marks or 0)
-						--self.total_faction[faction].nb_ab_marks        		= self.total_faction[faction].nb_ab_marks      		+ (pc_table.nb_ab_marks or 0)
-						--self.total_faction[faction].nb_av_marks        		= self.total_faction[faction].nb_av_marks       	+ (pc_table.nb_av_marks or 0)
-						--self.total_faction[faction].nb_eots_marks        	= self.total_faction[faction].nb_eots_marks      	+ (pc_table.nb_eots_marks or 0)
 
 						self.total_realm[faction][realm].honor_kills    		= self.total_realm[faction][realm].honor_kills  			+ (pc_table.honor_kills or 0)
 						self.total_realm[faction][realm].honor_points   		= self.total_realm[faction][realm].honor_points 			+ (pc_table.honor_points or 0)
 						self.total_realm[faction][realm].arena_points   		= self.total_realm[faction][realm].arena_points 			+ (pc_table.arena_points or 0)
-						--self.total_realm[faction][realm].nb_badges_of_justice	= self.total_realm[faction][realm].nb_badges_of_justice	+ (pc_table.nb_badges_of_justice or 0)
-						--self.total_realm[faction][realm].nb_wg_marks        	= self.total_realm[faction][realm].nb_wg_marks      		+ (pc_table.nb_wg_marks or 0)
-						--self.total_realm[faction][realm].nb_ab_marks        	= self.total_realm[faction][realm].nb_ab_marks      		+ (pc_table.nb_ab_marks or 0)
-						--self.total_realm[faction][realm].nb_av_marks        	= self.total_realm[faction][realm].nb_av_marks       		+ (pc_table.nb_av_marks or 0)
-						--self.total_realm[faction][realm].nb_eots_marks        = self.total_realm[faction][realm].nb_eots_marks      	+ (pc_table.nb_eots_marks or 0)
                 end
             end
         end
@@ -877,42 +824,17 @@ function AllPlayed:ComputeTotalHonor()
             self.total.arena_points
                 =   self.total_faction[L["Horde"]].arena_points
                   + self.total_faction[L["Alliance"]].arena_points
-            --self.total.nb_badges_of_justice
-            --    =   self.total_faction[L["Horde"]].nb_badges_of_justice
-            --      + self.total_faction[L["Alliance"]].nb_badges_of_justice
-            --self.total.nb_wg_marks
-            --    =   self.total_faction[L["Horde"]].nb_wg_marks
-            --      + self.total_faction[L["Alliance"]].nb_wg_marks
-            --self.total.nb_ab_marks
-            --    =   self.total_faction[L["Horde"]].nb_ab_marks
-            --      + self.total_faction[L["Alliance"]].nb_ab_marks
-            --self.total.nb_av_marks
-            --    =   self.total_faction[L["Horde"]].nb_av_marks
-            --      + self.total_faction[L["Alliance"]].nb_av_marks
-            --self.total.nb_eots_marks
-            --    =   self.total_faction[L["Horde"]].nb_eots_marks
-            --      + self.total_faction[L["Alliance"]].nb_eots_marks
         else
             -- Only the current faction count
             self.total.honor_kills 				= self.total_faction[self.faction].honor_kills
             self.total.honor_points 			= self.total_faction[self.faction].honor_points
             self.total.arena_points 			= self.total_faction[self.faction].arena_points
-            --self.total.nb_badges_of_justice	= self.total_faction[self.faction].nb_badges_of_justice
-            --self.total.nb_wg_marks 				= self.total_faction[self.faction].nb_wg_marks
-            --self.total.nb_ab_marks 				= self.total_faction[self.faction].nb_ab_marks
-            --self.total.nb_av_marks 				= self.total_faction[self.faction].nb_av_marks
-            --self.total.nb_eots_marks 			= self.total_faction[self.faction].nb_eots_marks
         end
     else
         -- Only the current realm count (all_factions is ignore)
         self.total.honor_kills 				= self.total_realm[self.faction][self.realm].honor_kills
         self.total.honor_points  			= self.total_realm[self.faction][self.realm].honor_points
         self.total.arena_points  			= self.total_realm[self.faction][self.realm].arena_points
-        --self.total.nb_badges_of_justice	= self.total_realm[self.faction][self.realm].nb_badges_of_justice
-        --self.total.nb_wg_marks  				= self.total_realm[self.faction][self.realm].nb_wg_marks
-        --self.total.nb_ab_marks  				= self.total_realm[self.faction][self.realm].nb_ab_marks
-        --self.total.nb_av_marks  				= self.total_realm[self.faction][self.realm].nb_av_marks
-        --self.total.nb_eots_marks  			= self.total_realm[self.faction][self.realm].nb_eots_marks
     end
 end
 
@@ -937,13 +859,6 @@ function AllPlayed:FillTablet()
 	local need_pvp =	self:GetOption('show_arena_points') or
 							self:GetOption('show_honor_points') or
 							self:GetOption('show_honor_kills')
-							--[[
-							self:GetOption('show_badges_of_justice') or
-							self:GetOption('show_wg_marks') or
-							self:GetOption('show_ab_marks') or
-							self:GetOption('show_av_marks') or
-							self:GetOption('show_eots_mark')
-							]]--
 
 	if need_pvp then nb_columns = nb_columns + 1 end
 
@@ -1266,6 +1181,331 @@ function AllPlayed:FillTablet()
 	-- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
 end
 
+-- Fill the QTip witl the information
+function AllPlayed:DrawTooltip(anchor)
+
+	-- Keep the anchor for further use
+	self.tooltip_anchor = anchor
+
+	-- Update the sort tables
+	self:BuildSortTables()
+
+	local first_category 		= true
+	local nb_columns = 1
+
+	-- Is the Location column needed?
+	if self:GetOption('show_location') ~= "none" then
+		nb_columns = nb_columns + 1
+	end
+
+	-- Do we have a PvP column?
+	local need_pvp =	self:GetOption('show_arena_points') or
+							self:GetOption('show_honor_points') or
+							self:GetOption('show_honor_kills')
+
+	if need_pvp then nb_columns = nb_columns + 1 end
+
+	-- Is the gold/rested XP column needed?
+	if self:GetOption('show_coins')
+		or self:GetOption('show_xp_total')
+		or self:GetOption('show_rested_xp')
+		or self:GetOption('show_rested_xp_countdown')
+		or self:GetOption('percent_rest') ~= "0" then
+		nb_columns = nb_columns + 1
+	end
+	
+	if not self.tooltip then
+		self.tooltip = lqt:Acquire("AllPlayedTooltip", nb_columns)
+	end
+	
+	local tooltip = self.tooltip
+	
+	tooltip:Clear()
+	tooltip:SmartAnchorTo(anchor)
+	tooltip:SetScale(1)
+	--tooltip:SetAlpha(1 - self:GetOption('opacity'))
+	
+	local line, column = tooltip:AddHeader()
+	tooltip:SetCell(line, 1, C:White(L["All Played Breakdown"]), "CENTER", nb_columns)
+	tooltip:AddSeparator()
+	
+	-- We group by factions, then by realm, then by PC
+	for _, faction in ipairs (self.sort_faction) do
+		-- We do not print the faction if no option to select it is on
+		-- and if the time played for the faction = 0 since this means
+		-- all PC in the faction are ingored.
+		if ((self:GetOption('all_factions') or self.faction == faction)
+			  and self.total.time_played ~= 0
+			  and self.sort_faction_realm[self:GetOption('display_sort_type')][faction]
+		) then
+			for _, realm in ipairs(self.sort_faction_realm[self:GetOption('display_sort_type')][faction]) do
+				-- We do not print the realm if no option to select it is on
+				-- and if the time played for the realm = 0 since this means
+				-- all PC in the realm are ingored.
+				if ( (self:GetOption('all_realms') or self.realm == realm) and
+					  self.total_realm[faction][realm].time_played ~= 0 ) then
+					----self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
+
+					-- Build the Realm aggregated line
+					local text_realm = string.format( C:Yellow(L["%s characters "]), realm )
+
+					local text_realm_optional = ""
+					local first_option = true
+
+					if self:GetOption('show_played_time') then
+						text_realm_optional = self:FormatTime(self.total_realm[faction][realm].time_played)
+						first_option = false
+					end
+
+					if self:GetOption('show_coins') then
+						if first_option then
+							text_realm_optional = FormatMoney(self.total_realm[faction][realm].coin)
+							first_option = false
+						else
+							text_realm_optional = string.format(
+										"%s " .. C:Green(" : ") .. "%s",
+										text_realm_optional,
+										FormatMoney(self.total_realm[faction][realm].coin)
+							)
+						end
+					end
+
+					if self:GetOption('show_xp_total') then
+						if first_option then
+							text_realm_optional = FormatXP(self.total_realm[faction][realm].xp)
+							first_option = false
+						else
+							text_realm_optional = string.format(
+									"%s " .. C:Green(" : %s"),
+									text_realm_optional,
+									FormatXP(self.total_realm[faction][realm].xp)
+							)
+						end
+					end
+
+					if text_realm_optional ~= "" then
+						text_realm = text_realm .. C:Green("[") .. text_realm_optional .. C:Green("]")
+					end
+
+					--tooltip:AddSeparator()
+					if first_category then
+						first_category = false
+					else
+						line, column = tooltip:AddLine()
+						tooltip:SetCell(line, 1, " ")
+					end
+
+					--tooltip:AddSeparator()
+					line, column = tooltip:AddLine()
+					tooltip:SetCell(line, 1, text_realm, "LEFT", nb_columns)
+
+
+					for _, pc in ipairs(self.sort_realm_pc[self:GetOption('display_sort_type')][faction][realm]) do
+						if not self:GetOption('is_ignored', realm, pc) then
+							local pc_data = self.db.account.data[faction][realm][pc]
+
+							local col_text = {}
+							local col_no = 1
+
+							-- Seconds played are still going up for the current PC
+							local seconds_played = self:EstimateTimePlayed(
+															  pc,
+															  realm,
+															  pc_data.seconds_played,
+															  pc_data.seconds_played_last_update
+														  )
+
+							col_text[col_no] = FormatCharacterName(
+															pc,
+															pc_data.level,
+															pc_data.xp,
+															seconds_played,
+															pc_data.class,
+															pc_data.class_loc,
+															faction
+							                   )
+
+							col_no = col_no + 1
+							col_text[col_no] = ''
+
+							--local text_location = ""
+							if self:GetOption('show_location') ~= "none" then
+								if self:GetOption('show_location') == "loc" or
+									pc_data.zone_text == L["Unknown"] or
+									(self:GetOption('show_location') == "loc/sub" and
+									 pc_data.subzone_text == "") then
+
+									col_text[col_no] = FactionColour(
+														faction,
+														pc_data.zone_text
+													)
+								elseif self:GetOption('show_location') == "sub" then
+
+									col_text[col_no] = FactionColour(
+														faction,
+														pc_data.subzone_text
+													)
+								else
+									col_text[col_no] = FactionColour(
+														faction,
+														pc_data.zone_text
+														.. '/' .. pc_data.subzone_text
+													)
+								end
+
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							--local text_pvp = ""
+							if need_pvp then
+								col_text[col_no] = FormatHonor(
+										faction,
+										pc_data.honor_kills,
+										pc_data.honor_points,
+										pc_data.arena_points
+								)
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							--local text_coin = ""
+							if self:GetOption('show_coins') then
+								col_text[col_no] = FormatMoney(pc_data.coin)
+							end
+
+							if (pc_data.level < self.max_pc_level) and
+							   (pc_data.level > 1 or pc_data.xp > 0)
+							then
+								-- How must rested XP do we have?
+								local estimated_rested_xp = self:EstimateRestedXP(
+																	pc,
+																	realm,
+																	pc_data.level,
+																	pc_data.rested_xp,
+																	pc_data.max_rested_xp,
+																	pc_data.last_update,
+																	pc_data.is_resting,
+																	pc_data.xp
+															)
+
+								-- Do we need to show the rested XP for the character?
+								if self:GetOption('show_rested_xp') then
+									if col_text[col_no] ~= "" then
+										col_text[col_no] = col_text[col_no] .. FactionColour( faction, " : " )
+									end
+									col_text[col_no] = col_text[col_no] .. string.format(
+																	FactionColour( faction, L["%d rested XP"] ),
+																	estimated_rested_xp
+															 )
+								end
+
+								local percent_for_colour = estimated_rested_xp / pc_data.max_rested_xp
+								if pc_data.level == self.max_pc_level - 1 then
+									-- Last level before max
+									percent_for_colour 
+										= estimated_rested_xp / 
+											(XPToNextLevelCache[self.max_pc_level - 1] - pc_data.xp)
+								end
+								local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
+
+								-- The time to rest is way more if not in an inn or a major city
+								if not pc_data.is_resting then
+									countdown_seconds = countdown_seconds * 4
+								end
+
+								local text_countdown = ""
+								if percent_for_colour < 1 and ( pc_data.is_resting or
+																		 pc ~= self.pc or realm ~= self.realm
+																	  )
+								then
+									text_countdown = self:FormatTime(countdown_seconds)
+								end
+
+								-- Do we show the percent XP rested and/or the countdown until 100% rested?
+								if self:GetOption('percent_rest') ~= "0" and self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
+									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
+																						 self:GetOption('percent_rest') * percent_for_colour,
+																						 L["rested"],
+																						 text_countdown
+																	 )
+								elseif self:GetOption('percent_rest') ~= "0" then
+									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s)"),
+																						 self:GetOption('percent_rest') * percent_for_colour,
+																						 L["rested"]
+																	 )
+								elseif self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
+									col_text[col_no] = col_text[col_no] .. PercentColour( percent_for_colour, " (-" .. text_countdown .. ")" )
+								end
+							end
+
+							line, column = tooltip:AddLine()
+							tooltip:SetCell(line, 1, "  "..col_text[1], "LEFT")
+							if nb_columns == 2 then
+								tooltip:SetCell(line, 2, col_text[2], "RIGHT")
+							elseif nb_columns == 3 then
+								tooltip:SetCell(line, 2, col_text[2], "CENTER")
+								tooltip:SetCell(line, 3, col_text[3], "RIGHT")
+							else
+								tooltip:SetCell(line, 2, col_text[2], "CENTER")
+								tooltip:SetCell(line, 3, col_text[3], "CENTER")
+								tooltip:SetCell(line, 4, col_text[4], "RIGHT")
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- Print the totals
+	
+	if self:GetOption('show_played_time') or
+	   self:GetOption('show_coins') or
+	   (self:GetOption('show_pvp_totals') and need_pvp) 
+	then
+		line, column = tooltip:AddLine()
+		tooltip:SetCell(line, 1, " ")
+		tooltip:AddSeparator()
+	end
+	
+	if self:GetOption('show_played_time') then
+		line, column = tooltip:AddLine()
+		tooltip:SetCell(line, 1, C:Orange( L["Total Time Played: "] ), "LEFT", nb_columns - 1)
+		tooltip:SetCell(line, nb_columns, C:Yellow( self:FormatTime(self.total.time_played) ), "RIGHT")
+	end
+
+	if self:GetOption('show_coins') then
+		line, column = tooltip:AddLine()
+		tooltip:SetCell(line, 1, C:Orange( L["Total Cash Value: "] ), "LEFT", nb_columns - 1)
+		tooltip:SetCell(line, nb_columns, FormatMoney(self.total.coin), "RIGHT")
+	end
+
+	if self:GetOption('show_pvp_totals') and need_pvp then
+		line, column = tooltip:AddLine()
+		tooltip:SetCell(line, 1, C:Orange( L["Total PvP: "] ), "LEFT", nb_columns - 1)
+		tooltip:SetCell(
+				line, 
+				nb_columns, 
+				FormatHonor(self.faction,
+								self.total.honor_kills,
+								self.total.honor_points,
+								self.total.arena_points
+				), 
+				"RIGHT"
+		)
+	end
+
+	if self:GetOption('show_xp_total') then
+		line, column = tooltip:AddLine()
+		tooltip:SetCell(line, 1, C:Orange( L["Total XP: "] ), "LEFT", nb_columns - 1)
+		tooltip:SetCell(line, nb_columns, C:Yellow( FormatXP(self.total.xp) ), "RIGHT")
+	end
+
+	tooltip:UpdateScrolling(GetScreenHeight() - 30)
+	tooltip:Show()
+	self.OnUpdate_frame:Show() -- Start the OnUpdate script
+end
 
 -- Function trigered when the TIME_PLAYED_MSG event is fired
 function AllPlayed:OnTimePlayedMsg(seconds_played)
@@ -1483,8 +1723,11 @@ function AllPlayed:SetOption( option, value, ... )
 
 	-- Set the opacity of the tablet frame
 	elseif option == 'opacity' then
-	    -- Update the tablet transparency
-	    tablet:SetTransparency(self:GetFrame(), value)
+		-- Update the tablet transparency
+		tablet:SetTransparency(self:GetFrame(), value)
+		if AllPlayed.tooltip then
+			AllPlayed.tooltip:SetAlpha(1-value)
+		end
 
 	-- Ajust the sort type with the direction
 	elseif option == 'sort_type' then
@@ -2457,7 +2700,7 @@ end
 -- #################################################################################
 -- #################################################################################
 
-AllPlayedLDB = ldb:NewDataObject("AllPlayed-LDB", {
+AllPlayedLDB = ldb:NewDataObject("AllPlayed", {
 	type = "data source",
 	text = "***AllPlayed***",
 	icon = AllPlayed.hasIcon,
@@ -2467,17 +2710,20 @@ AllPlayedLDB = AllPlayedLDB or {}
 
 local ldb_options = { type = 'group' }
 function AllPlayedLDB:OnClick(button)
-	--if button == "RightButton" then
-		if not ldb_options.args then
-			ldb_options.args = {}
-			for _,key in ipairs({'title','title2','blankLine','display','sort','ignore'}) do
-				ldb_options.args[key] = command_options.args[key]
-			end
+	if not ldb_options.args then
+		ldb_options.args = {}
+		for _,key in ipairs({'title','title2','blankLine','display','sort','ignore'}) do
+			ldb_options.args[key] = command_options.args[key]
 		end
-		dewdrop:Open(self, 'children', function()
-			dewdrop:FeedAceOptionsTable(ldb_options)
-		end)
-	--end
+	end
+	dewdrop:Open(self, 'children', function()
+		dewdrop:FeedAceOptionsTable(ldb_options)
+	end)
+	if AllPlayed.tooltip then
+		AllPlayed.tooltip = lqt:Release(AllPlayed.tooltip)
+		AllPlayed.tooltip_anchor = nil
+		AllPlayed.OnUpdate_frame:Hide()
+	end
 end
 
 --[[
@@ -2489,15 +2735,19 @@ function AllPlayedLDB:OnEnter(frame)
 	tablet:Open(frame)
 end
 ]]--
-function AllPlayedLDB:OnEnter()
-	if not tablet:IsRegistered(self) then
-		AllPlayedLDB:RegisterTablet(self)
-	end
-	tablet:Open(self)
+function AllPlayedLDB:OnEnter(motion)
+	--if not tablet:IsRegistered(self) then
+	--	AllPlayedLDB:RegisterTablet(self)
+	--end
+	--tablet:Open(self)
+	AllPlayed:DrawTooltip(self)
+
 end
 
 function AllPlayedLDB:OnLeave()
-	tablet:Close()
+	--tablet:Close()
+	--AllPlayed.tooltip = lqt:Release(AllPlayed.tooltip)
+	AllPlayed.hide_tooltip = true
 end
 
 function AllPlayedLDB:RegisterTablet(frame)
