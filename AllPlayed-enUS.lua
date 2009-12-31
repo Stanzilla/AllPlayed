@@ -1,4 +1,4 @@
--- AllPlayed-enUS.lua
+﻿-- AllPlayed-enUS.lua
 -- $Id$
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.enUS	= ("$Revision$"):match("(%d+)")
@@ -19,7 +19,7 @@ L:RegisterTranslations("enUS", function()
 
 		-- Menus
 		["AllPlayed Configuration"]													= true,
-		["Revision %s"]																	= true,
+		["Version %s (r%s)"]																= true,
 		["Display"]                                             				= true,
 		["Set the display options"]                             				= true,
 		["All Factions"]                                        				= true,
@@ -33,7 +33,7 @@ L:RegisterTranslations("enUS", function()
 		["Show Gold"]                                    						= true,
 		["Display the gold each character pocess"]     							= true,
 		["Show XP Progress"]                                    				= true,
-		["Display XP progress as a decimal value appended to the level"]      				= true,
+		["Display XP progress as a decimal value appended to the level"]	= true,
 		["Show XP total"]																	= true,
 		["Show the total XP for all characters"]									= true,
 		["Rested XP"]                                           				= true,
@@ -89,6 +89,8 @@ L:RegisterTranslations("enUS", function()
 		["Use the curent sort type in reverse order"]							= true,
 		["Use Icons"]																		= true,
 		["Use graphics for coin and PvP currencies"]								= true,
+		["Minimap Icon"]																	= true,
+		["Show Minimap Icon"]															= true,
 		["Font Size"]																		= true,
 		["Select the font size"]														= true,
 		["Opacity"]      																	= true,

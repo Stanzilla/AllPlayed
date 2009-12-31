@@ -31,7 +31,8 @@ local tablet = AceLibrary("Tablet-2.0")
 local dewdrop = AceLibrary("Dewdrop-2.0")
 -- LibDataBroker
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1", true)
-if not ldb then lib = {} end
+-- LibDBIcon
+local ldbicon = LibStub("LibDBIcon-1.0")
 -- LibQTip
 local lqt = LibStub("LibQTip-1.0")
 
@@ -47,6 +48,7 @@ local tabletParent = "AllPlayedTabletParent"
 AllPlayed = {}
 AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","APFuBarPlugin-2.0")
 
+AllPlayed.version      	= GetAddOnMetadata("AllPlayed", "Version"):match("([^ ]+)")
 
 -- Local function prototypes
 local FormatXP
@@ -159,6 +161,9 @@ AllPlayed:RegisterDefaults('profile', {
         		['*'] = false,
         	},
         },
+        ldbicon = {
+			  hide = nil,
+		  },
     },
 })
 
@@ -351,6 +356,14 @@ local command_options = {
 					  set       = function(v) AllPlayed:SetOption('use_icons',v) end,
 					  order     = 13,
 				 },
+				 show_minimap_icon = {
+					  name      = L["Minimap Icon"],
+					  desc      = L["Show Minimap Icon"],
+					  type      = 'toggle',
+					  get       = function() return AllPlayed:GetOption('show_minimap_icon') end,
+					  set       = function(v) AllPlayed:SetOption('show_minimap_icon',v) end,
+					  order     = 14,
+				 },
 				 font_size = {
 					  name      = L["Font Size"],
 					  desc      = L["Select the font size"],
@@ -360,7 +373,7 @@ local command_options = {
 					  step      = 1,
 					  get       = function() return AllPlayed:GetOption('font_size') end,
 					  set       = function(v) AllPlayed:SetOption('font_size',v) end,
-					  order     = 14,
+					  order     = 15,
 				 },
 				 opacity = {
 					  name      = L["Opacity"],
@@ -372,7 +385,7 @@ local command_options = {
 					  isPercent = true,
 					  get       = function() return AllPlayed:GetOption('opacity') end,
 					  set       = function(v) AllPlayed:SetOption('opacity',v) end,
-					  order     = 15,
+					  order     = 16,
 				 },
 			}, order = 10
 		},
@@ -578,8 +591,9 @@ function AllPlayed:OnEnable()
 	else
 		assert(false,"No AllPlayed_revision")
 	end
-	command_options.args.title2.name = string.format(L["Revision %s"], self.revision)
+	command_options.args.title2.name = string.format(L["Version %s (r%s)"], self.version, self.revision)
 	
+	-- Create a frame with an OnUpdate event to deal with the disposal of the tooltip created for LDB 
 	self.OnUpdate_frame = CreateFrame("frame")
 	self.OnUpdate_frame:Hide() -- to prevent the OnUpdate until it is needed.
 	self.elapsed = 0
@@ -597,6 +611,9 @@ function AllPlayed:OnEnable()
 		AllPlayed.tooltip_anchor = nil
 		AllPlayed.OnUpdate_frame:Hide()
 	end)
+	
+	-- LDB Minimap Icon support (for users without a LDB Broker)
+	ldbicon:Register("AllPlayed", AllPlayedLDB, self.db.profile.options.ldbicon)
 
 	self:MyUpdate()
 end
@@ -633,6 +650,12 @@ function AllPlayed:MyUpdate(...)
 		self:OnTextUpdate()
 		AllPlayedLDB:RegisterTablet(self.LDBFrame)
 	end
+	
+	if self.tooltip then
+		self:OnDataUpdate()
+		self:OnTextUpdate()
+		self:DrawTooltip()		
+	end
 end
 
 function AllPlayed:OnDataUpdate()
@@ -649,7 +672,7 @@ function AllPlayed:OnTextUpdate()
     --self:Debug("AllPlayed:OnTextUpdate()")
 
     self:SetText( self:FormatTime(self.total.time_played) )
-    if AllPlayedLDB then AllPlayedLDB.text = self:FormatTime(self.total.time_played) end
+    AllPlayedLDB.text = self:FormatTime(self.total.time_played)
 end
 
 function AllPlayed:OnTooltipUpdate()
@@ -761,29 +784,14 @@ function AllPlayed:ComputeTotalHonor()
 	self.total_faction[L["Horde"]].honor_kills      			= 0
 	self.total_faction[L["Horde"]].honor_points     			= 0
 	self.total_faction[L["Horde"]].arena_points     			= 0
-	--self.total_faction[L["Horde"]].nb_badges_of_justice   	= 0
-	--self.total_faction[L["Horde"]].nb_wg_marks     				= 0
-	--self.total_faction[L["Horde"]].nb_ab_marks     				= 0
-	--self.total_faction[L["Horde"]].nb_av_marks      			= 0
-	--self.total_faction[L["Horde"]].nb_eots_marks    			= 0
 
 	self.total_faction[L["Alliance"]].honor_kills   			= 0
 	self.total_faction[L["Alliance"]].honor_points  			= 0
 	self.total_faction[L["Alliance"]].arena_points  			= 0
-	--self.total_faction[L["Alliance"]].nb_badges_of_justice	= 0
-	--self.total_faction[L["Alliance"]].nb_wg_marks     			= 0
-	--self.total_faction[L["Alliance"]].nb_ab_marks     			= 0
-	--self.total_faction[L["Alliance"]].nb_av_marks      		= 0
-	--self.total_faction[L["Alliance"]].nb_eots_marks    		= 0
 
 	self.total.honor_kills                          			= 0
 	self.total.honor_points                         			= 0
 	self.total.arena_points                        				= 0
-	--self.total.nb_badges_of_justice									= 0
-	--self.total.nb_wg_marks												= 0
-	--self.total.nb_ab_marks			         						= 0
-	--self.total.nb_av_marks												= 0
-	--self.total.nb_eots_marks											= 0
 
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.account.data) do
@@ -1185,7 +1193,7 @@ end
 function AllPlayed:DrawTooltip(anchor)
 
 	-- Keep the anchor for further use
-	self.tooltip_anchor = anchor
+	self.tooltip_anchor = anchor or self.tooltip_anchor
 
 	-- Update the sort tables
 	self:BuildSortTables()
@@ -1221,7 +1229,7 @@ function AllPlayed:DrawTooltip(anchor)
 	local tooltip = self.tooltip
 	
 	tooltip:Clear()
-	tooltip:SmartAnchorTo(anchor)
+	tooltip:SmartAnchorTo(self.tooltip_anchor)
 	tooltip:SetScale(1)
 	--tooltip:SetAlpha(1 - self:GetOption('opacity'))
 	
@@ -1662,7 +1670,9 @@ function AllPlayed:GetOption( option, ... )
 	elseif option == 'display_sort_type' then
 		-- For display, we need the complete thing
 		return self.db.profile.options.sort_type
-
+		
+	elseif option == 'show_minimap_icon' then
+		return not self.db.profile.options.ldbicon.hide
 	end
 
 	return self.db.profile.options[option]
@@ -1756,6 +1766,16 @@ function AllPlayed:SetOption( option, value, ... )
 
 		already_set = true
 
+	elseif option == 'show_minimap_icon' then
+		if value then
+			self.db.profile.options.ldbicon.hide = nil
+			ldbicon:Show("AllPlayed")
+		else
+			self.db.profile.options.ldbicon.hide = true
+			ldbicon:Hide("AllPlayed")
+		end
+
+		already_set = true
 	end
 
 	-- Set the value
@@ -2703,10 +2723,8 @@ end
 AllPlayedLDB = ldb:NewDataObject("AllPlayed", {
 	type = "data source",
 	text = "***AllPlayed***",
-	icon = AllPlayed.hasIcon,
+	icon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp",
 })
-
-AllPlayedLDB = AllPlayedLDB or {}
 
 local ldb_options = { type = 'group' }
 function AllPlayedLDB:OnClick(button)
@@ -2726,15 +2744,6 @@ function AllPlayedLDB:OnClick(button)
 	end
 end
 
---[[
-function AllPlayedLDB:OnEnter(frame)
-	frame = frame or GetMouseFocus()
-	if not tablet:IsRegistered(frame) then
-		AllPlayedLDB:RegisterTablet(frame)
-	end
-	tablet:Open(frame)
-end
-]]--
 function AllPlayedLDB:OnEnter(motion)
 	--if not tablet:IsRegistered(self) then
 	--	AllPlayedLDB:RegisterTablet(self)
@@ -2744,11 +2753,11 @@ function AllPlayedLDB:OnEnter(motion)
 
 end
 
+--[[
 function AllPlayedLDB:OnLeave()
-	--tablet:Close()
-	--AllPlayed.tooltip = lqt:Release(AllPlayed.tooltip)
 	AllPlayed.hide_tooltip = true
 end
+]]--
 
 function AllPlayedLDB:RegisterTablet(frame)
 	tablet:Register(frame,
