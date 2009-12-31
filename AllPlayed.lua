@@ -26,7 +26,7 @@ local A = LibStub("LibAbacus-3.0")
 -- C is for colour management functions
 local C = LibStub("LibCrayon-3.0")
 -- tablet is for the tablet library functions
-local tablet = AceLibrary("Tablet-2.0")
+--local tablet = AceLibrary("Tablet-2.0")
 -- dewdrop is for the menu functions (only needed if FuBar is not there)
 local dewdrop = AceLibrary("Dewdrop-2.0")
 -- LibDataBroker
@@ -46,7 +46,8 @@ local tabletParent = "AllPlayedTabletParent"
 
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
 AllPlayed = {}
-AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","APFuBarPlugin-2.0")
+--AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1","APFuBarPlugin-2.0")
+AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1")
 
 AllPlayed.version      	= GetAddOnMetadata("AllPlayed", "Version"):match("([^ ]+)")
 
@@ -78,11 +79,13 @@ local XPToNextLevel
 local MXP
 
 -- Keep track if FuBar is present
+--[[
 if IsAddOnLoaded("Fubar") then
     AllPlayed.is_fubar_loaded = true
 else
     AllPlayed.is_fubar_loaded = false
 end
+]]--
 
 -- The data will be saved in WTF\{account name}\SaveVariables\AllPlayedDB.lua
 AllPlayed:RegisterDB("AllPlayedDB")
@@ -167,7 +170,7 @@ AllPlayed:RegisterDefaults('profile', {
     },
 })
 
--- Options for Waterfall, FuBar (Dewdrop) and AceConsole
+-- Options for Dewdrop
 -- See AceOptions for the format
 local command_options = {
 	type = 'group',
@@ -356,14 +359,6 @@ local command_options = {
 					  set       = function(v) AllPlayed:SetOption('use_icons',v) end,
 					  order     = 13,
 				 },
-				 show_minimap_icon = {
-					  name      = L["Minimap Icon"],
-					  desc      = L["Show Minimap Icon"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('show_minimap_icon') end,
-					  set       = function(v) AllPlayed:SetOption('show_minimap_icon',v) end,
-					  order     = 14,
-				 },
 				 font_size = {
 					  name      = L["Font Size"],
 					  desc      = L["Select the font size"],
@@ -525,7 +520,7 @@ function AllPlayed:OnEnable()
     self.max_pc_level = 60  +  10 * GetAccountExpansionLevel()
 
     -- Set the initial table transparency
-    tablet:SetTransparency(self:GetFrame(), self:GetOption('opacity'))
+    --tablet:SetTransparency(self:GetFrame(), self:GetOption('opacity'))
 
     -- Get the values for the current character
     self:SaveVar()
@@ -548,8 +543,7 @@ function AllPlayed:OnEnable()
     end
 
     -- Initialise the FuBar menu options
-    --dewdrop:InjectAceOptionsTable(self, command_options.args.fubar)
-    self.OnMenuRequest = command_options
+    --self.OnMenuRequest = command_options
 
     -- Compute Honor at least once (it will be computed only if it change afterward
     self:ComputeTotalHonor()
@@ -620,9 +614,11 @@ end
 
 function AllPlayed:OnDisable()
 	self:CancelScheduledEvent(self.name)
+	--[[
 	if not self.is_fubar_loaded then
-		tablet:Close(tabletParent)
+		--tablet:Close(tabletParent)
 	end
+	]]--
 end
 
 function AllPlayed:IsDebugging() return self.db.profile.debugging end
@@ -633,30 +629,36 @@ function AllPlayed:SetDebugging(debugging) self.db.profile.debugging = debugging
 --[[                          Fubar part                               ]]--
 --[[ ================================================================= ]]--
 
-AllPlayed.OnMenuRequest = command_options
-AllPlayed.hasIcon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp"
-AllPlayed.defaultPosition = "LEFT"
-AllPlayed.defaultMinimapPosition = 200
-AllPlayed.cannotDetachTooltip = false
-AllPlayed.hideWithoutStandby = true
-AllPlayed.clickableTooltip = false
-AllPlayed.hideMenuTitle = true			-- The menu title is provided in the command_options table
+--AllPlayed.OnMenuRequest = command_options
+--AllPlayed.hasIcon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp"
+--AllPlayed.defaultPosition = "LEFT"
+--AllPlayed.defaultMinimapPosition = 200
+--AllPlayed.cannotDetachTooltip = false
+--AllPlayed.hideWithoutStandby = true
+--AllPlayed.clickableTooltip = false
+--AllPlayed.hideMenuTitle = true			-- The menu title is provided in the command_options table
 
 function AllPlayed:MyUpdate(...)
-	self:Update(...)
+	--self:Update(...)
 
+	--[[
 	if self.LDBFrame and self.LDBFrame:IsShown() then
 		self:OnDataUpdate()
 		self:OnTextUpdate()
 		AllPlayedLDB:RegisterTablet(self.LDBFrame)
 	end
+	]]--
+	
+	self:OnDataUpdate()
+	--self:OnTextUpdate()
+   AllPlayedLDB.text = self:FormatTime(self.total.time_played)
+	
 	
 	if self.tooltip then
-		self:OnDataUpdate()
-		self:OnTextUpdate()
 		self:DrawTooltip()		
 	end
 end
+
 
 function AllPlayed:OnDataUpdate()
     --self:Debug("AllPlayed:OnDataUpdate()")
@@ -668,13 +670,16 @@ function AllPlayed:OnDataUpdate()
     self:ComputeTotal()
 end
 
+--[[
 function AllPlayed:OnTextUpdate()
     --self:Debug("AllPlayed:OnTextUpdate()")
 
-    self:SetText( self:FormatTime(self.total.time_played) )
+    --self:SetText( self:FormatTime(self.total.time_played) )
     AllPlayedLDB.text = self:FormatTime(self.total.time_played)
 end
+]]--
 
+--[[
 function AllPlayed:OnTooltipUpdate()
     --self:Debug("OnTooltipUpdate()")
     --self:Debug("=>self.total.time_played: ", self.total.time_played)
@@ -684,7 +689,9 @@ function AllPlayed:OnTooltipUpdate()
     --tablet:SetHint("Click to do something")
     -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
 end
+]]--
 
+--[[
 function AllPlayed:OnClick()
     -- do something
     --self:Update()
@@ -692,7 +699,7 @@ function AllPlayed:OnClick()
 		AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
 	end)
 end
-
+]]--
 
 
 --[[ ================================================================= ]]--
@@ -847,6 +854,7 @@ function AllPlayed:ComputeTotalHonor()
 end
 
 -- Fill the tablet with the All Played information
+--[[
 function AllPlayed:FillTablet()
 	--self:Debug("AllPlayed:FillTablet()")
 	--self:Debug("=>self.total.time_played: ", self.total.time_played)
@@ -1034,13 +1042,6 @@ function AllPlayed:FillTablet()
 										pc_data.honor_kills,
 										pc_data.honor_points,
 										pc_data.arena_points
-										--[[
-										pc_data.nb_badges_of_justice,
-										pc_data.nb_ab_marks,
-										pc_data.nb_av_marks,
-										pc_data.nb_wg_marks,
-										pc_data.nb_eots_marks
-										]]--
 								)
 								col_no = col_no + 1
 								col_text[col_no] = ''
@@ -1167,13 +1168,6 @@ function AllPlayed:FillTablet()
 										self.total.honor_kills,
 										self.total.honor_points,
 										self.total.arena_points
-										--[[
-										self.total.nb_badges_of_justice,
-										self.total.nb_ab_marks,
-										self.total.nb_av_marks,
-										self.total.nb_wg_marks,
-										self.total.nb_eots_marks
-										]]--
 						)
 		)
 	end
@@ -1188,6 +1182,7 @@ function AllPlayed:FillTablet()
 	--tablet:SetHint("Click to do something")
 	-- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
 end
+]]--
 
 -- Fill the QTip witl the information
 function AllPlayed:DrawTooltip(anchor)
@@ -1712,7 +1707,7 @@ function AllPlayed:SetOption( option, value, ... )
 
 		-- If there is a timer active, we change the rate
 		if self:IsEventScheduled(self.name) then
-			self:ScheduleRepeatingEvent(self.name, self.Update, self:GetOption('refresh_rate'), self)
+			self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
 		end
 
    -- Set activate or disactivate the PLAYER_MONEY event
@@ -1734,7 +1729,7 @@ function AllPlayed:SetOption( option, value, ... )
 	-- Set the opacity of the tablet frame
 	elseif option == 'opacity' then
 		-- Update the tablet transparency
-		tablet:SetTransparency(self:GetFrame(), value)
+		--tablet:SetTransparency(self:GetFrame(), value)
 		if AllPlayed.tooltip then
 			AllPlayed.tooltip:SetAlpha(1-value)
 		end
@@ -1784,7 +1779,7 @@ function AllPlayed:SetOption( option, value, ... )
 	end
 
 	-- Refesh
-	self:Update()
+	self:MyUpdate()
 end
 
 --[[ ================================================================= ]]--
@@ -2733,6 +2728,19 @@ function AllPlayedLDB:OnClick(button)
 		for _,key in ipairs({'title','title2','blankLine','display','sort','ignore'}) do
 			ldb_options.args[key] = command_options.args[key]
 		end
+		dewdrop:InjectAceOptionsTable(AllPlayed, ldb_options)
+		ldb_options.args.about = nil
+		ldb_options.args.standby = nil
+		ldb_options.args.debug = nil
+		
+		ldb_options.args.show_minimap_icon = {
+			name      = L["Minimap Icon"],
+			desc      = L["Show Minimap Icon"],
+			type      = 'toggle',
+			get       = function() return AllPlayed:GetOption('show_minimap_icon') end,
+			set       = function(v) AllPlayed:SetOption('show_minimap_icon',v) end,
+			order     = -5,
+		}
 	end
 	dewdrop:Open(self, 'children', function()
 		dewdrop:FeedAceOptionsTable(ldb_options)
@@ -2759,6 +2767,7 @@ function AllPlayedLDB:OnLeave()
 end
 ]]--
 
+--[[
 function AllPlayedLDB:RegisterTablet(frame)
 	tablet:Register(frame,
 		'children', function()
@@ -2791,6 +2800,7 @@ function AllPlayedLDB:RegisterTablet(frame)
 --	AllPlayed:FillTablet()
 
 end
+]]--
 
 --AllPlayedLDB.tooltip = AllPlayed.tablet
 
