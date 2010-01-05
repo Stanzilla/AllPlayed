@@ -41,4 +41,6 @@ AllPlayed-frFR.lua
 AllPlayed-koKR.lua
 AllPlayed-zhCN.lua
 AllPlayed-zhTW.lua
+Config.lua
+
 AllPlayed.lua

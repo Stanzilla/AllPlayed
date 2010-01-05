@@ -1,4 +1,6 @@
-﻿-- AllPlayed.lua
+﻿local display_name, AP = ...
+
+-- AllPlayed.lua
 -- $Id$
 
 if not AllPlayed_revision then AllPlayed_revision = {} end
@@ -47,7 +49,8 @@ local tabletParent = "AllPlayedTabletParent"
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
 AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1")
 
-AllPlayed.version      	= GetAddOnMetadata("AllPlayed", "Version"):match("([^ ]+)")
+-- For debuging
+AllPlayed.AP = AP
 
 -- Local function prototypes
 local AcquireTable
@@ -499,6 +502,9 @@ function AllPlayed:OnEnable()
 
     -- code here, executed after everything is loaded.
     -- Note: AceDB-2.0 will also call this when standby is toggled.
+    
+    -- Configuration initialization
+    AP.InitConfig()
 
     -- Register the events we need
     -- (event unregistering is done automagicaly by ACE)
@@ -599,17 +605,8 @@ function AllPlayed:OnEnable()
    -- or 20 seconds depending on the refresh_rate setting
 	self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
 
-	-- Find the curent revision number from all the files revisions
-	self.revision = 0
-	if AllPlayed_revision then
-		for _, rev in pairs(AllPlayed_revision) do
-			local revision = tonumber(rev)
-			if revision and revision > self.revision then self.revision = revision end
-		end
-	else
-		assert(false,"No AllPlayed_revision")
-	end
-	command_options.args.title2.name = string.format(L["Version %s (r%s)"], self.version, self.revision)
+	-- Initialize version string for menus
+	command_options.args.title2.name = AP.GetVersionString()
 	
 	-- Create a frame with an OnUpdate event to deal with the disposal of the tooltip created for LDB 
 	self.OnUpdate_frame = CreateFrame("frame")
@@ -2337,19 +2334,26 @@ function AllPlayedLDB:OnClick(button,down)
 	-- The popup only when the button is release
 	if down then return end
 	
-	if not ldb_options.args then
-		ldb_options.args = {}
-		for _,key in ipairs({'title','title2','blankLine','display','sort','ignore','show_minimap_icon'}) do
-			ldb_options.args[key] = command_options.args[key]
+	-- For tests of EasyMenu
+	if button ==  "Button5" then
+		AP.DisplayConfigMenu()
+	else
+		-- Normal case without outside the test
+		if not ldb_options.args then
+			ldb_options.args = {}
+			for _,key in ipairs({'title','title2','blankLine','display','sort','ignore','show_minimap_icon'}) do
+				ldb_options.args[key] = command_options.args[key]
+			end
+			dewdrop:InjectAceOptionsTable(AllPlayed, ldb_options)
+			ldb_options.args.about = nil
+			ldb_options.args.standby = nil
+			ldb_options.args.debug = nil
 		end
-		dewdrop:InjectAceOptionsTable(AllPlayed, ldb_options)
-		ldb_options.args.about = nil
-		ldb_options.args.standby = nil
-		ldb_options.args.debug = nil
+		dewdrop:Open(self, 'children', function()
+			dewdrop:FeedAceOptionsTable(ldb_options)
+		end)
 	end
-	dewdrop:Open(self, 'children', function()
-		dewdrop:FeedAceOptionsTable(ldb_options)
-	end)
+	
 	if AllPlayed.tooltip then
 		AllPlayed.tooltip = lqt:Release(AllPlayed.tooltip)
 		AllPlayed.tooltip_anchor = nil
