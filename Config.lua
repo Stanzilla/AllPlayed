@@ -223,6 +223,69 @@ local function ReturnConfigMenu()
 			},
 		},
 		[5] = {
+			text = L["Sort"],
+			tooltipText = L["Set the sort options"];
+			hasArrow = true;
+			menuList = {
+				[1] = {
+					text = L["Sort Type"],
+					tooltipText = L["Select the sort type"];
+					hasArrow = true;
+					menuList = {
+						[1] = {
+							text = L["By name"];
+							list = 'sort_type';
+							arg1 = "alpha";
+						},
+						[2] = {
+							text = L["By level"];
+							list = 'sort_type';
+							arg1 = "level";
+						},
+						[3] = {
+							text = L["By experience"];
+							list = 'sort_type';
+							arg1 = "xp";
+						},
+						[4] = {
+							text = L["By rested XP"];
+							list = 'sort_type';
+							arg1 = "rested_xp";
+						},
+						[5] = {
+							text = L["By money"];
+							list = 'sort_type';
+							arg1 = "coin";
+						},
+						[6] = {
+							text = L["By time played"];
+							list = 'sort_type';
+							arg1 = "time_played";
+						},
+					},
+				},
+				[2] = {
+					text = L["Sort in reverse order"];
+					tooltipText = L["Use the curent sort type in reverse order"];
+					checked = 'reverse_sort';
+				},
+			},
+		},
+		[6] = {
+			text = L["Ignore Characters"],
+			tooltipText = L["Hide characters from display"];
+			hasArrow = true;
+			menuList = {
+			},
+		},
+		[7] = {
+			text = " ";
+			disabled = true;
+		},
+		[8] = {
+			text = L["Minimap Icon"];
+			tooltipText = L["Show Minimap Icon"];
+			checked = 'show_minimap_icon';
 		},
 	}	
 
@@ -264,156 +327,44 @@ local function ReturnConfigMenu()
 			if menu[i].menuList then AddCheckboxOption(menu[i].menuList) end
 			
 			-- Set notCheckable if no checkable items were found
-			if not foundCheck then
-				for i=1,#menu do
-					menu[i].notCheckable = 1
-				end
+		end
+		
+		if not foundCheck then
+			for i=1,#menu do
+				menu[i].notCheckable = 1
 			end
 		end
 	end
 	AddCheckboxOption(config_menu)
 	
+	-- Build the ignored list
+	local i = 1
+	for faction, faction_table in pairs(AP.db.account.data) do
+		for realm, realm_table in pairs(faction_table) do
+			for pc, _ in pairs(realm_table) do
+				local pc_name = format(L["%s : %s"], realm, pc)
+				config_menu[6].menuList[i] = {
+					text = pc_name;
+					tooltipText = string.format(L["Hide %s of %s from display"], pc, realm);
+					tooltipOnButton = 1;
+					keepShownOnClick = 1;
+					checked = function() return AllPlayed:GetOption('is_ignored',realm, pc) end;
+					func = function(dropdownmenu, arg1, arg2, checked) 
+						AllPlayed:SetOption(
+							'is_ignored', 
+							not AllPlayed:GetOption('is_ignored',realm, pc), 
+							realm, 
+							pc
+						)
+					end;
+				}
+				i = i + 1
+			end
+		end
+	end
+
 	return config_menu
 end
-
---[[
-	[2] = {
-		text = "Stack";
-		tooltipText = "Compresses your inventory.";
-		tooltipOnButton = 1;
-		func = function() MrPlow:DoStuff("stack") end;
-	},
-	[3] = {
-		text = "Defrag";
-		tooltipText = "Defragments your inventory.";
-		tooltipOnButton = 1;
-		func = function() MrPlow:DoStuff("defrag") end;
-	},
-	[4] = {
-		text = "Sort";
-		tooltipText = "Sorts your inventory.";
-		tooltipOnButton = 1;
-		func = function() MrPlow:DoStuff("sort") end;
-	},
-	[5] = {
-		text = "Consolidate";
-		tooltipText = "Consolidates your inventory.";
-		tooltipOnButton = 1;
-		func = function() MrPlow:DoStuff("consolidate") end;
-	},
-	[6] = {
-		text = "The Works";
-		tooltipText = "Stacks, plows and sorts. All in one.";
-		tooltipOnButton = 1;
-		func = function() MrPlow:DoStuff("theworks") end;
-	},
-	[7] = {
-		text = " ";
-		disabled = true;
-	},
-	[8] = {
-		text = "Bank";
-		hasArrow = true;
-		disabled = not isGBankShown;
-		menuList = {
-			[1] = {
-				text = "Bank Stack";
-				tooltipText = "Compresses your bank.";
-				tooltipOnButton = 1;
-				func = function() MrPlow:DoStuff("bankstack") end;
-				disabled = not isBankShown;
-			},
-			[2] = {
-				text = "Bank Defrag";
-				tooltipText = "Defragments your bank.";
-				tooltipOnButton = 1;
-				func = function() MrPlow:DoStuff("bankdefrag") end;
-				disabled = not isBankShown;
-			},
-			[3] = {
-				text = "Bank Sort";
-				tooltipText = "Sorts your bank.";
-				tooltipOnButton = 1;
-				func = function() MrPlow:DoStuff("banksort") end;
-				disabled = not isBankShown;
-			},
-			[4] = {
-				text = "Bank Consolidate";
-				tooltipText = "Consolidate your bank.";
-				tooltipOnButton = 1;
-				func = function() MrPlow:DoStuff("bankconsolidate") end;
-				disabled = not isBankShown;
-			},
-			[5] = {
-				text = "Bank The Works";
-				tooltipText = "Stacks, plows and sorts your bank. All in one.";
-				tooltipOnButton = 1;
-				func = function() MrPlow:DoStuff("banktheworks") end;
-				disabled = not isBankShown;
-			},
-		};
-	},
-	[9] = {
-		text = "Guild Bank";
-		hasArrow = true;
-		disabled = not isGBankShown;
-		menuList = {
-			[1] = {
-				text = "Guild Bank Stack";
-				tooltipText = "Compresses your guild bank.";
-				tooltipOnButton = 1;
-				func = function() MrPlow:DoStuff("gbankstack") end;
-				tooltipOnButton = 1;
-				disabled = not isGBankShown;
-			},
-			[2] = {
-				text = "Guild Bank Defrag";
-				tooltipText = "Defragments your guild bank.";
-				func = function() MrPlow:DoStuff("gbankdefrag") end;
-				tooltipOnButton = 1;
-				disabled = not isGBankShown;
-			},
-			[3] = {
-				text = "Guild Bank Sort";
-				tooltipText = "Sorts your guild bank.";
-				func = function() MrPlow:DoStuff("gbanksort") end;
-				tooltipOnButton = 1;
-				disabled = not isGBankShown;
-			},
-			[4] = {
-				text = "Guild Bank The Works";
-				tooltipText = "Stacks, plows and sorts your guild bank. All in one.";
-				func = function() MrPlow:DoStuff("gbanktheworks") end;
-				tooltipOnButton = 1;
-				disabled = not isGBankShown;
-			},
-		};
-	},
-	[10] = {
-		text = " ";
-		disabled = true;
-	},
-	[11] = {
-		text = "Stop";
-		tooltipText = "Stops the current plow job.";
-		tooltipOnButton = 1;
-		func = function() MrPlow:DoStuff("stop") end;
-	},
-	[12] = {
-		text = toggle_action .. " minimap button";
-		tooltipText = toggle_action .. " the minimap button.";
-		tooltipOnButton = 1;
-		func = function() 
-			if not db.hide then 
-				db.hide = true
-				icon:Hide("MrPlowLDB")
-			else 
-				db.hide = nil
-				icon:Show("MrPlowLDB") 
-			end 
-		end;
-	},
-]]--
 
 do
 	local dropdownFrame = CreateFrame("Frame", "AllPlayedDropdownMenu", anchor, "UIDropDownMenuTemplate")

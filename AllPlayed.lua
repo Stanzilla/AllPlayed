@@ -504,6 +504,7 @@ function AllPlayed:OnEnable()
     -- Note: AceDB-2.0 will also call this when standby is toggled.
     
     -- Configuration initialization
+    AP.db = self.db
     AP.InitConfig()
 
     -- Register the events we need
