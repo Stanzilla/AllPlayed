@@ -109,6 +109,20 @@ L:RegisterTranslations("enUS", function()
 		["100%"]																				= true,
 		["150%"]																				= true,
 
+		["Filter"]																			= true,
+		["Specify what to display"]													= true,
+		["Configuration"]																	= true,
+		["Open configuration dialog"]													= true,
+		["Factions and Realms"]															= true,
+		["Time Played"]																	= true,
+		["About"]																			= true,
+		["UI Settings"]																	= true,
+		["Set UI options"]																= true,
+		["Experience Points"]															= true,
+		["Sort Order"]																		= true,
+		["Main Settings"]																	= true,
+		["Do not show Percent Rest"]													= true,
+
 		-- Strings
 		["v%s - %s (Type /ap for help)"]                 	       			= true,
 		["%s characters "]                               	       			= true,

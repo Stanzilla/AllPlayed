@@ -1,4 +1,4 @@
-﻿local display_name, AP = ...
+﻿local AP_display_name, AP = ...
 
 -- AllPlayed.lua
 -- $Id$
@@ -30,7 +30,7 @@ local C = LibStub("LibCrayon-3.0")
 -- tablet is for the tablet library functions
 --local tablet = AceLibrary("Tablet-2.0")
 -- dewdrop is for the menu functions (only needed if FuBar is not there)
-local dewdrop = AceLibrary("Dewdrop-2.0")
+--local dewdrop = AceLibrary("Dewdrop-2.0")
 -- LibDataBroker
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1", true)
 -- LibDBIcon
@@ -200,6 +200,7 @@ AllPlayed:RegisterDefaults('profile', {
 
 -- Options for Dewdrop
 -- See AceOptions for the format
+--[[
 local command_options = {
 	type = 'group',
 	args = {
@@ -459,7 +460,7 @@ local command_options = {
 		}
 	}
 }
-
+]]--
 
 
 -- This function is called by the ACE2 framework one time after the addon is loaded
@@ -468,15 +469,14 @@ function AllPlayed:OnInitialize()
     --self:SetDebugging(true) -- to have debugging through your whole app.
 
 	-- Register the command line
-	-- Most of this code is shamelessly stolen from Nymbia's Quartz (big thanks)
-	-- /ap and /allplayed will open a dewdrop menu
-	-- /apcl and /allplayedcl will be used for the command line options
+	-- /ap and /allplayed will open the blizard interface panel
 	self:RegisterChatCommand({L["/ap"], L["/allplayed"]}, function()
-		AceLibrary("Dewdrop-2.0"):Open('AllPlayed', 'children', function()
-			AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
-		end)
+		--AceLibrary("Dewdrop-2.0"):Open('AllPlayed', 'children', function()
+		--	AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
+		--end)
+		InterfaceOptionsFrame_OpenToCategory(AP_display_name)
+
 	end)
-	self:RegisterChatCommand({L["/apcl"], L["/allplayedcl"]}, command_options)
 
 
     -- Initial setup is done by OnEnable (not mush to do here)
@@ -560,6 +560,7 @@ function AllPlayed:OnEnable()
     self:SaveVar()
 
     -- Initialise the is_ignored option table
+--[[    
     command_options.args.ignore.args = {}
     for faction, faction_table in pairs(self.db.account.data) do
         for realm, realm_table in pairs(faction_table) do
@@ -575,6 +576,7 @@ function AllPlayed:OnEnable()
         	end
         end
     end
+]]--    
 
     -- Compute Honor at least once (it will be computed only if it change afterward
     self:ComputeTotalHonor()
@@ -607,7 +609,7 @@ function AllPlayed:OnEnable()
 	self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
 
 	-- Initialize version string for menus
-	command_options.args.title2.name = AP.GetVersionString()
+	--command_options.args.title2.name = AP.GetVersionString()
 	
 	-- Create a frame with an OnUpdate event to deal with the disposal of the tooltip created for LDB 
 	self.OnUpdate_frame = CreateFrame("frame")
@@ -2336,8 +2338,9 @@ function AllPlayedLDB:OnClick(button,down)
 	if down then return end
 	
 	-- For tests of EasyMenu
-	if button ==  "Button5" then
+	if button ==  "RightButton" then
 		AP.DisplayConfigMenu()
+--[[		
 	else
 		-- Normal case without outside the test
 		if not ldb_options.args then
@@ -2353,6 +2356,7 @@ function AllPlayedLDB:OnClick(button,down)
 		dewdrop:Open(self, 'children', function()
 			dewdrop:FeedAceOptionsTable(ldb_options)
 		end)
+]]--
 	end
 	
 	if AllPlayed.tooltip then
