@@ -210,16 +210,6 @@ local function ReturnConfigMenu()
 					tooltipText = L["Use graphics for coin and PvP currencies"];
 					checked = 'use_icons';
 				},
-				[15] = {
-					text = L["Scale"];
-					tooltipText = L["Scale the tooltip (70% to 150%)"];
-					disabled = true;
-				},
-				[16] = {
-					text = L["Opacity"];
-					tooltipText = L["% opacity of the tooltip background"];
-					disabled = true;
-				},
 			},
 		},
 		[5] = {
@@ -345,7 +335,7 @@ local function ReturnConfigMenu()
 	
 	-- Build the ignored list
 	local i = 1
-	for faction, faction_table in pairs(AP.db.account.data) do
+	for faction, faction_table in pairs(AP.db.global.data) do
 		for realm, realm_table in pairs(faction_table) do
 			for pc, _ in pairs(realm_table) do
 				local pc_name = format(L["%s : %s"], realm, pc)
@@ -677,7 +667,7 @@ local function GetOptions()
 
 	-- Ignore section
 	local faction_order = 1
-	for faction, faction_table in pairs(AP.db.account.data) do
+	for faction, faction_table in pairs(AP.db.global.data) do
 		local faction_id = "faction" .. faction_order
 		options.args.ignore.args[faction_id] = {
 				type 	= 'group', 

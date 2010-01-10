@@ -27,10 +27,6 @@ local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 local A = LibStub("LibAbacus-3.0")
 -- C is for colour management functions
 local C = LibStub("LibCrayon-3.0")
--- tablet is for the tablet library functions
---local tablet = AceLibrary("Tablet-2.0")
--- dewdrop is for the menu functions (only needed if FuBar is not there)
---local dewdrop = AceLibrary("Dewdrop-2.0")
 -- LibDataBroker
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1", true)
 -- LibDBIcon
@@ -47,7 +43,7 @@ local XPToNextLevelCache = {}
 local tabletParent = "AllPlayedTabletParent"
 
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
-AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1")
+AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1")
 
 -- For debuging
 AllPlayed.AP = AP
@@ -116,9 +112,87 @@ end	-- do block
 
 
 -- The data will be saved in WTF\{account name}\SaveVariables\AllPlayedDB.lua
-AllPlayed:RegisterDB("AllPlayedDB")
+--AllPlayed:RegisterDB("AllPlayedDB")
+
+-- Default values for the save variables
+default_options = {
+	global = {
+		data = {
+			-- Faction
+			['*'] = {
+				-- Realm
+				['*'] = {
+					-- Name
+					['*'] = {
+						class                      = "",   -- English class name
+						class_loc                  = "",   -- Localized class name
+						level                      = 0,
+						coin                       = 0,
+						rested_xp                  = 0,
+						xp                         = -1,
+						max_rested_xp              = 0,
+						last_update                = 0,
+						is_resting                 = false,
+						seconds_played             = 0,
+						seconds_played_last_update	= 0,
+						zone_text                  = L["Unknown"],
+						subzone_text               = "",
+						arena_points					= 0,
+						honor_points					= 0,
+						highest_rank					= nil,
+						honor_kills						= 0,
+					}
+				}
+			}
+		},
+		cache = {
+			XPToNextLevel = {
+				-- Build version
+				['*'] = {}
+			}
+		},
+	},
+	profile = {
+		options = {
+			all_factions               = true,
+			all_realms                 = true,
+			show_coins						= true,
+			show_played_time				= true,
+			show_seconds               = false,
+			show_progress              = true,
+			show_rested_xp             = false,
+			percent_rest               = "100",
+			show_rested_xp_countdown   = true,
+			refresh_rate               = 20,
+			show_class_name            = true,
+			colorize_class             = true,
+			use_pre_210_shaman_colour	= false,
+			show_location              = "none",
+			show_xp_total              = true,
+			show_arena_points				= false,
+			show_honor_points				= false,
+			show_honor_kills				= false,
+			show_pvp_totals				= false,
+			tooltip_scale					= 1,
+			opacity							= .9,
+			sort_type						= "alpha",
+			use_icons						= false,
+			is_ignored = {
+				-- Realm
+				['*'] = {
+					-- Name
+					['*'] = false,
+				},
+			},
+			ldbicon = {
+			  hide = nil,
+			},
+		},
+	},
+}
 
 -- Set the default for the save variables. Not very useful except to show the format
+--[[
 AllPlayed:RegisterDefaults('account', {
     -- Data for each PC
     data = {
@@ -157,8 +231,10 @@ AllPlayed:RegisterDefaults('account', {
 		}
 	 }
 })
+]]--
 
 -- The options that only change the display are done by profile
+--[[
 AllPlayed:RegisterDefaults('profile', {
     -- Global Options
     options = {
@@ -197,298 +273,54 @@ AllPlayed:RegisterDefaults('profile', {
 		  },
     },
 })
-
--- Options for Dewdrop
--- See AceOptions for the format
---[[
-local command_options = {
-	type = 'group',
-	args = {
-		title	= {
-			type = "header",
-			name = L["AllPlayed Configuration"],
-			order = 1
-		},
-		title2	= {
-			type = "header",
-			order = 2
-		},
-		blankLine = {
-			type = 'header',
-			order = 3,
-		},
-		display = {
-			type = 'group', name = L["Display"], desc = L["Set the display options"], args = {
-				 all_factions = {
-					  name      = L["All Factions"],
-					  desc      = L["All factions will be displayed"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('all_factions') end,
-					  set       = function(v) AllPlayed:SetOption('all_factions',v) end,
-					  order     = 1,
-				 },
-				 all_realms = {
-					  name      = L["All Realms"],
-					  desc      = L["All realms will de displayed"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('all_realms') end,
-					  set       = function(v) AllPlayed:SetOption('all_realms',v) end,
-					  order     = 2,
-				 },
-				 show_played_time = {
-					  name      = L["Show Played Time"],
-					  desc      = L["Display the played time and the total time played"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('show_played_time') end,
-					  set       = function(v) AllPlayed:SetOption('show_played_time',v) end,
-					  order     = 3,
-				 },
-				 show_seconds = {
-					  name      = L["Show Seconds"],
-					  desc      = L["Display the seconds in the time strings"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('show_seconds') end,
-					  set       = function(v) AllPlayed:SetOption('show_seconds',v) end,
-					  order     = 4,
-				 },
-				 show_coins = {
-					  name      = L["Show Gold"],
-					  desc      = L["Display the gold each character pocess"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('show_coins') end,
-					  set       = function(v) AllPlayed:SetOption('show_coins',v) end,
-					  order     = 5,
-				 },
-
-				 show_progress = {
-					  name      = L["Show XP Progress"],
-					  desc      = L["Display XP progress as a decimal value appended to the level"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('show_progress') end,
-					  set       = function(v) AllPlayed:SetOption('show_progress',v) end,
-					  order     = 6,
-				 },
-				 show_xp_total = {
-					  name      = L["Show XP total"],
-					  desc      = L["Show the total XP for all characters"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('show_xp_total') end,
-					  set       = function(v) AllPlayed:SetOption('show_xp_total',v) end,
-					  order     = 7,
-				 },
-				 show_location = {
-					  name      = L["Show Location"],
-					  desc      = L["Show the character location"],
-					  type      = 'text',
-					  get       = function() return AllPlayed:GetOption('show_location') end,
-					  set       = function(v) AllPlayed:SetOption('show_location',v) end,
-					  validate  = { ["none"]      = L["Don't show location"],
-										 ["loc"]       = L["Show zone"],
-										 ["sub"]       = L["Show subzone"],
-										 ["loc/sub"]   = L["Show zone/subzone"]
-					  },
-					  order     = 8,
-				 },
-				 rested_xp = {
-					  type = 'group', name = L["Rested XP"], desc = L["Set the rested XP options"], args = {
-							 show_rested_xp = {
-								 name        = L["Rested XP Total"],
-								 desc        = L["Show the character rested XP"],
-								 type        = 'toggle',
-								 get       	 = function() return AllPlayed:GetOption('show_rested_xp') end,
-								 set       	 = function(v) AllPlayed:SetOption('show_rested_xp',v) end,
-								 order = 1,
-							 },
-							 percent_rest = {
-								 name        = L["Percent Rest"],
-								 desc        = L["Set the base for % display of rested XP"],
-								 type        = 'text',
-								 get       	 = function() return AllPlayed:GetOption('percent_rest') end,
-								 set       	 = function(v) AllPlayed:SetOption('percent_rest',v) end,
-								 validate    = { ["0"] = L["None"], ["100"] = L["100%"], ["150"] = L["150%"] },
-								 order       = 2,
-							},
-							 show_rested_xp_countdown = {
-								 name        = L["Rested XP Countdown"],
-								 desc        = L["Show the time remaining before the character is 100% rested"],
-								 type        = 'toggle',
-								 get       	 = function() return AllPlayed:GetOption('show_rested_xp_countdown') end,
-								 set       	 = function(v) AllPlayed:SetOption('show_rested_xp_countdown',v) end,
-								 order = 3,
-							 },
-					  },
-					  order     = 8,
-				 },
-				 pvp = {
-					  type = 'group', name = L["PVP"], desc = L["Set the PVP options"], guiHidden = false, args = {
-								show_honor_kills= {
-									name        = L["Honor Kills"],
-									desc        = L["Show the character honor kills"],
-									type        = 'toggle',
-									get       	= function() return AllPlayed:GetOption('show_honor_kills') end,
-									set       	= function(v) AllPlayed:SetOption('show_honor_kills',v) end,
-									order = 1,
-								},
-								show_honor_points= {
-									name        = L["Honor Points"],
-									desc        = L["Show the character honor points"],
-									type        = 'toggle',
-									get       	= function() return AllPlayed:GetOption('show_honor_points') end,
-									set       	= function(v) AllPlayed:SetOption('show_honor_points',v) end,
-									order = 2,
-								},
-								show_arena_points	= {
-									name        = L["Arena Points"],
-									desc        = L["Show the character arena points"],
-									type        = 'toggle',
-									get       	= function() return AllPlayed:GetOption('show_arena_points') end,
-									set       	= function(v) AllPlayed:SetOption('show_arena_points',v) end,
-									order = 3,
-								},
-								show_pvp_totals = {
-									name        = L["Show PVP Totals"],
-									desc        = L["Show the honor related stats for all characters"],
-									type        = 'toggle',
-									get         = function() return AllPlayed:GetOption('show_pvp_totals') end,
-									set         = function(v) AllPlayed:SetOption('show_pvp_totals',v) end,
-									order = 10,
-								},
-					  },
-					  order     = 9,
-				 },
-				 show_class_name = {
-					  name      = L["Show Class Name"],
-					  desc      = L["Show the character class beside the level"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('show_class_name') end,
-					  set       = function(v) AllPlayed:SetOption('show_class_name',v) end,
-					  order     = 10,
-				 },
-				 colorize_class = {
-					  name      = L["Colorize Class"],
-					  desc      = L["Colorize the character name based on class"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('colorize_class') end,
-					  set       = function(v) AllPlayed:SetOption('colorize_class',v) end,
-					  order     = 11,
-				 },
-				 use_pre_210_shaman_colour = {
-					  name      = L["Use Old Shaman Colour"],
-					  desc      = L["Use the pre-210 patch colour for the Shaman class"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('use_pre_210_shaman_colour') end,
-					  set       = function(v) AllPlayed:SetOption('use_pre_210_shaman_colour',v) end,
-					  order     = 12,
-				 },
-				 use_icons = {
-					  name      = L["Use Icons"],
-					  desc      = L["Use graphics for coin and PvP currencies"],
-					  type      = 'toggle',
-					  get       = function() return AllPlayed:GetOption('use_icons') end,
-					  set       = function(v) AllPlayed:SetOption('use_icons',v) end,
-					  order     = 13,
-				 },
-				 tooltip_scale = {
-					  name      = L["Scale"],
-					  desc      = L["Scale the tooltip (70% to 150%)"],
-					  type      = 'range',
-					  min		  = .7,
-					  max       = 1.5,
-					  step      = .05,
-					  isPercent = true,
-					  get       = function() return AllPlayed:GetOption('tooltip_scale') end,
-					  set       = function(v) AllPlayed:SetOption('tooltip_scale',v) end,
-					  order     = 14,
-				 },
-				 opacity = {
-					  name      = L["Opacity"],
-					  desc      = L["% opacity of the tooltip background"],
-					  type      = 'range',
-					  min		  = 0,
-					  max       = 1,
-					  step      = .05,
-					  isPercent = true,
-					  get       = function() return AllPlayed:GetOption('opacity') end,
-					  set       = function(v) AllPlayed:SetOption('opacity',v) end,
-					  order     = 15,
-				 },
-			}, order = 10
-		},
-		sort = {
-			type = 'group', name = L["Sort"], desc = L["Set the sort options"], args = {
-				sort_type = {
-					name      = L["Sort Type"],
-					desc      = L["Select the sort type"],
-					type      = 'text',
-					get       = function() return AllPlayed:GetOption('sort_type') end,
-					set       = function(v) AllPlayed:SetOption('sort_type',v) end,
-					validate  = {
-								  ["alpha"] 			= L["By name"],
-								  ["level"] 			= L["By level"],
-								  ["xp"]					= L["By experience"],
-								  ["rested_xp"]		= L["By rested XP"],
-								  ["percent_rest"]	= L["By % rested"],
-								  ["coin"]				= L["By money"],
-								  ["time_played"]		= L["By time played"],
-					},
-					order     = 1,
-				},
-				reverse_sort = {
-				  name      = L["Sort in reverse order"],
-				  desc      = L["Use the curent sort type in reverse order"],
-				  type      = 'toggle',
-				  get       = function() return AllPlayed:GetOption('reverse_sort') end,
-				  set       = function(v) AllPlayed:SetOption('reverse_sort',v) end,
-				  order     = 2,
-				},
-			}, order = 20
-		},
-		ignore = {
-			name    = L["Ignore Characters"],
-			desc    = L["Hide characters from display"],
-			type    = 'group',
-			args    = {}, 			-- Will be set in OnEnable
-			order   = 30
-		},
-		show_minimap_icon = {
-			name      = L["Minimap Icon"],
-			desc      = L["Show Minimap Icon"],
-			type      = 'toggle',
-			get       = function() return AllPlayed:GetOption('show_minimap_icon') end,
-			set       = function(v) AllPlayed:SetOption('show_minimap_icon',v) end,
-			order     = -5,
-		}
-	}
-}
 ]]--
-
 
 -- This function is called by the ACE2 framework one time after the addon is loaded
 function AllPlayed:OnInitialize()
-    -- code here, executed only once.
-    --self:SetDebugging(true) -- to have debugging through your whole app.
+	-- code here, executed only once.
+   --self:SetDebugging(true) -- to have debugging through your whole app.
 
 	-- Register the command line
 	-- /ap and /allplayed will open the blizard interface panel
 	self:RegisterChatCommand({L["/ap"], L["/allplayed"]}, function()
-		--AceLibrary("Dewdrop-2.0"):Open('AllPlayed', 'children', function()
-		--	AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(command_options)
-		--end)
 		InterfaceOptionsFrame_OpenToCategory(AP_display_name)
-
 	end)
 
+	-- Conversion of old data
+	AllPlayedDB.global = AllPlayedDB.global or {}
+	if AllPlayedDB.global.data_version ~= "30300-2" and AllPlayedDB.account then
+	
+		local function tcopy(t)
+		  local t2 = AcquireTable()
+		  for k,v in pairs(t) do
+		  	 if type(v) == 'table' then
+		  	 	t2[k] = tcopy(v)
+		  	 else
+		  	 	t2[k] = v
+		  	 end
+		  end
+		  return t2
+		end
+	
+		AllPlayedDB.global = tcopy(AllPlayedDB.account)
+		AllPlayedDB.profiles = nil
+		AllPlayedDB.currentProfile = nil
+		AllPlayedDB.global.data_version = "30300-2"
+	end
 
-    -- Initial setup is done by OnEnable (not mush to do here)
-    -- We set total variables to zero and create the tables that will never
-    -- be deleted
-    self.total_faction      = { [L["Horde"]]    = { time_played = 0, coin = 0 },
-                                [L["Alliance"]] = { time_played = 0, coin = 0 },
-    }
-    self.total_realm        = { }
-    self.total              = { time_played = 0, coin = 0, xp = 0 }
+	-- Register the varibles with the defaults
+	self.db = LibStub("AceDB-3.0"):New("AllPlayedDB", default_options)
+	
+	-- Initial setup is done by OnEnable (not mush to do here)
+	-- We set total variables to zero and create the tables that will never
+	-- be deleted
+	self.total_faction      = { [L["Horde"]]    = { time_played = 0, coin = 0 },
+									    [L["Alliance"]] = { time_played = 0, coin = 0 },
+	}
+	self.total_realm        = { }
+	self.total              = { time_played = 0, coin = 0, xp = 0 }
 
-    self.sort_tables_done    = false
+	self.sort_tables_done    = false
 
 	-- Initialize the cache
 	local build_version
@@ -558,25 +390,6 @@ function AllPlayed:OnEnable()
 
     -- Get the values for the current character
     self:SaveVar()
-
-    -- Initialise the is_ignored option table
---[[    
-    command_options.args.ignore.args = {}
-    for faction, faction_table in pairs(self.db.account.data) do
-        for realm, realm_table in pairs(faction_table) do
-        	for pc, _ in pairs(realm_table) do
-        		local pc_name = format(L["%s : %s"], realm, pc)
-        		command_options.args.ignore.args[pc_name] = {
-        			name = pc_name,
-        			desc = string.format(L["Hide %s of %s from display"], pc, realm),
-        			type = 'toggle',
-        			get  = function() return AllPlayed:GetOption('is_ignored',realm, pc) end,
-        			set  = function(value) AllPlayed:SetOption('is_ignored', value, realm, pc) end
-        		}
-        	end
-        end
-    end
-]]--    
 
     -- Compute Honor at least once (it will be computed only if it change afterward
     self:ComputeTotalHonor()
@@ -662,7 +475,7 @@ function AllPlayed:OnDataUpdate()
     --self:Debug("AllPlayed:OnDataUpdate()")
 
     -- Update the data that may have changed but are not tracked by an event
-    self.db.account.data[self.faction][self.realm][self.pc].is_resting = IsResting()
+    self.db.global.data[self.faction][self.realm][self.pc].is_resting = IsResting()
 
     -- Recompute the totals
     self:ComputeTotal()
@@ -688,7 +501,7 @@ function AllPlayed:ComputeTotal()
     self.total.xp                                   = 0
 
     -- Let all the factions, realms and PC be counted
-    for faction, faction_table in pairs(self.db.account.data) do
+    for faction, faction_table in pairs(self.db.global.data) do
         for realm, realm_table in pairs(faction_table) do
             --self:Debug("faction: %s realm: %s", faction, realm)
 
@@ -767,7 +580,7 @@ function AllPlayed:ComputeTotalHonor()
 	self.total.arena_points                        				= 0
 
     -- Let all the factions, realms and PC be counted
-    for faction, faction_table in pairs(self.db.account.data) do
+    for faction, faction_table in pairs(self.db.global.data) do
         for realm, realm_table in pairs(faction_table) do
             --self:Debug("faction: %s realm: %s", faction, realm)
 
@@ -954,7 +767,7 @@ function AllPlayed:DrawTooltip(anchor)
 
 					for _, pc in ipairs(self.sort_realm_pc[self:GetOption('display_sort_type')][faction][realm]) do
 						if not self:GetOption('is_ignored', realm, pc) then
-							local pc_data = self.db.account.data[faction][realm][pc]
+							local pc_data = self.db.global.data[faction][realm][pc]
 
 							wipe(col_text)
 							local col_no = 1
@@ -1223,7 +1036,7 @@ function AllPlayed:SaveVar()
     --self:Debug("AllPlayed:SaveVar()")
 
     -- Fill some of the SaveVariables
-    local pc = self.db.account.data[self.faction][self.realm][self.pc]
+    local pc = self.db.global.data[self.faction][self.realm][self.pc]
     pc.class_loc, pc.class	= UnitClass("player")
     pc.level           		= UnitLevel("player")
     pc.xp              		= UnitXP("player")
@@ -1240,10 +1053,10 @@ function AllPlayed:SaveVar()
     -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
     if UnitXPMax("player") ~= XPToNextLevel(UnitLevel("player")) then
     	local _, build_version = GetBuildInfo()
-    	self.db.account.cache.XPToNextLevel[build_version][UnitLevel("player")] = UnitXPMax("player")
+    	self.db.global.cache.XPToNextLevel[build_version][UnitLevel("player")] = UnitXPMax("player")
     end
 
-    --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.account.data[self.faction][self.realm][self.pc].zone_text)
+    --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.global.data[self.faction][self.realm][self.pc].zone_text)
 
     -- Make sure that coin is not nil
     pc.coin = GetMoney() or 0
@@ -1260,7 +1073,7 @@ end
 function AllPlayed:SaveVarHonor()
 	--self:Debug("SaveVarHonor()")
 
-	local pc = self.db.account.data[self.faction][self.realm][self.pc]
+	local pc = self.db.global.data[self.faction][self.realm][self.pc]
 
 	pc.honor_points	 					= GetHonorCurrency()
 	pc.honor_kills, pc.highest_rank = GetPVPLifetimeStats()
@@ -1270,7 +1083,7 @@ end
 function AllPlayed:SetSecondsPlayed(seconds_played)
 	--self:Debug("SetSecondsPlayed(): ",seconds_played)
 
-	local pc = self.db.account.data[self.faction][self.realm][self.pc]
+	local pc = self.db.global.data[self.faction][self.realm][self.pc]
 
 	pc.seconds_played              = seconds_played
 	pc.seconds_played_last_update  = time()
@@ -1490,7 +1303,7 @@ end
 -- Function that Send a request to the server to get an update of the time played.
 function AllPlayed:RequestTimePlayed()
     -- We only send the event if the message has not been seen for 10 seconds
-    if time() - self.db.account.data[self.faction][self.realm][self.pc].seconds_played_last_update > 10 then
+    if time() - self.db.global.data[self.faction][self.realm][self.pc].seconds_played_last_update > 10 then
         RequestTimePlayed()
     end
 
@@ -1729,7 +1542,7 @@ function AllPlayed:BuildSortTables()
 	self.sort_realm_pc["time_played"] 				= AcquireTable()
 	self.sort_realm_pc["rev-time_played"]			= AcquireTable()
 
-	for faction, faction_table in pairs(self.db.account.data) do
+	for faction, faction_table in pairs(self.db.global.data) do
 
 		-- Realms in each faction are alpha sorted
 		--self:Debug("ST : Faction = ",faction)
@@ -2188,11 +2001,11 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[79] 	  = 1670800
 
 	-- Initialize the exceptions that were found by AllPlayed
-	--	XPToNextLevelCache = self.db.account.cache.XPToNextLevel[build_version]
-	if AllPlayed.db.account.cache.XPToNextLevel[build_version] ~= nil then
+	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]
+	if AllPlayed.db.global.cache.XPToNextLevel[build_version] ~= nil then
 		for level = 1,69 do
-			if AllPlayed.db.account.cache.XPToNextLevel[build_version][level] ~= nil then
-				XPToNextLevelCache[level] = AllPlayed.db.account.cache.XPToNextLevel[build_version][level]
+			if AllPlayed.db.global.cache.XPToNextLevel[build_version][level] ~= nil then
+				XPToNextLevelCache[level] = AllPlayed.db.global.cache.XPToNextLevel[build_version][level]
 			end
 		end
 	end
