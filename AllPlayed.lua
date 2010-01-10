@@ -22,7 +22,6 @@ local TEN_DAYS  = 60 * 60 * 24 * 10
 -- Load external libraries
 
 -- L is for localisation (to allow translation of the addon)
---local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
 -- A is for time and money formating functions
 local A = LibStub("LibAbacus-3.0")
@@ -41,13 +40,12 @@ local CLASS_COLOURS = {}
 -- Local cache
 local XPToNextLevelCache = {}
 
-local tabletParent = "AllPlayedTabletParent"
-
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
-AllPlayed = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDebug-2.0", "AceEvent-2.0", "AceHook-2.1")
+--AllPlayed = AceLibrary("AceAddon-2.0"):new("AceEvent-2.0", "AceHook-2.1")
+AllPlayed = LibStub("AceAddon-3.0"):NewAddon("AllPlayed", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0")
 
 -- For debuging
-AllPlayed.AP = AP
+--AllPlayed.AP = AP
 
 -- Local function prototypes
 local AcquireTable
@@ -111,9 +109,12 @@ do
 	end
 end	-- do block
 
+function AllPlayed:Debug(...)
+end
 
--- The data will be saved in WTF\{account name}\SaveVariables\AllPlayedDB.lua
---AllPlayed:RegisterDB("AllPlayedDB")
+--[[ ================================================================= ]]--
+--[[                      Ace Framework Init                           ]]--
+--[[ ================================================================= ]]--
 
 -- Default values for the save variables
 default_options = {
@@ -192,89 +193,6 @@ default_options = {
 	},
 }
 
--- Set the default for the save variables. Not very useful except to show the format
---[[
-AllPlayed:RegisterDefaults('account', {
-    -- Data for each PC
-    data = {
-        -- Faction
-        ['*'] = {
-            -- Realm
-            ['*'] = {
-                -- Name
-                ['*'] = {
-                    class                       = "",   -- English class name
-                    class_loc                   = "",   -- Localized class name
-                    level                       = 0,
-                    coin                        = 0,
-                    rested_xp                   = 0,
-                    xp                          = -1,
-                    max_rested_xp               = 0,
-                    last_update                 = 0,
-                    is_resting                  = false,
-                    seconds_played              = 0,
-                    seconds_played_last_update  = 0,
-                    zone_text                   = L["Unknown"],
-                    subzone_text                = "",
-                    arena_points						= 0,
-                    honor_points						= 0,
-                    highest_rank						= nil,
-                    honor_kills						= 0,
-
-                }
-            }
-        }
-    },
-    cache = {
-		XPToNextLevel = {
-			-- Build version
-			['*'] = {}
-		}
-	 }
-})
-]]--
-
--- The options that only change the display are done by profile
---[[
-AllPlayed:RegisterDefaults('profile', {
-    -- Global Options
-    options = {
-			all_factions               = true,
-			all_realms                 = true,
-			show_coins						= true,
-			show_played_time				= true,
-			show_seconds               = true,
-			show_progress              = true,
-			show_rested_xp             = false,
-			percent_rest               = "100",
-			show_rested_xp_countdown   = true,
-			refresh_rate               = 1,
-			show_class_name            = false,
-			colorize_class             = true,
-			use_pre_210_shaman_colour	= false,
-			show_location              = "none",
-			show_xp_total              = false,
-			show_arena_points				= false,
-			show_honor_points				= false,
-			show_honor_kills				= false,
-			show_pvp_totals				= false,
-			tooltip_scale					= 1,
-			opacity							= .9,
-			sort_type						= "alpha",
-			use_icons						= false,
-			is_ignored = {
-        	-- Realm
-        	['*'] = {
-        		-- Name
-        		['*'] = false,
-        	},
-        },
-        ldbicon = {
-			  hide = nil,
-		  },
-    },
-})
-]]--
 
 -- This function is called by the Ace2 framework one time after the addon is loaded
 function AllPlayed:OnInitialize()
@@ -283,10 +201,12 @@ function AllPlayed:OnInitialize()
 
 	-- Register the command line
 	-- /ap and /allplayed will open the blizard interface panel
-	self:RegisterChatCommand({L["/ap"], L["/allplayed"]}, function()
+	SLASH_ALLPLAYED_CONFIG1 = L["/ap"]
+	SLASH_ALLPLAYED_CONFIG2 = L["/allplayed"]
+	SlashCmdList["ALLPLAYED_CONFIG"] = function()
 		InterfaceOptionsFrame_OpenToCategory(AP_display_name)
-	end)
-
+	end
+	
 	-- Conversion of old data
 	AllPlayedDB.global = AllPlayedDB.global or {}
 	if AllPlayedDB.global.data_version ~= "30300-2" and AllPlayedDB.account then
@@ -327,7 +247,6 @@ function AllPlayed:OnInitialize()
 	self.sort_tables_done    = false
 
 	-- Initialize the cache
-	local build_version
 	InitXPToLevelCache()
 end
 
@@ -356,7 +275,6 @@ function AllPlayed:OnEnable()
     self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
 
     -- Hook the functions that need hooking
-    -- (hook removal is done automagicaly by Ace)
     self:Hook("Logout", true)
     self:Hook("Quit",   true)
 
@@ -422,7 +340,8 @@ function AllPlayed:OnEnable()
 
    -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
    -- or 20 seconds depending on the refresh_rate setting
-	self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
+	--self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
+	self.timer = self:ScheduleRepeatingTimer("MyUpdate", self:GetOption('refresh_rate'))
 
 	-- Create a frame with an OnUpdate event to deal with the disposal of the tooltip created for LDB 
 	self.OnUpdate_frame = CreateFrame("frame")
@@ -994,7 +913,7 @@ function AllPlayed:DrawTooltip(anchor)
 end
 
 -- Function trigered when the TIME_PLAYED_MSG event is fired
-function AllPlayed:OnTimePlayedMsg(seconds_played)
+function AllPlayed:OnTimePlayedMsg(msg, seconds_played)
     --self:Debug("OnTimePlayedMsg(): ",seconds_played)
 
     -- We save the normal variables and the seconds played
@@ -1006,7 +925,7 @@ function AllPlayed:OnTimePlayedMsg(seconds_played)
 end
 
 -- Event handler for the events that trigger a sort
-function AllPlayed:EventHandlerWithSort()
+function AllPlayed:EventHandlerWithSort(msg)
     --self:Debug("EventHandlerWithSort(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
 
     -- Trigger the sort
@@ -1017,7 +936,7 @@ function AllPlayed:EventHandlerWithSort()
 end
 
 -- Event handler for the other events registered
-function AllPlayed:EventHandler()
+function AllPlayed:EventHandler(msg)
     --self:Debug("EventHandler(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
 
     -- We save a new copy of the vars
@@ -1174,9 +1093,11 @@ function AllPlayed:SetOption( option, value, ... )
 		--self:Debug("=> refresh rate:", self:GetOption('refresh_rate'))
 
 		-- If there is a timer active, we change the rate
-		if self:IsEventScheduled(self.name) then
-			self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
-		end
+		--if self:IsEventScheduled(self.name) then
+		--	self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
+		--end
+		self:CancelTimer(self.timer,true)
+		self.timer = self:ScheduleRepeatingTimer("MyUpdate", self:GetOption('refresh_rate'))
 
    -- Set activate or disactivate the PLAYER_MONEY event
 	elseif option == 'show_coins' then
@@ -1265,14 +1186,14 @@ function AllPlayed:Logout()
     --self:Debug("Logout()")
 
     self:RequestTimePlayed()
-    return self.hooks.Logout()
+    --return self.hooks.Logout()
 end
 
 function AllPlayed:Quit()
     --self:Debug("Quit()")
 
     self:RequestTimePlayed()
-    return self.hooks.Quit()
+    --return self.hooks.Quit()
 end
 
 --[[ ================================================================= ]]--
