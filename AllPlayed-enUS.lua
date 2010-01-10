@@ -116,7 +116,7 @@ L:RegisterTranslations("enUS", function()
 		["Factions and Realms"]															= true,
 		["Time Played"]																	= true,
 		["About"]																			= true,
-		["UI Settings"]																	= true,
+		["UI"]																				= true,
 		["Set UI options"]																= true,
 		["Experience Points"]															= true,
 		["Sort Order"]																		= true,

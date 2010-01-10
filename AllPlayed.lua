@@ -309,7 +309,10 @@ function AllPlayed:OnInitialize()
 	end
 
 	-- Register the varibles with the defaults
-	self.db = LibStub("AceDB-3.0"):New("AllPlayedDB", default_options)
+	self.db = LibStub("AceDB-3.0"):New("AllPlayedDB", default_options, true)
+	self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
+	self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
+	self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
 	
 	-- Initial setup is done by OnEnable (not mush to do here)
 	-- We set total variables to zero and create the tables that will never
@@ -479,6 +482,20 @@ function AllPlayed:OnDataUpdate()
 
     -- Recompute the totals
     self:ComputeTotal()
+end
+
+function AllPlayed:RefreshConfig()
+	-- Reapply all the settings that change behavior
+	self:SetOption('show_seconds',self:GetOption('show_seconds'))
+	self:SetOption('show_coins',self:GetOption('show_coins'))
+	self:SetOption('use_pre_210_shaman_colour',self:GetOption('use_pre_210_shaman_colour'))
+	self:SetOption('tooltip_scale',self:GetOption('tooltip_scale'))
+	self:SetOption('opacity',self:GetOption('opacity'))
+	self:SetOption('show_minimap_icon',self:GetOption('show_minimap_icon'))
+	
+	-- Recompute all the totals
+	self:ComputeTotal()
+	self:ComputeTotalHonor()
 end
 
 --[[ ================================================================= ]]--
@@ -1167,9 +1184,13 @@ function AllPlayed:SetOption( option, value, ... )
    -- Set activate or disactivate the PLAYER_MONEY event
 	elseif option == 'show_coins' then
 		if value then
+			if not self:IsEventRegistered("PLAYER_MONEY") then
 				self:RegisterEvent("PLAYER_MONEY", "EventHandler")
+			end
 		else
+			if self:IsEventRegistered("PLAYER_MONEY") then
 				self:UnregisterEvent("PLAYER_MONEY")
+			end
 		end
 
 	-- Set the Shaman colour

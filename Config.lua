@@ -624,7 +624,7 @@ local function GetOptions()
 				order   = 20
 			},
 			ui = {
-				type = 'group', name = L["UI Settings"], desc = L["Set UI options"], args = {
+				type = 'group', name = L["UI"], desc = L["Set UI options"], args = {
 					show_minimap_icon = {
 						name      = L["Minimap Icon"],
 						desc      = L["Show Minimap Icon"],
@@ -660,7 +660,7 @@ local function GetOptions()
 						set       = function(info, v) AllPlayed:SetOption('opacity',v) end,
 						order     = .7,
 					},
-				},
+				}, order = 30,
 			},
 		},
 	}
@@ -702,6 +702,9 @@ local function GetOptions()
 			realm_order = realm_order + 1
 	  	end
 	end
+
+	-- Profile section
+	options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(AP.db)
 	
 	return options
 
