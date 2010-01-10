@@ -22,7 +22,8 @@ local TEN_DAYS  = 60 * 60 * 24 * 10
 -- Load external libraries
 
 -- L is for localisation (to allow translation of the addon)
-local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
+--local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
+L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
 -- A is for time and money formating functions
 local A = LibStub("LibAbacus-3.0")
 -- C is for colour management functions
@@ -275,7 +276,7 @@ AllPlayed:RegisterDefaults('profile', {
 })
 ]]--
 
--- This function is called by the ACE2 framework one time after the addon is loaded
+-- This function is called by the Ace2 framework one time after the addon is loaded
 function AllPlayed:OnInitialize()
 	-- code here, executed only once.
    --self:SetDebugging(true) -- to have debugging through your whole app.
@@ -336,7 +337,6 @@ function AllPlayed:OnEnable()
     --self:Debug("AllPlayed:OnEnable()")
 
     -- code here, executed after everything is loaded.
-    -- Note: AceDB-2.0 will also call this when standby is toggled.
     
     -- Configuration initialization
     AP.db = self.db
@@ -356,7 +356,7 @@ function AllPlayed:OnEnable()
     self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
 
     -- Hook the functions that need hooking
-    -- (hook removal is done automagicaly by ACE)
+    -- (hook removal is done automagicaly by Ace)
     self:Hook("Logout", true)
     self:Hook("Quit",   true)
 
@@ -424,9 +424,6 @@ function AllPlayed:OnEnable()
    -- or 20 seconds depending on the refresh_rate setting
 	self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
 
-	-- Initialize version string for menus
-	--command_options.args.title2.name = AP.GetVersionString()
-	
 	-- Create a frame with an OnUpdate event to deal with the disposal of the tooltip created for LDB 
 	self.OnUpdate_frame = CreateFrame("frame")
 	self.OnUpdate_frame:Hide() -- to prevent the OnUpdate until it is needed.
@@ -1244,6 +1241,8 @@ function AllPlayed:SetOption( option, value, ... )
 			self.db.profile.options.ldbicon.hide = true
 			ldbicon:Hide("AllPlayed")
 		end
+		
+		ldbicon:Refresh("AllPlayed", self.db.profile.options.ldbicon)
 
 		already_set = true
 	end

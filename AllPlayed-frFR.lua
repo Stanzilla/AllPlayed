@@ -1,141 +1,134 @@
--- AllPlayed-frFR.lua
+﻿-- AllPlayed-frFR.lua
 -- $Id: AllPlayed-frFR.lua 007 2008-10-22 11:48:03Z laotseu $
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.frFR	= ("$Revision$"):match("(%d+)")
 
+local L = LibStub("AceLocale-3.0"):NewLocale("AllPlayed", "frFR")
+if not L then return end
 
-local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
+-- Faction names 
+--		L["Alliance"]													= "Alliance"
+--		L["Horde"]														= "Horde" 
 
--- This is only a place-holder for future possible localisation files
-L:RegisterTranslations("frFR", function()
-	return {
+-- Tablet title²
+L["All Played Breakdown"]										= "All Played"
 
-		-- Faction names 
---		["Alliance"]													= "Alliance",
---		["Horde"]														= "Horde", 
+-- Menus
+L["AllPlayed Configuration"]										= "Configuration AllPlayed"
+L["Revision %s"]													= "Révision %s"
+L["Display"]														= "Afficher"
+L["Set the display options"]										= "Afficher les options"
+L["All Factions"]												= "Toutes les factions"
+L["All factions will be displayed"]								= "Afficher toutes les factions"
+L["All Realms"]													= "Tous les royaumes"
+L["All realms will de displayed"]								= "Afficher tous les royaumes"
+L["Show Played Time"]											= "Afficher le temps joué"
+L["Display the played time and the total time played"]			= "Afficher le temps joué et le total"
+L["Show Seconds"]												= "Voir secondes"
+L["Display the seconds in the time strings"]						= "Afficher les secondes dans ..."
+L["Show Gold"]													= "Voir son Or"
+L["Display the gold each character pocess"]						= "Voir total Or avec tous ses persos"
+L["Show XP Progress"]											= "Voir progression de son XP"
+L["Display XP progress as a decimal value appended to the level"]	= "Afficher le niveau actuel de son XP"
+L["Show XP total"]												= "Voir XP totale"
+L["Show the total XP for all characters"]						= "Voir XP totale de tous ses persos"
+L["Rested XP"]													= "XP avant level"
+L["Set the rested XP options"]									= "Options pour XP avant level"
+L["Rested XP Total"]												= "XP avant level "
+L["Show the character rested XP"]								= "Voir XP avant level du personnage"
+L["Percent Rest"]												= "Voir %XP avant level" 
+L["Set the base for % display of rested XP"]						= "Options pour %XP avant level"
+L["Rested XP Countdown"]											= "Compte à rebours XP avant level"
+L["Show the time remaining before the character is 100% rested"]	= "Afficher le temps restant avant que le personnage soit reposé à 100%"
+L["PVP"]															= "PvP"
+L["Set the PVP options"]											= "Options PvP"
+L["Arena Points"]												= "Points d'arène"
+L["Show the character arena points"]								= "Voir les points d'arène"
+L["Honor Points"]												= "Points d'honneur"
+L["Show the character honor points"]								= "Voir les points d'honneur"
+L["Honor Kills"]													= "Victoires honorables"
+L["Show the character honor kills"]								= "Voir les victoires honorables"
+L["Show PVP Totals"]												= "Afficher le total PVP"
+L["Badges of Justice"]											= "Insignes de justice"
+L["Show the character badges of Justice"]						= "Voir les insignes de justice"
+L["WG Marks"]													= "Marque du Goulet"
+L["Show the Warsong Gulch Marks"]								= "Voir les marques du Goulet des Chanteguerres"
+L["AB Marks"]													= "Marque du Bassin"
+L["Show the Arathi Basin Marks"]									= "Voir les marques du Bassin d'Arathi"
+L["AV Marks"]													= "Marque Altérac"
+L["Show the Alterac Valley Marks"]								= "Voir les marques de la Vallee d'Altérac"
+L["EotS Marks"]													= "Marque du Cyclone"
+L["Show the Eye of the Storm Marks"]								= "Voir les marques de l'Oeil du Cyclone"
+L["Show the honor related stats for all characters"]				= "Voir le total des points de tous les personnages"
+L["Show Class Name"]												= "Afficher le nom de la classe"
+L["Show the character class beside the level"]					= "Voir la classe du personnage à côté du niveau"
+L["Show Location"]												= "Afficher lieu"
+L["Show the character location"]									= "Afficher le lieu du personnage"
+L["Don't show location"]											= "Ne pas afficher le lieu"
+L["Show zone"]													= "Afficher la zone"
+L["Show subzone"]												= "Afficher la sous-zone"
+L["Show zone/subzone"]											= "Afficher zone/sous-zone"
+L["Colorize Class"]												= "Colorer classe"
+L["Colorize the character name based on class"]					= "Colorer le nom des personnages par classe"
+L["Use Old Shaman Colour"]										= "Utiliser ancienne couleur Chaman"
+L["Use the pre-210 patch colour for the Shaman class"]			= "Utilisez l'ancienne couleur pour la classe Chaman (patch 2.1)"
+L["Sort Type"]													= "Type de tri"
+L["Select the sort type"]										= "Sélectionnez le type de tri"
+L["By name"]														= "Par nom"
+L["By level"]													= "Par niveau"
+L["By experience"]												= "Par XP"
+L["By rested XP"]												= "Par XP avant niveau"
+L["By % rested"]													= "Par %XP avant niveau"
+L["By money"]													= "Par Or"
+L["By time played"]												= "Par temps de jeu"
+L["Sort in reverse order"]										= "Trier dans l'ordre inverse"
+L["Use the curent sort type in reverse order"]					= "Inverser l'ordre de tri"
+L["Use Icons"]													= "Afficher images"
+L["Use graphics for coin and PvP currencies"]					= "Utilise les images pour l'or et les marques PvP"
+L["Font Size"]													= "Taille de la police d'écriture"
+L["Select the font size"]										= "Choisir la police d'écriture"
+L["Opacity"]														= "Transparence"
+L["% opacity of the tooltip background"]							= "% de transparence du fond"
+L["Sort"]														= "Trier par"
+L["Set the sort options"]										= "Options : trier par"
+L["Ignore Characters"]											= "Ignorer personnages"
+L["Hide characters from display"]								= "Cacher des personnages de l'affichage"
+L["%s : %s"]														= "%s : %s"
+L["Hide %s of %s from display"]									= "Cacher %s de %s de l'affichage"
+L["BC Installed?"]												= "BC est installé?"
+L["Is the Burning Crusade expansion installed?"]					= "Est-ce que l'extension Burning Crusade est installée ?"
+L["Close"]														= "Fermer" 
+L["Close the tooltip"]											= "Fermer le menu" 
+L["None"]														= "Aucun"
+L["100%"]														= "100%"
+L["150%"]														= "150%"
 
-		-- Tablet title²
-		["All Played Breakdown"]										= "All Played",
+-- Strings
+L["v%s - %s (Type /ap for help)"]								= "v%s - %s (Taper /ap pour afficher l'aide)"
+L["%s characters "]												= "Personnages sur %s"
+L["%d rested XP"]												= "%d XP avant level" 
+L["rested"]														= "reposé"
+L["Total %s Time Played: "]										= "Total %s temps joué : "
+L["Total %s Cash Value: "]										= "Total %s Or: " 
+L["Total Time Played: "]											= "Total temps joué : "
+L["Total Cash Value: "]											= "Total Or: " 
+L["Total PvP: "]													= "Total PvP: "
+L["Total XP: "]													= "Total XP: "
+L["Unknown"]														= "Inconnu"
+L["%.1f M XP"]													= "%.1f M XP"
+L["%.1f K XP"]													= "%.1f K XP"
+L["%d XP"]														= "%d XP"
+L['%s HK']														= "%s Vict."
+L['%s HP']														= "%s Honneur"
+--		L['%s AP']														= true
+L['%s BoJ']														= "%s E. just."
+L['%s AB']														= "%s Arat."
+L['%s AV']														= "%s Alt."
+L['%s WG']														= "%s Chant."
+L['%s EotS']														= "%s Oeil"
 
-		-- Menus
-		["AllPlayed Configuration"]										= "Configuration AllPlayed",
-		["Revision %s"]													= "Révision %s",
-		["Display"]														= "Afficher",
-		["Set the display options"]										= "Afficher les options",
-		["All Factions"]												= "Toutes les factions",
-		["All factions will be displayed"]								= "Afficher toutes les factions",
-		["All Realms"]													= "Tous les royaumes",
-		["All realms will de displayed"]								= "Afficher tous les royaumes",
-		["Show Played Time"]											= "Afficher le temps joué",
-		["Display the played time and the total time played"]			= "Afficher le temps joué et le total",
-		["Show Seconds"]												= "Voir secondes",
-		["Display the seconds in the time strings"]						= "Afficher les secondes dans ...",
-		["Show Gold"]													= "Voir son Or",
-		["Display the gold each character pocess"]						= "Voir total Or avec tous ses persos",
-		["Show XP Progress"]											= "Voir progression de son XP",
-		["Display XP progress as a decimal value appended to the level"]	= "Afficher le niveau actuel de son XP",
-		["Show XP total"]												= "Voir XP totale",
-		["Show the total XP for all characters"]						= "Voir XP totale de tous ses persos",
-		["Rested XP"]													= "XP avant level",
-		["Set the rested XP options"]									= "Options pour XP avant level",
-		["Rested XP Total"]												= "XP avant level ",
-		["Show the character rested XP"]								= "Voir XP avant level du personnage",
-		["Percent Rest"]												= "Voir %XP avant level", 
-		["Set the base for % display of rested XP"]						= "Options pour %XP avant level",
-		["Rested XP Countdown"]											= "Compte à rebours XP avant level",
-		["Show the time remaining before the character is 100% rested"]	= "Afficher le temps restant avant que le personnage soit reposé à 100%",
-		["PVP"]															= "PvP",
-		["Set the PVP options"]											= "Options PvP",
-		["Arena Points"]												= "Points d'arène",
-		["Show the character arena points"]								= "Voir les points d'arène",
-		["Honor Points"]												= "Points d'honneur",
-		["Show the character honor points"]								= "Voir les points d'honneur",
-		["Honor Kills"]													= "Victoires honorables",
-		["Show the character honor kills"]								= "Voir les victoires honorables",
-		["Show PVP Totals"]												= "Afficher le total PVP",
-		["Badges of Justice"]											= "Insignes de justice",
-		["Show the character badges of Justice"]						= "Voir les insignes de justice",
-		["WG Marks"]													= "Marque du Goulet",
-		["Show the Warsong Gulch Marks"]								= "Voir les marques du Goulet des Chanteguerres",
-		["AB Marks"]													= "Marque du Bassin",
-		["Show the Arathi Basin Marks"]									= "Voir les marques du Bassin d'Arathi",
-		["AV Marks"]													= "Marque Altérac",
-		["Show the Alterac Valley Marks"]								= "Voir les marques de la Vallee d'Altérac",
-		["EotS Marks"]													= "Marque du Cyclone",
-		["Show the Eye of the Storm Marks"]								= "Voir les marques de l'Oeil du Cyclone",
-		["Show the honor related stats for all characters"]				= "Voir le total des points de tous les personnages",
-		["Show Class Name"]												= "Afficher le nom de la classe",
-		["Show the character class beside the level"]					= "Voir la classe du personnage à côté du niveau",
-		["Show Location"]												= "Afficher lieu",
-		["Show the character location"]									= "Afficher le lieu du personnage",
-		["Don't show location"]											= "Ne pas afficher le lieu",
-		["Show zone"]													= "Afficher la zone",
-		["Show subzone"]												= "Afficher la sous-zone",
-		["Show zone/subzone"]											= "Afficher zone/sous-zone",
-		["Colorize Class"]												= "Colorer classe",
-		["Colorize the character name based on class"]					= "Colorer le nom des personnages par classe",
-		["Use Old Shaman Colour"]										= "Utiliser ancienne couleur Chaman",
-		["Use the pre-210 patch colour for the Shaman class"]			= "Utilisez l'ancienne couleur pour la classe Chaman (patch 2.1)",
-		["Sort Type"]													= "Type de tri",
-		["Select the sort type"]										= "Sélectionnez le type de tri",
-		["By name"]														= "Par nom",
-		["By level"]													= "Par niveau",
-		["By experience"]												= "Par XP",
-		["By rested XP"]												= "Par XP avant niveau",
-		["By % rested"]													= "Par %XP avant niveau",
-		["By money"]													= "Par Or",
-		["By time played"]												= "Par temps de jeu",
-		["Sort in reverse order"]										= "Trier dans l'ordre inverse",
-		["Use the curent sort type in reverse order"]					= "Inverser l'ordre de tri",
-		["Use Icons"]													= "Afficher images",
-		["Use graphics for coin and PvP currencies"]					= "Utilise les images pour l'or et les marques PvP",
-		["Font Size"]													= "Taille de la police d'écriture",
-		["Select the font size"]										= "Choisir la police d'écriture",
-		["Opacity"]														= "Transparence",
-		["% opacity of the tooltip background"]							= "% de transparence du fond",
-		["Sort"]														= "Trier par",
-		["Set the sort options"]										= "Options : trier par",
-		["Ignore Characters"]											= "Ignorer personnages",
-		["Hide characters from display"]								= "Cacher des personnages de l'affichage",
-		["%s : %s"]														= "%s : %s",
-		["Hide %s of %s from display"]									= "Cacher %s de %s de l'affichage",
-		["BC Installed?"]												= "BC est installé?",
-		["Is the Burning Crusade expansion installed?"]					= "Est-ce que l'extension Burning Crusade est installée ?",
-		["Close"]														= "Fermer", 
-		["Close the tooltip"]											= "Fermer le menu", 
-		["None"]														= "Aucun",
-		["100%"]														= "100%",
-		["150%"]														= "150%",
-
-		-- Strings
-		["v%s - %s (Type /ap for help)"]								= "v%s - %s (Taper /ap pour afficher l'aide)",
-		["%s characters "]												= "Personnages sur %s",
-		["%d rested XP"]												= "%d XP avant level", 
-		["rested"]														= "reposé",
-		["Total %s Time Played: "]										= "Total %s temps joué : ",
-		["Total %s Cash Value: "]										= "Total %s Or: ", 
-		["Total Time Played: "]											= "Total temps joué : ",
-		["Total Cash Value: "]											= "Total Or: ", 
-		["Total PvP: "]													= "Total PvP: ",
-		["Total XP: "]													= "Total XP: ",
-		["Unknown"]														= "Inconnu",
-		["%.1f M XP"]													= "%.1f M XP",
-		["%.1f K XP"]													= "%.1f K XP",
-		["%d XP"]														= "%d XP",
-		['%s HK']														= "%s Vict.",
-		['%s HP']														= "%s Honneur",
---		['%s AP']														= true,
-		['%s BoJ']														= "%s E. just.",
-		['%s AB']														= "%s Arat.",
-		['%s AV']														= "%s Alt.",
-		['%s WG']														= "%s Chant.",
-		['%s EotS']														= "%s Oeil",
-
-		-- Console commands
-		["/allplayed"]													= "/allplayed", 
-		["/ap"]															= "/ap",
-		["/allplayedcl"]												= "/allplayedcl", 
-		["/apcl"]														= "/apcl", 
-
-	}
-end)
+-- Console commands
+L["/allplayed"]													= "/allplayed" 
+L["/ap"]															= "/ap"
+L["/allplayedcl"]												= "/allplayedcl" 
+L["/apcl"]														= "/apcl" 

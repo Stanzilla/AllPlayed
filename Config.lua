@@ -7,7 +7,7 @@ if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.config	= ("$Revision$"):match("(%d+)")
 
 -- Localizations
-local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
+L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
 
 -- Local functions
 local GetVersionString
