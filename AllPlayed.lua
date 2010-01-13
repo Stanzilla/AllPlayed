@@ -1102,13 +1102,9 @@ function AllPlayed:SetOption( option, value, ... )
    -- Set activate or disactivate the PLAYER_MONEY event
 	elseif option == 'show_coins' then
 		if value then
-			if not self:IsEventRegistered("PLAYER_MONEY") then
-				self:RegisterEvent("PLAYER_MONEY", "EventHandler")
-			end
+			self:RegisterEvent("PLAYER_MONEY", "EventHandler")
 		else
-			if self:IsEventRegistered("PLAYER_MONEY") then
-				self:UnregisterEvent("PLAYER_MONEY")
-			end
+			self:UnregisterEvent("PLAYER_MONEY")
 		end
 
 	-- Set the Shaman colour
