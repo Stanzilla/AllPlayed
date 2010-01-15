@@ -199,6 +199,10 @@ function AllPlayed:OnInitialize()
 	-- code here, executed only once.
    --self:SetDebugging(true) -- to have debugging through your whole app.
 
+	-- Initialize the SaveVariables table if it's the first time that AllPlayed is loaded
+	AllPlayedDB = AllPlayedDB or {}
+
+
 	-- Register the command line
 	-- /ap and /allplayed will open the blizard interface panel
 	SLASH_ALLPLAYED_CONFIG1 = L["/ap"]
