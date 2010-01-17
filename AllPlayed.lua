@@ -22,7 +22,7 @@ local TEN_DAYS  = 60 * 60 * 24 * 10
 -- Load external libraries
 
 -- L is for localisation (to allow translation of the addon)
-L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
+local L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
 -- A is for time and money formating functions
 local A = LibStub("LibAbacus-3.0")
 -- C is for colour management functions
@@ -2094,23 +2094,6 @@ function AllPlayedLDB:OnClick(button,down)
 	-- For tests of EasyMenu
 	if button ==  "RightButton" then
 		AP.DisplayConfigMenu()
---[[		
-	else
-		-- Normal case without outside the test
-		if not ldb_options.args then
-			ldb_options.args = {}
-			for _,key in ipairs({'title','title2','blankLine','display','sort','ignore','show_minimap_icon'}) do
-				ldb_options.args[key] = command_options.args[key]
-			end
-			dewdrop:InjectAceOptionsTable(AllPlayed, ldb_options)
-			ldb_options.args.about = nil
-			ldb_options.args.standby = nil
-			ldb_options.args.debug = nil
-		end
-		dewdrop:Open(self, 'children', function()
-			dewdrop:FeedAceOptionsTable(ldb_options)
-		end)
-]]--
 	end
 	
 	if AllPlayed.tooltip then
