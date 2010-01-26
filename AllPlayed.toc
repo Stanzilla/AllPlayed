@@ -23,7 +23,7 @@
 
 ## DefaultState: enabled
 
-## OptionalDeps: Ace3, LibAbacus-3.0, LibCrayon-3.0, !ClassColors, LibQTip-1.0, LDBIcon-1.0
+## OptionalDeps: Ace3, LibAbacus-3.0, LibCrayon-3.0, !ClassColors, LibQTip-1.0, LibDBIcon-1.0
 
 ## SavedVariables: AllPlayedDB
 
