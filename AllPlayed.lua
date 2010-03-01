@@ -41,11 +41,15 @@ local CLASS_COLOURS = {}
 local XPToNextLevelCache = {}
 
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
---AllPlayed = AceLibrary("AceAddon-2.0"):new("AceEvent-2.0", "AceHook-2.1")
 AllPlayed = LibStub("AceAddon-3.0"):NewAddon("AllPlayed", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0")
 
 -- For debuging
 --AllPlayed.AP = AP
+AllPlayed.debugging = false
+function AllPlayed:Debug(msg,...)
+	if not self.debugging then return end
+	geterrorhandler()(format(msg,...))
+end
 
 -- Local function prototypes
 local AcquireTable
@@ -108,9 +112,6 @@ do
 		return AcquireTable()
 	end
 end	-- do block
-
-function AllPlayed:Debug(...)
-end
 
 --[[ ================================================================= ]]--
 --[[                      Ace Framework Init                           ]]--
@@ -242,8 +243,8 @@ function AllPlayed:OnInitialize()
 	-- Initial setup is done by OnEnable (not mush to do here)
 	-- We set total variables to zero and create the tables that will never
 	-- be deleted
-	self.total_faction      = { [L["Horde"]]    = { time_played = 0, coin = 0 },
-									    [L["Alliance"]] = { time_played = 0, coin = 0 },
+	self.total_faction      = { ["Horde"]    = { time_played = 0, coin = 0 },
+									    ["Alliance"] = { time_played = 0, coin = 0 },
 	}
 	self.total_realm        = { }
 	self.total              = { time_played = 0, coin = 0, xp = 0 }
@@ -255,7 +256,6 @@ function AllPlayed:OnInitialize()
 end
 
 function AllPlayed:OnEnable()
-    self.debugging = self:IsDebugging()
 
     --self:Debug("AllPlayed:OnEnable()")
 
@@ -283,9 +283,9 @@ function AllPlayed:OnEnable()
     self:Hook("Quit",   true)
 
     -- Initialize values that don't change between reloads
-    self.faction    = UnitFactionGroup("player")
-    self.realm      = GetRealmName()
-    self.pc         = UnitName("player")
+    self.faction, self.loc_faction	= UnitFactionGroup("player")
+    self.realm      						= GetRealmName()
+    self.pc         						= UnitName("player")
 
     -- Initial update of values
 
@@ -385,6 +385,8 @@ function AllPlayed:SetDebugging(debugging) self.db.profile.debugging = debugging
 --[[ ================================================================= ]]--
 
 function AllPlayed:MyUpdate(...)
+	self:Debug("MyUpdate: %d",time())
+
 	self:OnDataUpdate()
    AllPlayedLDB.text = self:FormatTime(self.total.time_played)
    
@@ -424,18 +426,18 @@ end
 
 -- Get the totals per faction and realm
 function AllPlayed:ComputeTotal()
-    --self:Debug("AllPlayed:ComputeTotal()")
+    self:Debug("AllPlayed:ComputeTotal(): %d",time())
 
     -- Let's start from scratch
-    self.total_faction[L["Horde"]].time_played      = 0
-    self.total_faction[L["Horde"]].coin             = 0
-    self.total_faction[L["Horde"]].xp               = 0
-    self.total_faction[L["Alliance"]].time_played   = 0
-    self.total_faction[L["Alliance"]].coin          = 0
-    self.total_faction[L["Alliance"]].xp            = 0
-    self.total.time_played                          = 0
-    self.total.coin                                 = 0
-    self.total.xp                                   = 0
+    self.total_faction["Horde"].time_played      = 0
+    self.total_faction["Horde"].coin             = 0
+    self.total_faction["Horde"].xp               = 0
+    self.total_faction["Alliance"].time_played   = 0
+    self.total_faction["Alliance"].coin          = 0
+    self.total_faction["Alliance"].xp            = 0
+    self.total.time_played                       = 0
+    self.total.coin                              = 0
+    self.total.xp                                = 0
 
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.global.data) do
@@ -479,14 +481,14 @@ function AllPlayed:ComputeTotal()
         if self:GetOption('all_factions') then
             -- Everything count
             self.total.time_played
-                =   self.total_faction[L["Horde"]].time_played
-                  + self.total_faction[L["Alliance"]].time_played
+                =   self.total_faction["Horde"].time_played
+                  + self.total_faction["Alliance"].time_played
             self.total.coin
-                =   self.total_faction[L["Horde"]].coin
-                  + self.total_faction[L["Alliance"]].coin
+                =   self.total_faction["Horde"].coin
+                  + self.total_faction["Alliance"].coin
             self.total.xp
-                =   self.total_faction[L["Horde"]].xp
-                  + self.total_faction[L["Alliance"]].xp
+                =   self.total_faction["Horde"].xp
+                  + self.total_faction["Alliance"].xp
         else
             -- Only the current faction count
             self.total.time_played = self.total_faction[self.faction].time_played
@@ -504,13 +506,13 @@ end
 function AllPlayed:ComputeTotalHonor()
 	--self:Debug("AllPlayed:ComputeTotalHonor()")
 
-	self.total_faction[L["Horde"]].honor_kills      			= 0
-	self.total_faction[L["Horde"]].honor_points     			= 0
-	self.total_faction[L["Horde"]].arena_points     			= 0
+	self.total_faction["Horde"].honor_kills      			= 0
+	self.total_faction["Horde"].honor_points     			= 0
+	self.total_faction["Horde"].arena_points     			= 0
 
-	self.total_faction[L["Alliance"]].honor_kills   			= 0
-	self.total_faction[L["Alliance"]].honor_points  			= 0
-	self.total_faction[L["Alliance"]].arena_points  			= 0
+	self.total_faction["Alliance"].honor_kills   			= 0
+	self.total_faction["Alliance"].honor_points  			= 0
+	self.total_faction["Alliance"].arena_points  			= 0
 
 	self.total.honor_kills                          			= 0
 	self.total.honor_points                         			= 0
@@ -547,14 +549,14 @@ function AllPlayed:ComputeTotalHonor()
         if self:GetOption('all_factions') then
             -- Everything count
             self.total.honor_kills
-                =   self.total_faction[L["Horde"]].honor_kills
-                  + self.total_faction[L["Alliance"]].honor_kills
+                =   self.total_faction["Horde"].honor_kills
+                  + self.total_faction["Alliance"].honor_kills
             self.total.honor_points
-                =   self.total_faction[L["Horde"]].honor_points
-                  + self.total_faction[L["Alliance"]].honor_points
+                =   self.total_faction["Horde"].honor_points
+                  + self.total_faction["Alliance"].honor_points
             self.total.arena_points
-                =   self.total_faction[L["Horde"]].arena_points
-                  + self.total_faction[L["Alliance"]].arena_points
+                =   self.total_faction["Horde"].arena_points
+                  + self.total_faction["Alliance"].arena_points
         else
             -- Only the current faction count
             self.total.honor_kills 				= self.total_faction[self.faction].honor_kills
@@ -941,7 +943,7 @@ end
 
 -- Event handler for the other events registered
 function AllPlayed:EventHandler(msg)
-    --self:Debug("EventHandler(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
+    self:Debug("EventHandler(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
 
     -- We save a new copy of the vars
     self:SaveVar()
@@ -1317,28 +1319,27 @@ local honor_strings = {
 		['hp-Alliance']	= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Alliance:0|t',
 		['hp-Horde']		= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Horde:0|t',
 		ap 					= '%s|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0|t',
-		bj 					= '%s|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,-1|t',
-		ab 					= '%s|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,1|t',
-		av 					= '%s|TInterface\\Icons\\INV_Jewelry_Necklace_21:0|t',
-		wg 					= '%s|TInterface\\Icons\\INV_Misc_Rune_07:0|t',
-		es 					= '%s|TInterface\\Icons\\Spell_Nature_EyeOfTheStorm:0|t'
+--		bj 					= '%s|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,-1|t',
+--		ab 					= '%s|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,1|t',
+--		av 					= '%s|TInterface\\Icons\\INV_Jewelry_Necklace_21:0|t',
+--		wg 					= '%s|TInterface\\Icons\\INV_Misc_Rune_07:0|t',
+--		es 					= '%s|TInterface\\Icons\\Spell_Nature_EyeOfTheStorm:0|t'
 	},
 	no_icons = {
 		hk 					= L['%s HK'],
 		['hp-Alliance']	= L['%s HP'],
 		['hp-Horde'] 		= L['%s HP'],
 		ap 					= L['%s AP'],
-		bj 					= L['%s BoJ'],
-		ab 					= L['%s AB'],
-		av 					= L['%s AV'],
-		wg 					= L['%s WG'],
-		es 					= L['%s EotS']
+--		bj 					= L['%s BoJ'],
+--		ab 					= L['%s AB'],
+--		av 					= L['%s AV'],
+--		wg 					= L['%s WG'],
+--		es 					= L['%s EotS']
 	}
 }
 
 -- Function that produce the honour string based on the display options
-function FormatHonor( faction,	honor_kills,	pvp_points,	arena_points,	badges,
-							 ab_marks, 	av_marks, 		wg_marks, 	eots_marks  				)
+function FormatHonor( faction, honor_kills, pvp_points, arena_points )
 
 	local honor_string, fmt = ""
 	if AllPlayed:GetOption('use_icons') then
@@ -1365,7 +1366,7 @@ end
 
 -- This function colorize the text based on the faction
 function FactionColour( faction, string )
-    if faction == L["Horde"] then
+    if faction == "Horde" then
         return C:Red(string)
     else
         -- Blue
@@ -1445,11 +1446,13 @@ end
 
 -- Build the static sort table needed
 function AllPlayed:BuildSortTables()
+	self:Debug("Sorting asked: %d",time())
 	-- If the sort is already done, we don't redo it.
 	if self.sort_tables_done then return end
+	self:Debug("Sorting done: %d",time())
 
 	-- Static sort for the factions
-	if not self.sort_faction then self.sort_faction = { L["Horde"], L["Alliance"] } end
+	if not self.sort_faction then self.sort_faction = { "Horde", "Alliance" } end
 
 	self.sort_faction_realm = ClearTable(self.sort_faction_realm)
 	self.sort_faction_realm["alpha"] 				= AcquireTable()
@@ -1578,7 +1581,7 @@ do
 	local table_to_sort, realm_for_sort
 
 	function buildSortedTable( unsorted_table, sort_function, realm )
-		AllPlayed:Debug("buildSortedTable:")
+		--AllPlayed:Debug("buildSortedTable:")
 
 		-- If the realm is needed for the sort, we initialize it
 		realm_for_sort = realm or nil
@@ -1668,7 +1671,7 @@ do
 			  )
 		 end
 
-		 AllPlayed:Debug("PCSortByRestedXP: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
+		 --AllPlayed:Debug("PCSortByRestedXP: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
 		 if estimated_rested_xp_a ~= estimated_rested_xp_b then
 			  return estimated_rested_xp_a < estimated_rested_xp_b
@@ -1708,7 +1711,7 @@ do
 			  )
 		 end
 
-		 AllPlayed:Debug("PCSortByRestedXP: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
+		 --AllPlayed:Debug("PCSortByRestedXP: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
 		 if estimated_rested_xp_b ~= estimated_rested_xp_a then
 			  return estimated_rested_xp_b < estimated_rested_xp_a
@@ -1748,7 +1751,7 @@ do
 			  )
 		 end
 
-		 AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
+		 --AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
 		 if estimated_rested_xp_a / table_to_sort[a].max_rested_xp
 			 ~= estimated_rested_xp_b / table_to_sort[b].max_rested_xp then
@@ -1792,7 +1795,7 @@ do
 			  )
 		 end
 
-		 AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
+		 --AllPlayed:Debug("PCSortByPercentRest: %s = %s, %s = %s",a, estimated_rested_xp_a, b, estimated_rested_xp_b)
 
 		 if estimated_rested_xp_b / table_to_sort[b].max_rested_xp
 			 ~= estimated_rested_xp_a / table_to_sort[a].max_rested_xp then

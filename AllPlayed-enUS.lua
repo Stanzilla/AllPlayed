@@ -7,9 +7,17 @@ AllPlayed_revision.enUS	= ("$Revision$"):match("(%d+)")
 --local L = AceLibrary("AceLocale-2.2"):new("AllPlayed")
 local L = LibStub("AceLocale-3.0"):NewLocale("AllPlayed", "enUS", true)
 
+---
+--- Global strings section, no translation needed
+---
+
 -- Faction names
-L["Alliance"]                                            			= true
-L["Horde"]                                               			= true
+--L["Alliance"]                                            			= FACTION_ALLIANCE
+--L["Horde"]                                               			= FACTION_HORDE
+
+---
+--- End of Global strings section
+---
 
 -- Tablet title
 L["All Played Breakdown"]                                			= true
@@ -50,16 +58,16 @@ L["Show the character honor points"]										= true
 L["Honor Kills"]																	= true
 L["Show the character honor kills"]											= true
 L["Show PVP Totals"]																= true
-L["Badges of Justice"]															= true
-L["Show the character badges of Justice"]									= true
-L["WG Marks"]																		= true
-L["Show the Warsong Gulch Marks"]											= true
-L["AB Marks"]																		= true
-L["Show the Arathi Basin Marks"]												= true
-L["AV Marks"]																		= true
-L["Show the Alterac Valley Marks"]											= true
-L["EotS Marks"]																	= true
-L["Show the Eye of the Storm Marks"]										= true
+--L["Badges of Justice"]															= true
+--L["Show the character badges of Justice"]									= true
+--L["WG Marks"]																		= true
+--L["Show the Warsong Gulch Marks"]											= true
+--L["AB Marks"]																		= true
+--L["Show the Arathi Basin Marks"]												= true
+--L["AV Marks"]																		= true
+--L["Show the Alterac Valley Marks"]											= true
+--L["EotS Marks"]																	= true
+--L["Show the Eye of the Storm Marks"]										= true
 L["Show the honor related stats for all characters"]					= true
 L["Show Class Name"]                                     			= true
 L["Show the character class beside the level"]           			= true
@@ -124,17 +132,17 @@ L["%d XP"]																			= true
 L['%s HK']																			= true
 L['%s HP']																			= true
 L['%s AP']																			= true
-L['%s BoJ']																			= true
-L['%s AB']																			= true
-L['%s AV']																			= true
-L['%s WG']																			= true
-L['%s EotS']																		= true
+--L['%s BoJ']																			= true
+--L['%s AB']																			= true
+--L['%s AV']																			= true
+--L['%s WG']																			= true
+--L['%s EotS']																		= true
 
 -- Console commands
 L["/allplayed"]                                   	       			= true
 L["/ap"]                                          	       			= true
-L["/allplayedcl"]                                          			= true
-L["/apcl"]                                                 			= true
+--L["/allplayedcl"]                                          			= true
+--L["/apcl"]                                                 			= true
 
 -- New stuff for 30300-2
 L["Filter"]																			= true

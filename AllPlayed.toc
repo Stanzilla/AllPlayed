@@ -10,7 +10,7 @@
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Always: delayed
 
-## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96 for the koKR, kuja for deDE, RoyalHawk for zhZN, s8095324 for zhTW and Orbital Digital and oXid_FoX for frFR localizations.
+## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96 and chkid for the koKR, kuja for deDE, RoyalHawk for zhZN, s8095324 for zhTW and Orbital Digital, oXid_FoX and Beltza for frFR localizations.
 ## X-Website: http://www.wowace.com/projects/all-played-laotseu/
 ## X-AceForum: http://www.wowace.com/forums/index.php?topic=2042.0
 ## X-RelSite-UI.WoW: 3485
