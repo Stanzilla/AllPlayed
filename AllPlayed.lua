@@ -51,6 +51,10 @@ function AllPlayed:Debug(msg,...)
 	geterrorhandler()(format(msg,...))
 end
 
+function AllPlayed:Trace(msg,...)
+	geterrorhandler()(format("%.2f: %s", gettime(), msg,...))
+end
+
 -- Local function prototypes
 local AcquireTable
 local ReleaseTable
@@ -323,7 +327,10 @@ function AllPlayed:OnEnable()
   	 self:BuildSortTables()
 
     -- Request the time played so we can populate seconds_played
-    self:RequestTimePlayed()
+    --self:RequestTimePlayed()
+    -- Wait 10 seconds so that the call is not made if another addon already do it
+    -- at load time
+    self:ScheduleTimer("RequestTimePlayed", 10)
 
 	-- Set the callback for !ClassColor if present
 	if CUSTOM_CLASS_COLORS then
@@ -1243,14 +1250,32 @@ function AllPlayed:EstimateRestedXP( pc, realm, level, rested_xp, max_rested_xp,
     return estimated_rested_xp
 end
 
--- Function that Send a request to the server to get an update of the time played.
-function AllPlayed:RequestTimePlayed()
-    -- We only send the event if the message has not been seen for 10 seconds
-    if time() - self.db.global.data[self.faction][self.realm][self.pc].seconds_played_last_update > 10 then
-        RequestTimePlayed()
-    end
 
-end
+do -- Time Played functions closure
+
+	local requesting
+
+	-- Time Played display function that is hooked to prevent chat spam from AllPlayed
+	-- Thanks to Phanx for the code
+	local o = ChatFrame_DisplayTimePlayed
+	ChatFrame_DisplayTimePlayed = function(...)
+		if requesting then
+			requesting = false
+			return
+		end
+		return o(...)
+	end
+	
+	-- Function that Send a request to the server to get an update of the time played.
+	function AllPlayed:RequestTimePlayed()
+		-- We only send the event if the message has not been seen for 10 seconds
+		if time() - self.db.global.data[self.faction][self.realm][self.pc].seconds_played_last_update > 10 then
+			requesting = true
+			RequestTimePlayed()
+		end
+	end
+
+end -- Time Played functions closure
 
 function AllPlayed:FormatTime(seconds)
     return A:FormatDurationFull( seconds, false, not self:GetOption('show_seconds') )

@@ -7,6 +7,7 @@ local L = LibStub("AceLocale-3.0"):NewLocale("AllPlayed", "frFR")
 if not L then return end
 
 -- Exported from http://www.wowace.com/addons/all-played-laotseu/localization/
+-- Translators:  Orbital Digital, oXid_FoX and Beltza
 
 L["100%"] = "100%"
 L["150%"] = "150%"
@@ -49,7 +50,7 @@ L["%d rested XP"] = "%d XP avant level"
 L["%d XP"] = "%d XP"
 L["EotS Marks"] = "Marque du Cyclone"
 L["Experience Points"] = "Points d'Expériences"
-L["Factions and Realms"] = "Factions et Royaumes" -- Needs review
+L["Factions and Realms"] = "Factions et Royaumes"
 L["Filter"] = "Filtrage"
 L["Hide characters from display"] = "Cacher des personnages de l'affichage"
 L["Hide %s of %s from display"] = "Cacher %s de %s de l'affichage"
@@ -58,11 +59,11 @@ L["Honor Points"] = "Points d'honneur"
 L["Ignore Characters"] = "Ignorer personnages"
 L["Is the Burning Crusade expansion installed?"] = "Est-ce que l'extension Burning Crusade est installée ?"
 L["Main Settings"] = "Paramètres principaux"
-L["Minimap Icon"] = "Icône de la Minimap" -- Needs review
+L["Minimap Icon"] = "Icône de la Minicarte"
 L["None"] = "Aucun"
 L["Opacity"] = "Transparence"
 L["% opacity of the tooltip background"] = "% de transparence du fond"
-L["Open configuration dialog"] = "Ouvrir la fenêtre des paramètres" -- Needs review
+L["Open configuration dialog"] = "Ouvrir la fenêtre des paramètres"
 L["Percent Rest"] = "Voir %XP avant level"
 L["PVP"] = "PvP"
 L["rested"] = "reposé"
@@ -70,7 +71,7 @@ L["Rested XP"] = "XP avant level"
 L["Rested XP Countdown"] = "Compte à rebours XP avant level"
 L["Rested XP Total"] = "XP avant level "
 L["%s AP"] = "%s AP"
-L["Scale"] = "Échelle/Graduation" -- Needs review
+L["Scale"] = "Échelle"
 L["Scale the tooltip (70% to 150%)"] = "Taille de la bulle d'aide (70% à 150%)"
 L["%s characters "] = "Personnages sur %s"
 L["Select the sort type"] = "Sélectionnez le type de tri"
