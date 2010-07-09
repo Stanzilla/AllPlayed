@@ -788,7 +788,7 @@ function AllPlayed:DrawTooltip(anchor)
 							if (pc_data.level < self.max_pc_level) and
 							   (pc_data.level > 1 or pc_data.xp > 0)
 							then
-								-- How must rested XP do we have?
+								-- How much rested XP do we have?
 								local estimated_rested_xp = self:EstimateRestedXP(
 																	pc,
 																	realm,
@@ -812,11 +812,14 @@ function AllPlayed:DrawTooltip(anchor)
 								end
 
 								local percent_for_colour = estimated_rested_xp / pc_data.max_rested_xp
+								local rested_percent = percent_for_colour
 								if pc_data.level == self.max_pc_level - 1 then
 									-- Last level before max
-									percent_for_colour 
-										= estimated_rested_xp / 
-											(XPToNextLevelCache[self.max_pc_level - 1] - pc_data.xp)
+									percent_for_colour
+										= math.min(estimated_rested_xp, XPToNextLevelCache[self.max_pc_level - 1] - pc_data.xp) 
+										  / (XPToNextLevelCache[self.max_pc_level - 1] - pc_data.xp)
+									rested_percent 
+										= math.floor(estimated_rested_xp / XPToNextLevelCache[self.max_pc_level - 1] * 100  +  0.5) / 100
 								end
 								local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
 
@@ -833,16 +836,21 @@ function AllPlayed:DrawTooltip(anchor)
 									text_countdown = self:FormatTime(countdown_seconds)
 								end
 
+								-- Force the display to 100% for the last level before max
+								local percent_rest = self:GetOption('percent_rest')
+								if percent_rest ~= "0" and pc_data.level == self.max_pc_level -1 then
+									percent_rest = 100
+								end
 								-- Do we show the percent XP rested and/or the countdown until 100% rested?
-								if self:GetOption('percent_rest') ~= "0" and self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
+								if percent_rest ~= "0" and self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
 									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
-																						 self:GetOption('percent_rest') * percent_for_colour,
+																						 percent_rest * rested_percent,
 																						 L["rested"],
 																						 text_countdown
 																	 )
 								elseif self:GetOption('percent_rest') ~= "0" then
 									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s)"),
-																						 self:GetOption('percent_rest') * percent_for_colour,
+																						 percent_rest * rested_percent,
 																						 L["rested"]
 																	 )
 								elseif self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
@@ -1224,10 +1232,9 @@ end
 -- was in an Inn
 function AllPlayed:EstimateRestedXP( pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting, curent_xp )
     --self:Debug("AllPlayed:EstimateRestedXP: %s, %s, %s, %s, %s, %s, %s",pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting)
-    -- I'm putting level as a parameter even though I don't use it for now. I need to find
-    -- out at what level do a character start to gain rested XP
+    -- I need to find out at what level a character starts to gain rested XP
 
-    -- If the character is the current player and he is not in an Inn, he gain no rest
+    -- If the character is the current player and he is not in an Inn, he gains no rest
     if pc == AllPlayed.pc and realm == self.realm and not is_resting then
         return rested_xp
     end
