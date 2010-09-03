@@ -12,6 +12,11 @@ AllPlayed_revision.toc  = GetAddOnMetadata("AllPlayed", "Version"):match("%$Revi
 --[[                     Addon Initialisation                          ]]--
 --[[ ================================================================= ]]--
 
+-- Backward compatilility when playing Cataclysm
+local IS_40 = (select(4, GetBuildInfo()) >= 40000)
+local GetArenaCurrency = GetArenaCurrency or function() return 0 end
+local GetHonorCurrency = GetHonorCurrency or function() return 0 end
+
 -- Define static values for the addon
 -- Ten days in second, needed to estimate the rested XP
 local TEN_DAYS  = 60 * 60 * 24 * 10
@@ -316,6 +321,7 @@ function AllPlayed:OnEnable()
 
     -- Find the max level
     self.max_pc_level = 60  +  10 * GetAccountExpansionLevel()
+    if GetAccountExpansionLevel() == 3 then self.max_pc_level = 85 end
 
     -- Get the values for the current character
     self:SaveVar()
@@ -1076,6 +1082,11 @@ function AllPlayed:GetOption( option, ... )
 		
 	elseif option == 'show_minimap_icon' then
 		return not self.db.profile.options.ldbicon.hide
+	end
+	
+	-- Some option need to be set to false for Cataclysm
+	if IS_40 then
+		if option == 'show_arena_points' or option == 'show_honor_points' then return false end
 	end
 
 	return self.db.profile.options[option]
@@ -1975,6 +1986,7 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[77] 	  = 1637400
 	XPToNextLevelCache[78] 	  = 1653900
 	XPToNextLevelCache[79] 	  = 1670800
+	XPToNextLevelCache[80] 	  = 1686300
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]

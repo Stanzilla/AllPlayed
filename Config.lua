@@ -6,6 +6,9 @@
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.config	= ("$Revision$"):match("(%d+)")
 
+-- Backward compatibility stuff
+local IS_40 = (select(4, GetBuildInfo()) >= 40000)
+
 -- Localizations
 local L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
 
@@ -284,17 +287,29 @@ local function ReturnConfigMenu()
 			func = function() InterfaceOptionsFrame_OpenToCategory(AP_display_name) end;
 		},
 	}	
+	
+	-- No area or honor points in Cataclysm
+	if IS_40 then
+		config_menu[4].menuList[10].menuList[2] = config_menu[4].menuList[10].menuList[4]
+		config_menu[4].menuList[10].menuList[3] = nil
+		config_menu[4].menuList[10].menuList[4] = nil
+	end
 
 	-- Set version for display
 	config_menu[2].text = GetVersionString()
 	
-	-- All the checkbox option need to have their menu with the menu button
+	-- All the checkbox options need to have their menu with the menu button
 	-- and a pair of function to get and set the options
 	local function AddCheckboxOption(menu)
 	
 		local foundCheck = false
 		
 		for i=1,#menu do
+			-- For Cataclysm only
+			if IS_40 then
+				menu[i].isNotRadial = true
+			end
+		
 			if menu[i].checked then 
 				menu[i].tooltipOnButton = 1 
 				menu[i].keepShownOnClick = 1
@@ -354,6 +369,9 @@ local function ReturnConfigMenu()
 						)
 					end;
 				}
+				-- Specify no radial button for Cataclysm
+				if IS_40 then config_menu[6].menuList[i].isNotRadial = true end
+				
 				i = i + 1
 			end
 		end
@@ -579,7 +597,7 @@ local function GetOptions()
 						set       	= function(info, v) AllPlayed:SetOption('show_honor_kills',v) end,
 						order = 11.1,
 					},
-					show_honor_points= {
+					show_honor_points = {
 						name        = L["Honor Points"],
 						desc        = L["Show the character honor points"],
 						type        = 'toggle',
@@ -664,6 +682,12 @@ local function GetOptions()
 			},
 		},
 	}
+	
+	-- Arena and Honor points do not exists in Cataclysm
+	if IS_40 then
+		options.args.display.args.show_arena_points = nil
+		options.args.display.args.show_honor_points = nil
+	end
 
 	-- Ignore section
 	local faction_order = 1
