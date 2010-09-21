@@ -289,11 +289,11 @@ local function ReturnConfigMenu()
 	}	
 	
 	-- No area or honor points in Cataclysm
-	if IS_40 then
-		config_menu[4].menuList[10].menuList[2] = config_menu[4].menuList[10].menuList[4]
-		config_menu[4].menuList[10].menuList[3] = nil
-		config_menu[4].menuList[10].menuList[4] = nil
-	end
+	--if IS_40 then
+	--	config_menu[4].menuList[10].menuList[2] = config_menu[4].menuList[10].menuList[4]
+	--	config_menu[4].menuList[10].menuList[3] = nil
+	--	config_menu[4].menuList[10].menuList[4] = nil
+	--end
 
 	-- Set version for display
 	config_menu[2].text = GetVersionString()
@@ -307,7 +307,11 @@ local function ReturnConfigMenu()
 		for i=1,#menu do
 			-- For Cataclysm only
 			if IS_40 then
-				menu[i].isNotRadial = true
+				menu[i].isNotRadio = true
+				if not menu[i].checked and not menu[i].list then
+					menu[i].notCheckable = true
+					menu[i].text = "|TInterface\Common\UI-SliderBar-Background:0:1.5:0:0:8:8|t" .. menu[i].text
+				end
 			end
 		
 			if menu[i].checked then 
@@ -324,6 +328,9 @@ local function ReturnConfigMenu()
 			-- For options where you choose one choice from a list of set arguments
 			-- arg1 contains the choice
 			if menu[i].list then
+				if IS_40 then
+					menu[i].isNotRadio = nil
+				end
 				menu[i].tooltipOnButton = 1 
 				menu[i].value = menu[i].list
 				menu[i].checked = function() return AllPlayed:GetOption(menu[i].value) == menu[i].arg1 end
@@ -337,9 +344,9 @@ local function ReturnConfigMenu()
 			-- Submenus
 			if menu[i].menuList then AddCheckboxOption(menu[i].menuList) end
 			
-			-- Set notCheckable if no checkable items were found
 		end
 		
+		-- Set notCheckable if no checkable items were found
 		if not foundCheck then
 			for i=1,#menu do
 				menu[i].notCheckable = 1
@@ -370,7 +377,7 @@ local function ReturnConfigMenu()
 					end;
 				}
 				-- Specify no radial button for Cataclysm
-				if IS_40 then config_menu[6].menuList[i].isNotRadial = true end
+				if IS_40 then config_menu[6].menuList[i].isNotRadio = true end
 				
 				i = i + 1
 			end
@@ -684,10 +691,10 @@ local function GetOptions()
 	}
 	
 	-- Arena and Honor points do not exists in Cataclysm
-	if IS_40 then
-		options.args.display.args.show_arena_points = nil
-		options.args.display.args.show_honor_points = nil
-	end
+	--if IS_40 then
+	--	options.args.display.args.show_arena_points = nil
+	--	options.args.display.args.show_honor_points = nil
+	--end
 
 	-- Ignore section
 	local faction_order = 1

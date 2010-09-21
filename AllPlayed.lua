@@ -14,8 +14,8 @@ AllPlayed_revision.toc  = GetAddOnMetadata("AllPlayed", "Version"):match("%$Revi
 
 -- Backward compatilility when playing Cataclysm
 local IS_40 = (select(4, GetBuildInfo()) >= 40000)
-local GetArenaCurrency = GetArenaCurrency or function() return 0 end
-local GetHonorCurrency = GetHonorCurrency or function() return 0 end
+local GetArenaCurrency = GetArenaCurrency or function() return select(2,GetCurrencyInfo(390)) or 0 end
+local GetHonorCurrency = GetHonorCurrency or function() return select(2,GetCurrencyInfo(392)) or 0 end
 
 -- Define static values for the addon
 -- Ten days in second, needed to estimate the rested XP
@@ -260,6 +260,10 @@ function AllPlayed:OnInitialize()
 
 	self.sort_tables_done    = false
 
+    -- Find the max level
+    self.max_pc_level = 60  +  10 * GetAccountExpansionLevel()
+    if GetAccountExpansionLevel() == 3 then self.max_pc_level = 85 end
+
 	-- Initialize the cache
 	InitXPToLevelCache()
 end
@@ -318,10 +322,6 @@ function AllPlayed:OnEnable()
     else
 		CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
     end
-
-    -- Find the max level
-    self.max_pc_level = 60  +  10 * GetAccountExpansionLevel()
-    if GetAccountExpansionLevel() == 3 then self.max_pc_level = 85 end
 
     -- Get the values for the current character
     self:SaveVar()
@@ -1085,9 +1085,9 @@ function AllPlayed:GetOption( option, ... )
 	end
 	
 	-- Some option need to be set to false for Cataclysm
-	if IS_40 then
-		if option == 'show_arena_points' or option == 'show_honor_points' then return false end
-	end
+	--if IS_40 then
+	--	if option == 'show_arena_points' or option == 'show_honor_points' then return false end
+	--end
 
 	return self.db.profile.options[option]
 end
@@ -1320,9 +1320,9 @@ end
 
 -- Fonction that format the money string
 -- The result is a string with embeded coin icons
-local gold_icon 	= "|TInterface\\AddOns\\AllPlayed\\Gold:0:0:2:0|t"
-local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:2:0|t"
-local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:2:0|t"
+local gold_icon 	= "|TInterface\\AddOns\\AllPlayed\\Gold:0:0:0:0:16:16|t"
+local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:0:0:16:16|t"
+local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:0:0:16:16|t"
 --> "6996|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t 38|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t 2|TInterface\MoneyFrame\UI-CopperIcon:0:0:2:0|t"
 --local gold_icon 	= "|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t"
 --local silver_icon = "|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t"
@@ -1332,6 +1332,20 @@ function FormatMoney(amount)
 
 	local string = ""
 
+	if amount >= 10000 then
+		string = format("%s %s %s",
+							 format(GOLD_AMOUNT_TEXTURE, amount / 10000, 0, 0),
+							 format(SILVER_AMOUNT_TEXTURE, (amount % 10000) / 100, 0, 0),
+							 format(COPPER_AMOUNT_TEXTURE, (amount % 100), 0, 0))
+	elseif amount >= 100 then
+		string = format("%s %s",
+							 format(SILVER_AMOUNT_TEXTURE, (amount % 10000) / 100, 0, 0),
+							 format(COPPER_AMOUNT_TEXTURE, (amount % 100), 0, 0))
+	else
+		string = format("%s",
+							 format(COPPER_AMOUNT_TEXTURE, amount, 0, 0))
+	end
+	--[[
 	if amount >= 10000 then
 		string = format("%d%s %d%s %d%s",
 							 amount / 10000,
@@ -1351,7 +1365,7 @@ function FormatMoney(amount)
 							 amount,
 							 copper_icon)
 	end
-
+	]]--
 	return C:White(string)
 
 end
@@ -1359,8 +1373,8 @@ end
 local honor_strings = {
 	icons = {
 		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0|t',
-		['hp-Alliance']	= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Alliance:0|t',
-		['hp-Horde']		= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Horde:0|t',
+		['hp-Alliance']	= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Alliance:0:0:0:0:64:64|t',
+		['hp-Horde']		= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Horde:0:0:0:0:64:64|t',
 		ap 					= '%s|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0|t',
 --		bj 					= '%s|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,-1|t',
 --		ab 					= '%s|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,1|t',
@@ -1987,11 +2001,15 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[78] 	  = 1653900
 	XPToNextLevelCache[79] 	  = 1670800
 	XPToNextLevelCache[80] 	  = 1686300
+	XPToNextLevelCache[81] 	  = 1686300
+	XPToNextLevelCache[82] 	  = 1686300
+	XPToNextLevelCache[83] 	  = 1686300
+	XPToNextLevelCache[84] 	  = 1686300
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]
 	if AllPlayed.db.global.cache.XPToNextLevel[build_version] ~= nil then
-		for level = 1,69 do
+		for level = 1, AllPlayed.max_pc_level do
 			if AllPlayed.db.global.cache.XPToNextLevel[build_version][level] ~= nil then
 				XPToNextLevelCache[level] = AllPlayed.db.global.cache.XPToNextLevel[build_version][level]
 			end
