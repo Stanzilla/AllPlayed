@@ -1320,9 +1320,12 @@ end
 
 -- Fonction that format the money string
 -- The result is a string with embeded coin icons
-local gold_icon 	= "|TInterface\\AddOns\\AllPlayed\\Gold:0:0:0:0:16:16|t"
-local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:0:0:16:16|t"
-local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:0:0:16:16|t"
+local gold_icon 	= "\124TInterface\\Interface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t"
+local silver_icon = "\124TInterface\\Interface\\MoneyFrame\\UI-SilverIcon:0:0:2:0|t"
+local copper_icon = "\124TInterface\\Interface\\MoneyFrame\\UI-CopperIcon:0:0:2:0|t"
+--local gold_icon 	= "TInterface\\AddOns\\AllPlayed\\Gold:0:0:0:0:16:16|t"
+--local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:0:0:16:16|t"
+--local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:0:0:16:16|t"
 --> "6996|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t 38|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t 2|TInterface\MoneyFrame\UI-CopperIcon:0:0:2:0|t"
 --local gold_icon 	= "|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t"
 --local silver_icon = "|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t"
@@ -1331,7 +1334,7 @@ function FormatMoney(amount)
    if not AllPlayed:GetOption('use_icons') then return A:FormatMoneyFull( amount, true, false ) end
 
 	local string = ""
-
+--[[
 	if amount >= 10000 then
 		string = format("%s %s %s",
 							 format(GOLD_AMOUNT_TEXTURE, amount / 10000, 0, 0),
@@ -1345,7 +1348,8 @@ function FormatMoney(amount)
 		string = format("%s",
 							 format(COPPER_AMOUNT_TEXTURE, amount, 0, 0))
 	end
-	--[[
+	]]--
+
 	if amount >= 10000 then
 		string = format("%d%s %d%s %d%s",
 							 amount / 10000,
@@ -1365,17 +1369,20 @@ function FormatMoney(amount)
 							 amount,
 							 copper_icon)
 	end
-	]]--
+
 	return C:White(string)
 
 end
 
 local honor_strings = {
 	icons = {
-		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0|t',
-		['hp-Alliance']	= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Alliance:0:0:0:0:64:64|t',
-		['hp-Horde']		= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Horde:0:0:0:0:64:64|t',
-		ap 					= '%s|TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0|t',
+--		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0|t',
+		hk 					= '%s\124TInterface\\GossipFrame\\BattleMasterGossipIcon:0:0:2:0:16:16\124t',
+--		['hp-Alliance']	= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Alliance:0:0:0:0:64:64|t',
+--		['hp-Horde']		= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Horde:0:0:0:0:64:64|t',
+		['hp-Alliance']	= '%s\124TInterface\\PVPFrame\\PVP-Currency-Alliance:0:0:2:0:32:32\124t',
+		['hp-Horde']		= '%s\124TInterface\\PVPFrame\\PVP-Currency-Horde:0:0:2:0:32:32\124t',
+		ap 					= '%s\124TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:2:0:32:32\124t',
 --		bj 					= '%s|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,-1|t',
 --		ab 					= '%s|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,1|t',
 --		av 					= '%s|TInterface\\Icons\\INV_Jewelry_Necklace_21:0|t',
