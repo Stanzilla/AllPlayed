@@ -629,6 +629,7 @@ end
 
 -- Fill the QTip witl the information
 local col_text = {} -- reuse the table that is used over and over when drawing.
+local col_align = {}
 local pvp_columns = { 'show_arena_points', 'show_honor_points', 'show_honor_kills', 'show_conquest_points' }
 function AllPlayed:DrawTooltip(anchor)
 
@@ -669,7 +670,6 @@ function AllPlayed:DrawTooltip(anchor)
 
 	-- Is the gold/rested XP column needed?
 	if self:GetOption('show_coins')
-		or self:GetOption('show_xp_total')
 		or self:GetOption('show_rested_xp')
 		or self:GetOption('show_rested_xp_countdown')
 		or self:GetOption('percent_rest') ~= "0" then
@@ -711,7 +711,7 @@ function AllPlayed:DrawTooltip(anchor)
 					----self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
 
 					-- Build the Realm aggregated line
-					local text_realm = string.format( C:Yellow(L["%s characters "]), realm )
+					local text_realm = string.format( C:Yellow(L["%s %s characters "]), realm, faction )
 
 					local text_realm_optional = ""
 					local first_option = true
@@ -769,6 +769,7 @@ function AllPlayed:DrawTooltip(anchor)
 							local pc_data = self.db.global.data[faction][realm][pc]
 
 							wipe(col_text)
+							wipe(col_align)
 							local col_no = 1
 
 							-- Seconds played are still going up for the current PC
@@ -788,6 +789,7 @@ function AllPlayed:DrawTooltip(anchor)
 															pc_data.class_loc,
 															faction
 							                   )
+							col_align[col_no] = 'LEFT'
 
 							col_no = col_no + 1
 							col_text[col_no] = ''
@@ -817,55 +819,60 @@ function AllPlayed:DrawTooltip(anchor)
 													)
 								end
 
+								col_align[col_no] = 'CENTER'
 								col_no = col_no + 1
 								col_text[col_no] = ''
 							end
 
 							if need_jp then
 								col_text[col_no] = FormatJustice(pc_data.justice_points)
+								col_align[col_no] = 'CENTER'
 								col_no = col_no + 1
 								col_text[col_no] = ''
 							end
 
 							if self:GetOption('show_honor_kills') then
 								col_text[col_no] = FormatHonor(faction, pc_data.honor_kills)
+								col_align[col_no] = 'CENTER'
 								col_no = col_no + 1
 								col_text[col_no] = ''
 							end
 
 							if self:GetOption('show_honor_points') then
 								col_text[col_no] = FormatHonor(faction, nil, pc_data.honor_points)
+								col_align[col_no] = 'CENTER'
 								col_no = col_no + 1
 								col_text[col_no] = ''
 							end
 
 							if self:GetOption('show_arena_points') then
 								col_text[col_no] = FormatHonor(faction, nil, nil, pc_data.arena_points)
+								col_align[col_no] = 'CENTER'
+								col_no = col_no + 1
+								col_text[col_no] = ''
 								col_no = col_no + 1
 								col_text[col_no] = ''
 							end
 
 							if self:GetOption('show_conquest_points') then
 								col_text[col_no] = FormatHonor(faction, nil, nil, nil, pc_data.conquest_points)
-								col_no = col_no + 1
-								col_text[col_no] = ''
+								col_align[col_no] = 'CENTER'
 							end
 
-							--[[
-							--local text_pvp = ""
-							if need_pvp then
-								col_text[col_no] = FormatHonor(
-										faction,
-										pc_data.honor_kills,
-										pc_data.honor_points,
-										pc_data.arena_points,
-										pc_data.conquest_points
-								)
-								col_no = col_no + 1
-								col_text[col_no] = ''
+							-- Is the last column needed ?
+							if self:GetOption('show_coins') or 
+								self:GetOption('show_rested_xp') or 
+							   self:GetOption('show_rested_xp_countdown') or
+							   self:GetOption('percent_rest') ~= "0"
+							then
+								col_align[col_no] = 'RIGHT'
+							else
+								col_text[col_no] = nil
+								col_align[col_no] = nil
+								col_no = col_no - 1
 							end
-							]]--
 
+						
 							--local text_coin = ""
 							if self:GetOption('show_coins') then
 								col_text[col_no] = FormatMoney(pc_data.coin)
@@ -946,10 +953,7 @@ function AllPlayed:DrawTooltip(anchor)
 
 							line, column = tooltip:AddLine()
 							for i=1,nb_columns do
-								local align = 'CENTER'
-								if i == 1 then align = 'LEFT' end
-								if i == nb_columns then align = 'RIGHT' end
-								tooltip:SetCell(line, i, "  "..col_text[i], align)
+								tooltip:SetCell(line, i, "  "..col_text[i], col_align[i])
 							end
 						end
 					end

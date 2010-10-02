@@ -174,5 +174,7 @@ L['Show %s total']																= true
 L['Show the total %s for all characters']									= true
 -- <currency type> (<icon string>)
 L['%s (%s)']																		= true
--- <currency type> (<first icon string> or <second icon string> 
+-- <currency type> (<first icon string> or <second icon string>) 
 L["%s (%s or %s)"]																= true
+-- <realm> <faction> characters.
+L["%s %s characters "]															= true
