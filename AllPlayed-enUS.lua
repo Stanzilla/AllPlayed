@@ -161,7 +161,9 @@ L["Do not show Percent Rest"]													= true
 
 -- New stuff for 40000-1
 L['Justice Points']																= true
+L["Total Justice Points: "]													= true
 L['Conquest Points']																= true
+L['Conquest Pts']																	= true
 -- New abbreviations
 L['%s JP']																			= true
 L['%s CP']																			= true

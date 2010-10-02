@@ -25,7 +25,7 @@ local honor_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0
 local conquest_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Alliance:0:0:2:0:64:64\124t'
 local conquest_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t'
 local arena_icon = '\124TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:2:0:32:32\124t'
-local kill_icon = '\124TInterface\\GossipFrame\\BattleMasterGossipIcon:0:0:2:0:16:16\124t'
+local kill_icon = '\124TInterface\\Icons\\Spell_Holy_BlessingOfStrength:0:0:2:0:64:64\124t'
 
 -- Version iditification management
 do
@@ -748,7 +748,7 @@ local function GetOptions()
 	if IS_40 then
 		options.args.display.args.show_arena_points = nil
 		options.args.display.args.show_conquest_points = {
-						name        = format(L["%s (%s or %s)"], L["Conquest Points"], conquest_alliance_icon, conquest_horde_icon),
+						name        = format(L["%s (%s or %s)"], L["Conquest Pts"], conquest_alliance_icon, conquest_horde_icon),
 						desc        = format(L['Display the %s each character pocess'],L["Conquest Points"]),
 						type        = 'toggle',
 						get       	= function() return AllPlayed:GetOption('show_conquest_points') end,

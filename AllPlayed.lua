@@ -68,6 +68,7 @@ local ReleaseTable
 local ClearTable
 local FormatXP
 local FormatMoney
+local FormatJustice
 local FormatHonor
 local FormatPVECurrency
 local FactionColour
@@ -451,15 +452,18 @@ function AllPlayed:ComputeTotal()
     self:Debug("AllPlayed:ComputeTotal(): %d",time())
 
     -- Let's start from scratch
-    self.total_faction["Horde"].time_played      = 0
-    self.total_faction["Horde"].coin             = 0
-    self.total_faction["Horde"].xp               = 0
-    self.total_faction["Alliance"].time_played   = 0
-    self.total_faction["Alliance"].coin          = 0
-    self.total_faction["Alliance"].xp            = 0
-    self.total.time_played                       = 0
-    self.total.coin                              = 0
-    self.total.xp                                = 0
+    self.total_faction["Horde"].time_played      	= 0
+    self.total_faction["Horde"].coin             	= 0
+    self.total_faction["Horde"].xp               	= 0
+    self.total_faction["Horde"].justice_points   	= 0
+    self.total_faction["Alliance"].time_played   	= 0
+    self.total_faction["Alliance"].coin          	= 0
+    self.total_faction["Alliance"].xp            	= 0
+    self.total_faction["Alliance"].justice_points	= 0
+    self.total.time_played                       	= 0
+    self.total.coin                              	= 0
+    self.total.xp                                	= 0
+    self.total.justice_points                     	= 0
 
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.global.data) do
@@ -471,6 +475,7 @@ function AllPlayed:ComputeTotal()
             self.total_realm[faction][realm].time_played = 0
             self.total_realm[faction][realm].coin = 0
             self.total_realm[faction][realm].xp = 0
+            self.total_realm[faction][realm].justice_points = 0
             for pc, pc_table in pairs(realm_table) do
                 if not self:GetOption('is_ignored', realm, pc) then
 						-- Need to get the current seconds_played for the PC
@@ -487,12 +492,14 @@ function AllPlayed:ComputeTotal()
 
 						pc_xp = pc_xp + XPToLevel(pc_table.level)
 
-						self.total_faction[faction].time_played         = self.total_faction[faction].time_played       + seconds_played
-						self.total_faction[faction].coin                = self.total_faction[faction].coin              + pc_table.coin
-						self.total_faction[faction].xp                  = self.total_faction[faction].xp                + pc_xp
-						self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  + seconds_played
-						self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         + pc_table.coin
-						self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           + pc_xp
+						self.total_faction[faction].time_played         = self.total_faction[faction].time_played       	+ seconds_played
+						self.total_faction[faction].coin                = self.total_faction[faction].coin              	+ pc_table.coin
+						self.total_faction[faction].xp                  = self.total_faction[faction].xp                	+ pc_xp
+						self.total_faction[faction].justice_points      = self.total_faction[faction].justice_points    	+ pc_table.justice_points
+						self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  	+ seconds_played
+						self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         	+ pc_table.coin
+						self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           	+ pc_xp
+						self.total_realm[faction][realm].justice_points = self.total_realm[faction][realm].justice_points	+ pc_table.justice_points
                 end
             end
         end
@@ -511,17 +518,22 @@ function AllPlayed:ComputeTotal()
             self.total.xp
                 =   self.total_faction["Horde"].xp
                   + self.total_faction["Alliance"].xp
+            self.total.justice_points
+                =   self.total_faction["Horde"].justice_points
+                  + self.total_faction["Alliance"].justice_points
         else
             -- Only the current faction count
-            self.total.time_played = self.total_faction[self.faction].time_played
-            self.total.coin        = self.total_faction[self.faction].coin
-            self.total.xp          = self.total_faction[self.faction].xp
+            self.total.time_played 		= self.total_faction[self.faction].time_played
+            self.total.coin        		= self.total_faction[self.faction].coin
+            self.total.xp          		= self.total_faction[self.faction].xp
+            self.total.justice_points	= self.total_faction[self.faction].justice_points
         end
     else
         -- Only the current realm count (all_factions is ignore)
-        self.total.time_played = self.total_realm[self.faction][self.realm].time_played
-        self.total.coin        = self.total_realm[self.faction][self.realm].coin
-        self.total.xp          = self.total_realm[self.faction][self.realm].xp
+        self.total.time_played 		= self.total_realm[self.faction][self.realm].time_played
+        self.total.coin        		= self.total_realm[self.faction][self.realm].coin
+        self.total.xp          		= self.total_realm[self.faction][self.realm].xp
+        self.total.justice_points	= self.total_realm[self.faction][self.realm].justice_points
     end
 end
 
@@ -531,14 +543,17 @@ function AllPlayed:ComputeTotalHonor()
 	self.total_faction["Horde"].honor_kills      			= 0
 	self.total_faction["Horde"].honor_points     			= 0
 	self.total_faction["Horde"].arena_points     			= 0
+	self.total_faction["Horde"].conquest_points    			= 0
 
 	self.total_faction["Alliance"].honor_kills   			= 0
 	self.total_faction["Alliance"].honor_points  			= 0
 	self.total_faction["Alliance"].arena_points  			= 0
+	self.total_faction["Alliance"].conquest_points 			= 0
 
 	self.total.honor_kills                          			= 0
 	self.total.honor_points                         			= 0
 	self.total.arena_points                        				= 0
+	self.total.conquest_points                     				= 0
 
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.global.data) do
@@ -551,16 +566,19 @@ function AllPlayed:ComputeTotalHonor()
             self.total_realm[faction][realm].honor_kills = 0
             self.total_realm[faction][realm].honor_points = 0
             self.total_realm[faction][realm].arena_points = 0
+            self.total_realm[faction][realm].conquest_points = 0
 
             for pc, pc_table in pairs(realm_table) do
                 if not self:GetOption('is_ignored', realm, pc) then
 						self.total_faction[faction].honor_kills         	= self.total_faction[faction].honor_kills       	+ (pc_table.honor_kills or 0)
 						self.total_faction[faction].honor_points        	= self.total_faction[faction].honor_points      	+ (pc_table.honor_points or 0)
 						self.total_faction[faction].arena_points        	= self.total_faction[faction].arena_points      	+ (pc_table.arena_points or 0)
+						self.total_faction[faction].conquest_points        = self.total_faction[faction].conquest_points      + (pc_table.conquest_points or 0)
 
 						self.total_realm[faction][realm].honor_kills    		= self.total_realm[faction][realm].honor_kills  			+ (pc_table.honor_kills or 0)
 						self.total_realm[faction][realm].honor_points   		= self.total_realm[faction][realm].honor_points 			+ (pc_table.honor_points or 0)
 						self.total_realm[faction][realm].arena_points   		= self.total_realm[faction][realm].arena_points 			+ (pc_table.arena_points or 0)
+						self.total_realm[faction][realm].conquest_points   	= self.total_realm[faction][realm].conquest_points 		+ (pc_table.conquest_points or 0)
                 end
             end
         end
@@ -579,17 +597,22 @@ function AllPlayed:ComputeTotalHonor()
             self.total.arena_points
                 =   self.total_faction["Horde"].arena_points
                   + self.total_faction["Alliance"].arena_points
+            self.total.conquest_points
+                =   self.total_faction["Horde"].conquest_points
+                  + self.total_faction["Alliance"].conquest_points
         else
             -- Only the current faction count
             self.total.honor_kills 				= self.total_faction[self.faction].honor_kills
             self.total.honor_points 			= self.total_faction[self.faction].honor_points
             self.total.arena_points 			= self.total_faction[self.faction].arena_points
+            self.total.conquest_points 		= self.total_faction[self.faction].conquest_points
         end
     else
         -- Only the current realm count (all_factions is ignore)
         self.total.honor_kills 				= self.total_realm[self.faction][self.realm].honor_kills
         self.total.honor_points  			= self.total_realm[self.faction][self.realm].honor_points
         self.total.arena_points  			= self.total_realm[self.faction][self.realm].arena_points
+        self.total.conquest_points  		= self.total_realm[self.faction][self.realm].conquest_points
     end
 end
 
@@ -606,6 +629,7 @@ end
 
 -- Fill the QTip witl the information
 local col_text = {} -- reuse the table that is used over and over when drawing.
+local pvp_columns = { 'show_arena_points', 'show_honor_points', 'show_honor_kills', 'show_conquest_points' }
 function AllPlayed:DrawTooltip(anchor)
 
 	-- Keep the anchor for further use
@@ -622,12 +646,26 @@ function AllPlayed:DrawTooltip(anchor)
 		nb_columns = nb_columns + 1
 	end
 
-	-- Do we have a PvP column?
+	-- Do we have PvP columns?
+	local need_pvp = false
+	for _,column in ipairs(pvp_columns) do
+		if self:GetOption(column) then
+			need_pvp = true
+			nb_columns = nb_columns + 1
+		end
+	end
+	--[[
 	local need_pvp =	self:GetOption('show_arena_points') or
 							self:GetOption('show_honor_points') or
-							self:GetOption('show_honor_kills')
-
+							self:GetOption('show_honor_kills') or
+							self:GetOption('show_conquest_points')
 	if need_pvp then nb_columns = nb_columns + 1 end
+	]]--
+	
+	-- De we need to display the Justice Points 
+	local need_jp =	self:GetOption('show_justice_points')
+	if need_jp then nb_columns = nb_columns + 1 end
+
 
 	-- Is the gold/rested XP column needed?
 	if self:GetOption('show_coins')
@@ -783,17 +821,50 @@ function AllPlayed:DrawTooltip(anchor)
 								col_text[col_no] = ''
 							end
 
+							if need_jp then
+								col_text[col_no] = FormatJustice(pc_data.justice_points)
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							if self:GetOption('show_honor_kills') then
+								col_text[col_no] = FormatHonor(faction, pc_data.honor_kills)
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							if self:GetOption('show_honor_points') then
+								col_text[col_no] = FormatHonor(faction, nil, pc_data.honor_points)
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							if self:GetOption('show_arena_points') then
+								col_text[col_no] = FormatHonor(faction, nil, nil, pc_data.arena_points)
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							if self:GetOption('show_conquest_points') then
+								col_text[col_no] = FormatHonor(faction, nil, nil, nil, pc_data.conquest_points)
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							--[[
 							--local text_pvp = ""
 							if need_pvp then
 								col_text[col_no] = FormatHonor(
 										faction,
 										pc_data.honor_kills,
 										pc_data.honor_points,
-										pc_data.arena_points
+										pc_data.arena_points,
+										pc_data.conquest_points
 								)
 								col_no = col_no + 1
 								col_text[col_no] = ''
 							end
+							]]--
 
 							--local text_coin = ""
 							if self:GetOption('show_coins') then
@@ -874,16 +945,11 @@ function AllPlayed:DrawTooltip(anchor)
 							end
 
 							line, column = tooltip:AddLine()
-							tooltip:SetCell(line, 1, "  "..col_text[1], "LEFT")
-							if nb_columns == 2 then
-								tooltip:SetCell(line, 2, col_text[2], "RIGHT")
-							elseif nb_columns == 3 then
-								tooltip:SetCell(line, 2, col_text[2], "CENTER")
-								tooltip:SetCell(line, 3, col_text[3], "RIGHT")
-							else
-								tooltip:SetCell(line, 2, col_text[2], "CENTER")
-								tooltip:SetCell(line, 3, col_text[3], "CENTER")
-								tooltip:SetCell(line, 4, col_text[4], "RIGHT")
+							for i=1,nb_columns do
+								local align = 'CENTER'
+								if i == 1 then align = 'LEFT' end
+								if i == nb_columns then align = 'RIGHT' end
+								tooltip:SetCell(line, i, "  "..col_text[i], align)
 							end
 						end
 					end
@@ -896,7 +962,8 @@ function AllPlayed:DrawTooltip(anchor)
 	
 	if self:GetOption('show_played_time') or
 	   self:GetOption('show_coins') or
-	   (self:GetOption('show_pvp_totals') and need_pvp) 
+	   (self:GetOption('show_pvp_totals') and need_pvp) or
+	   (self:GetOption('show_justice_total') and need_jp)
 	then
 		line, column = tooltip:AddLine()
 		tooltip:SetCell(line, 1, " ")
@@ -915,6 +982,12 @@ function AllPlayed:DrawTooltip(anchor)
 		tooltip:SetCell(line, nb_columns, FormatMoney(self.total.coin), "RIGHT")
 	end
 
+	if self:GetOption('show_justice_total') and need_jp then
+		line, column = tooltip:AddLine()
+		tooltip:SetCell(line, 1, C:Orange( L["Total Justice Points: "] ), "LEFT", nb_columns - 1)
+		tooltip:SetCell(line, nb_columns, FormatJustice(self.total.justice_points), "RIGHT")
+	end
+
 	if self:GetOption('show_pvp_totals') and need_pvp then
 		line, column = tooltip:AddLine()
 		tooltip:SetCell(line, 1, C:Orange( L["Total PvP: "] ), "LEFT", nb_columns - 1)
@@ -924,7 +997,8 @@ function AllPlayed:DrawTooltip(anchor)
 				FormatHonor(self.faction,
 								self.total.honor_kills,
 								self.total.honor_points,
-								self.total.arena_points
+								self.total.arena_points,
+								self.total.conquest_points
 				), 
 				"RIGHT"
 		)
@@ -1342,60 +1416,7 @@ end
 
 -- Fonction that format the money string
 -- The result is a string with embeded coin icons
---local gold_icon 	= "\124TInterface\\Interface\\MONEYFRAME\\UI-GoldIcon:0:0:2:0|t"
---local silver_icon = "\124TInterface\\Interface\\MONEYFRAME\\UI-SilverIcon:0:0:2:0|t"
---local copper_icon = "\124TInterface\\Interface\\MONEYFRAME\\UI-CopperIcon:0:0:2:0|t"
---local gold_icon 	= "TInterface\\AddOns\\AllPlayed\\Gold:0:0:0:0:16:16|t"
---local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:0:0:16:16|t"
---local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:0:0:16:16|t"
---> "6996|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t 38|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t 2|TInterface\MoneyFrame\UI-CopperIcon:0:0:2:0|t"
---local gold_icon 	= "|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t"
---local silver_icon = "|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t"
---local copper_icon = "|TInterface\MoneyFrame\UI-CopperIcon:0:0:2:0|t"
 function FormatMoney(money)
-   --if not AllPlayed:GetOption('use_icons') then return A:FormatMoneyFull( amount, true, false ) end
-
-	--local string = ""
---[[
-	if amount >= 10000 then
-		string = format("%s %s %s",
-							 format(GOLD_AMOUNT_TEXTURE, amount / 10000, 0, 0),
-							 format(SILVER_AMOUNT_TEXTURE, (amount % 10000) / 100, 0, 0),
-							 format(COPPER_AMOUNT_TEXTURE, (amount % 100), 0, 0))
-	elseif amount >= 100 then
-		string = format("%s %s",
-							 format(SILVER_AMOUNT_TEXTURE, (amount % 10000) / 100, 0, 0),
-							 format(COPPER_AMOUNT_TEXTURE, (amount % 100), 0, 0))
-	else
-		string = format("%s",
-							 format(COPPER_AMOUNT_TEXTURE, amount, 0, 0))
-	end
-	]]--
-
---[[
-	if amount >= 10000 then
-		string = format("%d%s %d%s %d%s",
-							 amount / 10000,
-							 gold_icon,
-							 (amount % 10000) / 100,
-							 silver_icon,
-							 (amount % 100),
-							 copper_icon)
-	elseif amount >= 100 then
-		string = format("%d%s %d%s",
-							 (amount % 10000) / 100,
-							 silver_icon,
-							 (amount % 100),
-							 copper_icon)
-	else
-		string = format("%d%s",
-							 amount,
-							 copper_icon)
-	end
-
-	return C:White(string)
-]]--
-
 	local goldString, silverString, copperString;
 	local gold = floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD));
 	local silver = floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER);
@@ -1432,20 +1453,23 @@ end
 local honor_strings = {
 	icons = {
 --		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0|t',
-		hk 					= '%s\124TInterface\\GossipFrame\\BattleMasterGossipIcon:0:0:2:0:16:16\124t',
-		['hp-Alliance']	= '%s\124TInterface\\TargetingFrame\\UI-PVP-Alliance:0:0:0:0:64:64\124t',
-		['hp-Horde']		= '%s\124TInterface\\TargetingFrame\\UI-PVP-Horde:0:0:0:0:64:64\124t',
+--		hk 					= '%s\124TInterface\\GossipFrame\\BattleMasterGossipIcon:0:0:2:0:16:16\124t',
+		hk 					= '%s\124TInterface\\Icons\\Spell_Holy_BlessingOfStrength:0:0:2:0:64:64\124t',
+		['hp-Alliance']	= '%s\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0:0:2:0:64:64\124t',
+		['hp-Horde']		= '%s\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t',
 		ap 					= '%s\124TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:2:0:32:32\124t',
-		['con-Alliance']	= '%s\124TInterface\\PVPFrame\\PVPCurrency-Conquest-Alliance:15:15:2:0:64:64\124t',
-		['con-Horde']		= '%s\124TInterface\\PVPFrame\\PVPCurrency-Conquest-Horde:15:15:2:0:64:64\124t',
+		['cp-Alliance']	= '%s\124TInterface\\Icons\\PVPCurrency-Conquest-Alliance:0:0:2:0:64:64\124t',
+		['cp-Horde']		= '%s\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t',
+		jp						= '%s\124TInterface\\Icons\\pvecurrency-justice:0:0:2:0:64:64\124t',
 	},
 	no_icons = {
 		hk 					= L['%s HK'],
 		['hp-Alliance']	= L['%s HP'],
 		['hp-Horde'] 		= L['%s HP'],
 		ap 					= L['%s AP'],
-		['con-Alliance']	= L['%s CP'],
-		['con-Horde']		= L['%s CP'],
+		['cp-Alliance']	= L['%s CP'],
+		['cp-Horde']		= L['%s CP'],
+		jp						= L['%s JP'],
 	}
 }
 
@@ -1455,9 +1479,17 @@ if IS_40 then
 	honor_strings.icons['hp-Horde']		= '%s\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t'
 end
 
+-- Function that produce the justice points string
+function FormatJustice( justice_points )
+	if AllPlayed:GetOption('use_icons') then
+		return format(honor_strings.icons.jp, justice_points)
+	else
+		return format(honor_strings.no_icons.jp, justice_points)
+	end
+end
 
 -- Function that produce the honour string based on the display options
-function FormatHonor( faction, honor_kills, pvp_points, arena_points, conquest_points )
+function FormatHonor( faction, honor_kills, honor_points, arena_points, conquest_points )
 
 	local honor_string, fmt = ""
 	if AllPlayed:GetOption('use_icons') then
@@ -1466,15 +1498,17 @@ function FormatHonor( faction, honor_kills, pvp_points, arena_points, conquest_p
 		fmt = honor_strings.no_icons
 	end
 
-
-	if AllPlayed:GetOption('show_honor_kills') then
-		honor_string = honor_string .. format(fmt.hk, C:White(tostring(honor_kills))) .. ' '
+	if AllPlayed:GetOption('show_honor_kills') and honor_kills ~= nil then
+		honor_string = honor_string .. format(fmt.hk, C:White(tostring(honor_kills))) .. '  '
 	end
-	if AllPlayed:GetOption('show_honor_points') 		then
-		honor_string = honor_string .. format(fmt['hp-' .. faction], C:White(tostring(pvp_points))) .. ' '
+	if AllPlayed:GetOption('show_honor_points') and honor_points ~= nil 		then
+		honor_string = honor_string .. format(fmt['hp-' .. faction], C:White(tostring(honor_points))) .. '  '
 	end
-	if AllPlayed:GetOption('show_arena_points') 		then
+	if AllPlayed:GetOption('show_arena_points') and arena_points ~= nil 		then
 		honor_string = honor_string .. format(fmt.ap, C:White(tostring(arena_points))) .. ' '
+	end
+	if AllPlayed:GetOption('show_conquest_points') and conquest_points ~= nil 		then
+		honor_string = honor_string .. format(fmt['cp-' .. faction], C:White(tostring(conquest_points))) .. '  '
 	end
 
 	-- Return the string minus the last space
