@@ -1,4 +1,4 @@
-﻿local AP_display_name, AP = ...
+local AP_display_name, AP = ...
 
 -- AllPlayed.lua
 -- $Id$
@@ -12,10 +12,12 @@ AllPlayed_revision.toc  = GetAddOnMetadata("AllPlayed", "Version"):match("%$Revi
 --[[                     Addon Initialisation                          ]]--
 --[[ ================================================================= ]]--
 
--- Backward compatilility when playing Cataclysm
+-- Backward and forward compatilility when playing Cataclysm
 local IS_40 = (select(4, GetBuildInfo()) >= 40000)
-local GetArenaCurrency = GetArenaCurrency or function() return select(2,GetCurrencyInfo(390)) or 0 end
+local GetArenaCurrency = GetArenaCurrency or function() return 0 end
 local GetHonorCurrency = GetHonorCurrency or function() return select(2,GetCurrencyInfo(392)) or 0 end
+local GetConquestCurrency = GetConquestCurrency or function() return ( GetCurrencyInfo and select(2,GetCurrencyInfo(390)) ) or 0 end
+local GetJusticeCurrency = GetJusticeCurrency or function() return ( GetCurrencyInfo and select(2,GetCurrencyInfo(395)) ) or 0 end
 
 -- Define static values for the addon
 -- Ten days in second, needed to estimate the rested XP
@@ -67,6 +69,7 @@ local ClearTable
 local FormatXP
 local FormatMoney
 local FormatHonor
+local FormatPVECurrency
 local FactionColour
 local PercentColour
 local ClassColour
@@ -149,8 +152,10 @@ default_options = {
 						seconds_played_last_update	= 0,
 						zone_text                  = L["Unknown"],
 						subzone_text               = "",
+						justice_points					= 0,
 						arena_points					= 0,
 						honor_points					= 0,
+						conquest_points				= 0,
 						highest_rank					= nil,
 						honor_kills						= 0,
 					}
@@ -181,10 +186,14 @@ default_options = {
 			use_pre_210_shaman_colour	= false,
 			show_location              = "none",
 			show_xp_total              = true,
+			show_justice_points			= false,
+			show_justice_total			= false,
 			show_arena_points				= false,
+			show_conquest_points			= false,
 			show_honor_points				= false,
 			show_honor_kills				= false,
 			show_pvp_totals				= false,
+			show_justice_points			= false,
 			tooltip_scale					= 1,
 			opacity							= .9,
 			sort_type						= "alpha",
@@ -1006,6 +1015,8 @@ function AllPlayed:SaveVar()
     pc.zone_text       		= GetZoneText()
     pc.subzone_text    		= GetSubZoneText()
 	 pc.arena_points    		= GetArenaCurrency()
+	 pc.conquest_points		= GetConquestCurrency()
+	 pc.justice_points		= GetJusticeCurrency()
 	 
 	 -- Statistical stuff
 	 
@@ -1036,7 +1047,7 @@ function AllPlayed:SaveVarHonor()
 	local pc = self.db.global.data[self.faction][self.realm][self.pc]
 
 	pc.honor_points	 					= GetHonorCurrency()
-	pc.honor_kills, pc.highest_rank = GetPVPLifetimeStats()
+	pc.honor_kills, pc.highest_rank 	= GetPVPLifetimeStats()
 end
 
 -- Set the value seconds_played that will be saved in the save variables
@@ -1084,10 +1095,21 @@ function AllPlayed:GetOption( option, ... )
 		return not self.db.profile.options.ldbicon.hide
 	end
 	
-	-- Some option need to be set to false for Cataclysm
-	--if IS_40 then
-	--	if option == 'show_arena_points' or option == 'show_honor_points' then return false end
-	--end
+	-- Some options are not available before Cataclysm
+	if not IS_40 then
+		if option == 'show_conquest_points' or 
+		   option == 'show_justice_points' or 
+		   option == 'show_justice_total'
+		then 
+			return false 
+		end
+	end
+	
+	
+	-- Some options need to be set to false for Cataclysm
+	if IS_40 then
+		if option == 'show_arena_points' then return false end
+	end
 
 	return self.db.profile.options[option]
 end
@@ -1320,9 +1342,9 @@ end
 
 -- Fonction that format the money string
 -- The result is a string with embeded coin icons
-local gold_icon 	= "\124TInterface\\Interface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t"
-local silver_icon = "\124TInterface\\Interface\\MoneyFrame\\UI-SilverIcon:0:0:2:0|t"
-local copper_icon = "\124TInterface\\Interface\\MoneyFrame\\UI-CopperIcon:0:0:2:0|t"
+--local gold_icon 	= "\124TInterface\\Interface\\MONEYFRAME\\UI-GoldIcon:0:0:2:0|t"
+--local silver_icon = "\124TInterface\\Interface\\MONEYFRAME\\UI-SilverIcon:0:0:2:0|t"
+--local copper_icon = "\124TInterface\\Interface\\MONEYFRAME\\UI-CopperIcon:0:0:2:0|t"
 --local gold_icon 	= "TInterface\\AddOns\\AllPlayed\\Gold:0:0:0:0:16:16|t"
 --local silver_icon = "|TInterface\\AddOns\\AllPlayed\\Silver:0:0:0:0:16:16|t"
 --local copper_icon = "|TInterface\\AddOns\\AllPlayed\\Copper:0:0:0:0:16:16|t"
@@ -1330,10 +1352,10 @@ local copper_icon = "\124TInterface\\Interface\\MoneyFrame\\UI-CopperIcon:0:0:2:
 --local gold_icon 	= "|TInterface\MoneyFrame\UI-GoldIcon:0:0:2:0|t"
 --local silver_icon = "|TInterface\MoneyFrame\UI-SilverIcon:0:0:2:0|t"
 --local copper_icon = "|TInterface\MoneyFrame\UI-CopperIcon:0:0:2:0|t"
-function FormatMoney(amount)
-   if not AllPlayed:GetOption('use_icons') then return A:FormatMoneyFull( amount, true, false ) end
+function FormatMoney(money)
+   --if not AllPlayed:GetOption('use_icons') then return A:FormatMoneyFull( amount, true, false ) end
 
-	local string = ""
+	--local string = ""
 --[[
 	if amount >= 10000 then
 		string = format("%s %s %s",
@@ -1350,6 +1372,7 @@ function FormatMoney(amount)
 	end
 	]]--
 
+--[[
 	if amount >= 10000 then
 		string = format("%d%s %d%s %d%s",
 							 amount / 10000,
@@ -1371,6 +1394,38 @@ function FormatMoney(amount)
 	end
 
 	return C:White(string)
+]]--
+
+	local goldString, silverString, copperString;
+	local gold = floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD));
+	local silver = floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER);
+	local copper = mod(money, COPPER_PER_SILVER);
+	
+	if ( not AllPlayed:GetOption('use_icons') ) then
+		goldString = gold..C:Gold(GOLD_AMOUNT_SYMBOL);
+		silverString = silver..C:Silver(SILVER_AMOUNT_SYMBOL);
+		copperString = copper..C:Copper(COPPER_AMOUNT_SYMBOL);
+	else
+		goldString = format(GOLD_AMOUNT_TEXTURE, gold, 0, 0);
+		silverString = format(SILVER_AMOUNT_TEXTURE, silver, 0, 0);
+		copperString = format(COPPER_AMOUNT_TEXTURE, copper, 0, 0);
+	end
+	
+	local moneyString = "";
+	local separator = "";	
+	if ( gold > 0 ) then
+		moneyString = goldString;
+		separator = " ";
+	end
+	if ( silver > 0 ) then
+		moneyString = moneyString..separator..silverString;
+		separator = " ";
+	end
+	if ( copper > 0 or moneyString == "" ) then
+		moneyString = moneyString..separator..copperString;
+	end
+	
+	return moneyString;
 
 end
 
@@ -1378,32 +1433,31 @@ local honor_strings = {
 	icons = {
 --		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0|t',
 		hk 					= '%s\124TInterface\\GossipFrame\\BattleMasterGossipIcon:0:0:2:0:16:16\124t',
---		['hp-Alliance']	= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Alliance:0:0:0:0:64:64|t',
---		['hp-Horde']		= '%s|TInterface\\AddOns\\AllPlayed\\UI-PVP-Horde:0:0:0:0:64:64|t',
-		['hp-Alliance']	= '%s\124TInterface\\PVPFrame\\PVP-Currency-Alliance:0:0:2:0:32:32\124t',
-		['hp-Horde']		= '%s\124TInterface\\PVPFrame\\PVP-Currency-Horde:0:0:2:0:32:32\124t',
+		['hp-Alliance']	= '%s\124TInterface\\TargetingFrame\\UI-PVP-Alliance:0:0:0:0:64:64\124t',
+		['hp-Horde']		= '%s\124TInterface\\TargetingFrame\\UI-PVP-Horde:0:0:0:0:64:64\124t',
 		ap 					= '%s\124TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:2:0:32:32\124t',
---		bj 					= '%s|TInterface\\Icons\\Spell_Holy_ChampionsBond:0,0,0,-1|t',
---		ab 					= '%s|TInterface\\Icons\\INV_Jewelry_Amulet_07:0,0,0,1|t',
---		av 					= '%s|TInterface\\Icons\\INV_Jewelry_Necklace_21:0|t',
---		wg 					= '%s|TInterface\\Icons\\INV_Misc_Rune_07:0|t',
---		es 					= '%s|TInterface\\Icons\\Spell_Nature_EyeOfTheStorm:0|t'
+		['con-Alliance']	= '%s\124TInterface\\PVPFrame\\PVPCurrency-Conquest-Alliance:15:15:2:0:64:64\124t',
+		['con-Horde']		= '%s\124TInterface\\PVPFrame\\PVPCurrency-Conquest-Horde:15:15:2:0:64:64\124t',
 	},
 	no_icons = {
 		hk 					= L['%s HK'],
 		['hp-Alliance']	= L['%s HP'],
 		['hp-Horde'] 		= L['%s HP'],
 		ap 					= L['%s AP'],
---		bj 					= L['%s BoJ'],
---		ab 					= L['%s AB'],
---		av 					= L['%s AV'],
---		wg 					= L['%s WG'],
---		es 					= L['%s EotS']
+		['con-Alliance']	= L['%s CP'],
+		['con-Horde']		= L['%s CP'],
 	}
 }
 
+-- New icons for Cataclysm
+if IS_40 then
+	honor_strings.icons['hp-Alliance']	= '%s\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0:0:2:0:64:64\124t'
+	honor_strings.icons['hp-Horde']		= '%s\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t'
+end
+
+
 -- Function that produce the honour string based on the display options
-function FormatHonor( faction, honor_kills, pvp_points, arena_points )
+function FormatHonor( faction, honor_kills, pvp_points, arena_points, conquest_points )
 
 	local honor_string, fmt = ""
 	if AllPlayed:GetOption('use_icons') then
@@ -1426,6 +1480,16 @@ function FormatHonor( faction, honor_kills, pvp_points, arena_points )
 	-- Return the string minus the last space
 	return (string.gsub(honor_string, "^%s*(.-)%s*$", "%1"))
 
+end
+
+local justice_icon = "%s\124TInterface\\Icons\\pvecurrency-justice:0:0:2:0:64:64\124t"
+local justice_text = GetCurrencyInfo(395)
+function FormatPVECurrency( justice_points )
+	if AllPlayed:GetOption('use_icons') then
+		return format(justice_icon,justice_points)
+	else
+		return format("%s %s",justice_points,justice_text)
+	end
 end
 
 -- This function colorize the text based on the faction

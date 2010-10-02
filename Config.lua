@@ -1,4 +1,4 @@
-﻿local AP_display_name, AP = ...
+local AP_display_name, AP = ...
 
 -- Config.lua
 -- $Id$
@@ -17,6 +17,15 @@ local GetVersionString
 local ReturnConfigMenu
 local DisplayConfigMenu
 local InitConfig
+
+-- Icons
+local justice_icon = "\124TInterface\\Icons\\pvecurrency-justice:0:0:2:0:64:64\124t"
+local honor_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0:0:2:0:64:64\124t'
+local honor_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t'
+local conquest_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Alliance:0:0:2:0:64:64\124t'
+local conquest_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t'
+local arena_icon = '\124TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:2:0:32:32\124t'
+local kill_icon = '\124TInterface\\GossipFrame\\BattleMasterGossipIcon:0:0:2:0:16:16\124t'
 
 -- Version iditification management
 do
@@ -128,6 +137,22 @@ local function ReturnConfigMenu()
 					},
 				},
 				[9] = {
+					text = format(L["%s (%s)"],L["Justice Points"],justice_icon);
+					hasArrow = true;
+					menuList = {
+						[1] = {
+							text = format(L["Show %s"],L["Justice Points"]);
+							tooltipText = format(L["Display the %s each character pocess"],L["Justice Points"]);
+							checked = 'show_justice_points';
+						},
+						[2] = {
+							text = format(L["Show %s total"],L["Justice Points"]);
+							tooltipText = format(L["Show the total %s for all characters"],L["Justice Points"]);
+							checked = 'show_justice_total';
+						},
+					},
+				},
+				[10] = {
 					text = L["Rested XP"];
 					tooltipText = L["Set the rested XP options"];
 					hasArrow = true;
@@ -166,24 +191,24 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[10] = {
+				[11] = {
 					text = L["PVP"];
 					tooltipText = L["Set the PVP options"];
 					hasArrow = true;
 					menuList = {
 						[1] = {
-							text = L["Honor Kills"];
+							text = format(L["%s (%s)"], L["Honor Kills"], kill_icon);
 							tooltipText = L["Show the character honor kills"];
 							checked = 'show_honor_kills';
 						},
 						[2] = {
-							text = L["Honor Points"];
-							tooltipText = L["Show the character honor points"];
+							text = format(L["%s (%s or %s)"], L["Honor Points"], honor_alliance_icon, honor_horde_icon);
+							tooltipText = format(L['Display the %s each character pocess'],L["Honor Points"]);
 							checked = 'show_honor_points';
 						},
 						[3] = {
-							text = L["Arena Points"];
-							tooltipText = L["Show the character arena points"];
+							text = format(L["%s (%s)"], L["Arena Points"], arena_icon);
+							tooltipText = format(L['Display the %s each character pocess'],L["Arena Points"]);
 							checked = 'show_arena_points';
 						},
 						[4] = {
@@ -193,22 +218,22 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[11] = {
+				[12] = {
 					text = L["Show Class Name"];
 					tooltipText = L["Show the character class beside the level"];
 					checked = 'show_class_name';
 				},
-				[12] = {
+				[13] = {
 					text = L["Colorize Class"];
 					tooltipText = L["Colorize the character name based on class"];
 					checked = 'colorize_class';
 				},
-				[13] = {
+				[14] = {
 					text = L["Use Old Shaman Colour"];
 					tooltipText = L["Use the pre-210 patch colour for the Shaman class"];
 					checked = 'use_pre_210_shaman_colour';
 				},
-				[14] = {
+				[15] = {
 					text = L["Use Icons"];
 					tooltipText = L["Use graphics for coin and PvP currencies"];
 					checked = 'use_icons';
@@ -288,12 +313,20 @@ local function ReturnConfigMenu()
 		},
 	}	
 	
-	-- No area or honor points in Cataclysm
-	--if IS_40 then
-	--	config_menu[4].menuList[10].menuList[2] = config_menu[4].menuList[10].menuList[4]
-	--	config_menu[4].menuList[10].menuList[3] = nil
-	--	config_menu[4].menuList[10].menuList[4] = nil
-	--end
+	-- No area points in Cataclysm, conquest point instead
+	if IS_40 then
+		config_menu[4].menuList[11].menuList[3].text = format(L["%s (%s or %s)"],
+																			   L["Conquest Points"],
+																			   conquest_alliance_icon,
+																			   conquest_horde_icon)
+		config_menu[4].menuList[11].menuList[3].tooltipText = format(L['Display the %s each character pocess'],L["Conquest Points"])
+		config_menu[4].menuList[11].menuList[3].checked = 'show_conquest_points'
+	end
+	
+	-- No Justice points before Cataclysm
+	if not IS_40 then
+		
+	end
 
 	-- Set version for display
 	config_menu[2].text = GetVersionString()
@@ -417,15 +450,14 @@ local function GetOptions()
 						name = L["Main Settings"], 
 						order     = 1,
 					},
-					 show_coins = {
-						  name      = L["Show Gold"],
-						  desc      = L["Display the gold each character pocess"],
-						  type      = 'toggle',
-						  get       = function() return AllPlayed:GetOption('show_coins') end,
-						  set       = function(info, v) AllPlayed:SetOption('show_coins',v) end,
-						  order     = 1.1,
-					 },
-
+					show_coins = {
+						name      = L["Show Gold"],
+						desc      = L["Display the gold each character pocess"],
+						type      = 'toggle',
+						get       = function() return AllPlayed:GetOption('show_coins') end,
+						set       = function(info, v) AllPlayed:SetOption('show_coins',v) end,
+						order     = 1.1,
+					},
 					use_icons = {
 						name      = L["Use Icons"],
 						desc      = L["Use graphics for coin and PvP currencies"],
@@ -458,7 +490,7 @@ local function GetOptions()
 						set       = function(info, v) AllPlayed:SetOption('use_pre_210_shaman_colour',v) end,
 						order     = 1.5,
 					},
-					 show_location = {
+					show_location = {
 						  name      = L["Show Location"],
 						  desc      = L["Show the character location"],
 						  width		 = "full",
@@ -471,7 +503,28 @@ local function GetOptions()
 											 ["loc/sub"]   = L["Show zone/subzone"]
 						  },
 						  order     = 1.6,
-					 },
+					},
+					justice = {
+						type = 'header', 
+						name = format(L["%s (%s)"],L["Justice Points"],justice_icon),
+						order     = 1.7,
+					},
+					show_justice_points = {
+						name      = format(L["Show %s"],L["Justice Points"]),
+						desc      = format(L["Display the %s each character pocess"],L["Justice Points"]),
+						type      = 'toggle',
+						get       = function() return AllPlayed:GetOption('show_justice_points') end,
+						set       = function(info, v) AllPlayed:SetOption('show_justice_points',v) end,
+						order     = 1.71,
+					},
+					show_justice_total = {
+						name      = format(L["Show %s total"],L["Justice Points"]),
+						desc      = format(L["Show the total %s for all characters"],L["Justice Points"]),
+						type      = 'toggle',
+						get       = function() return AllPlayed:GetOption('show_justice_total') end,
+						set       = function(info, v) AllPlayed:SetOption('show_justice_total',v) end,
+						order     = 1.72,
+					},
 					faction_and_realms = {
 						type = 'header', 
 						name = L["Factions and Realms"], 
@@ -598,6 +651,7 @@ local function GetOptions()
 					},
 					show_honor_kills= {
 						name        = L["Honor Kills"],
+						name        = format(L["%s (%s)"], L["Honor Kills"], kill_icon),
 						desc        = L["Show the character honor kills"],
 						type        = 'toggle',
 						get       	= function() return AllPlayed:GetOption('show_honor_kills') end,
@@ -605,16 +659,16 @@ local function GetOptions()
 						order = 11.1,
 					},
 					show_honor_points = {
-						name        = L["Honor Points"],
-						desc        = L["Show the character honor points"],
+						name        = format(L["%s (%s or %s)"], L["Honor Points"], honor_alliance_icon, honor_horde_icon),
+						desc        = format(L['Display the %s each character pocess'],L["Honor Points"]),
 						type        = 'toggle',
 						get       	= function() return AllPlayed:GetOption('show_honor_points') end,
 						set       	= function(info, v) AllPlayed:SetOption('show_honor_points',v) end,
 						order = 11.2,
 					},
 					show_arena_points	= {
-						name        = L["Arena Points"],
-						desc        = L["Show the character arena points"],
+						name        = format(L["%s (%s)"], L["Arena Points"], arena_icon),
+						desc        = format(L['Display the %s each character pocess'],L["Arena Points"]),
 						type        = 'toggle',
 						get       	= function() return AllPlayed:GetOption('show_arena_points') end,
 						set       	= function(info, v) AllPlayed:SetOption('show_arena_points',v) end,
@@ -690,11 +744,25 @@ local function GetOptions()
 		},
 	}
 	
-	-- Arena and Honor points do not exists in Cataclysm
-	--if IS_40 then
-	--	options.args.display.args.show_arena_points = nil
-	--	options.args.display.args.show_honor_points = nil
-	--end
+	-- Arena points do not exists in Cataclysm but Conquest points do
+	if IS_40 then
+		options.args.display.args.show_arena_points = nil
+		options.args.display.args.show_conquest_points = {
+						name        = format(L["%s (%s or %s)"], L["Conquest Points"], conquest_alliance_icon, conquest_horde_icon),
+						desc        = format(L['Display the %s each character pocess'],L["Conquest Points"]),
+						type        = 'toggle',
+						get       	= function() return AllPlayed:GetOption('show_conquest_points') end,
+						set       	= function(info, v) AllPlayed:SetOption('show_conquest_points',v) end,
+						order = 11.3,
+		}
+	end
+	
+	-- Justice Points shouuld not be displayed before Cataclysm
+	if not IS_40 then
+		options.args.display.args.justice = nil
+		options.args.display.args.show_justice_points = nil
+		options.args.display.args.show_justice_total = nil
+	end
 
 	-- Ignore section
 	local faction_order = 1
