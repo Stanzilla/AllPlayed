@@ -6,8 +6,7 @@ AllPlayed_revision.frFR	= ("$Revision$"):match("(%d+)")
 local L = LibStub("AceLocale-3.0"):NewLocale("AllPlayed", "frFR")
 if not L then return end
 
--- Exported from http://www.wowace.com/addons/all-played-laotseu/localization/
+-- Generated from http://www.wowace.com/addons/all-played-laotseu/localization/
 -- Translators:  Orbital Digital, oXid_FoX and Beltza
 
 --@localization(locale="frFR",format="lua_additive_table",same-key-is-true=true)@
-
