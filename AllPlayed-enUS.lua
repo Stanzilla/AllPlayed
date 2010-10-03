@@ -1,4 +1,4 @@
-﻿-- AllPlayed-enUS.lua
+-- AllPlayed-enUS.lua
 -- $Id$
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.enUS	= ("$Revision$"):match("(%d+)")
@@ -159,3 +159,22 @@ L["Sort Order"]																	= true
 L["Main Settings"]																= true
 L["Do not show Percent Rest"]													= true
 
+-- New stuff for 40000-1
+L['Justice Points']																= true
+L["Total Justice Points: "]													= true
+L['Conquest Points']																= true
+L['Conquest Pts']																	= true
+-- New abbreviations
+L['%s JP']																			= true
+L['%s CP']																			= true
+-- The %s is replaced by the currency type
+L['Show %s']																		= true
+L['Display the %s each character pocess']									= true
+L['Show %s total']																= true
+L['Show the total %s for all characters']									= true
+-- <currency type> (<icon string>)
+L['%s (%s)']																		= true
+-- <currency type> (<first icon string> or <second icon string>) 
+L["%s (%s or %s)"]																= true
+-- <realm> <faction> characters.
+L["%s %s characters "]															= true
