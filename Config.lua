@@ -428,7 +428,7 @@ local function ReturnConfigMenu()
 end
 
 do
-	local dropdownFrame = CreateFrame("Frame", "AllPlayedDropdownMenu", anchor, "UIDropDownMenuTemplate")
+	local dropdownFrame = CreateFrame("Frame", "AllPlayedDropdownMenu", nil, "UIDropDownMenuTemplate")
 
 	function DisplayConfigMenu(anchorFrame)
 		local anchor
