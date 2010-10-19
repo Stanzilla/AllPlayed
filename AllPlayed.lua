@@ -296,9 +296,10 @@ function AllPlayed:OnEnable()
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA", 		"EventHandler")
     self:RegisterEvent("ZONE_CHANGED",          		"EventHandler")
     self:RegisterEvent("MINIMAP_ZONE_CHANGED",  		"EventHandler")
-    if(self:GetOption('show_coins')) then
+    --if(self:GetOption('show_coins')) then
     	self:RegisterEvent("PLAYER_MONEY",      "EventHandler")
-    end
+    --end
+  	 self:RegisterEvent("CURRENCY_DISPLAY_UPDATE",     "EventHandler")
     self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
 
     -- Hook the functions that need hooking
@@ -1232,13 +1233,13 @@ function AllPlayed:SetOption( option, value, ... )
 		self.timer = self:ScheduleRepeatingTimer("MyUpdate", self:GetOption('refresh_rate'))
 
    -- Set activate or disactivate the PLAYER_MONEY event
-	elseif option == 'show_coins' then
-		if value then
-			self:RegisterEvent("PLAYER_MONEY", "EventHandler")
-		else
-			self:UnregisterEvent("PLAYER_MONEY")
-		end
-
+	--elseif option == 'show_coins' then
+	--	if value then
+	--		self:RegisterEvent("PLAYER_MONEY", "EventHandler")
+	--	else
+	--		self:UnregisterEvent("PLAYER_MONEY")
+	--	end
+	--
 	-- Set the Shaman colour
 	elseif option == 'use_pre_210_shaman_colour' then
 		if value then
