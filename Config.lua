@@ -30,6 +30,7 @@ local conquest_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Alli
 local conquest_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t'
 local arena_icon = '\124TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:2:0:32:32\124t'
 local kill_icon = '\124TInterface\\Icons\\Spell_Holy_BlessingOfStrength:0:0:2:0:64:64\124t'
+local ap_icon = '\124TInterface\\Icons\\INV_Misc_PocketWatch_02:0:0\124t'
 
 -- Version iditification management
 do
@@ -445,7 +446,7 @@ end -- do
 -- Option management
 local function GetOptions()
 	local options = {
-		name = AP_display_name,
+		name = ap_icon .. " " .. AP_display_name,
 		childGroups = "tab",
 		type = "group",
 		order = 1,

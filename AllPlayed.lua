@@ -1082,13 +1082,14 @@ end
 -- is not called very often, I don't see the needs to do more special cases
 function AllPlayed:SaveVar()
     --self:Debug("AllPlayed:SaveVar()")
+    local unit_xp_max = UnitXPMax("player")
 
     -- Fill some of the SaveVariables
     local pc = self.db.global.data[self.faction][self.realm][self.pc]
     pc.class_loc, pc.class	= UnitClass("player")
     pc.level           		= UnitLevel("player")
     pc.xp              		= UnitXP("player")
-    pc.max_rested_xp   		= UnitXPMax("player") * 1.5
+    pc.max_rested_xp   		= unit_xp_max * 1.5
     pc.last_update     		= time()
     pc.is_resting      		= IsResting()
     pc.zone_text       		= GetZoneText()
@@ -1101,9 +1102,9 @@ function AllPlayed:SaveVar()
 	 
 
     -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
-    if UnitXPMax("player") ~= XPToNextLevel(UnitLevel("player")) then
+    if unit_xp_max ~=0 and unit_xp_max ~= XPToNextLevel(UnitLevel("player")) then
     	local _, build_version = GetBuildInfo()
-    	self.db.global.cache.XPToNextLevel[build_version][UnitLevel("player")] = UnitXPMax("player")
+    	self.db.global.cache.XPToNextLevel[build_version][UnitLevel("player")] = unit_xp_max
     end
 
     --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.global.data[self.faction][self.realm][self.pc].zone_text)
@@ -2110,8 +2111,13 @@ function InitXPToLevelCache( game_version, build_version )
 	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]
 	if AllPlayed.db.global.cache.XPToNextLevel[build_version] ~= nil then
 		for level = 1, AllPlayed.max_pc_level do
-			if AllPlayed.db.global.cache.XPToNextLevel[build_version][level] ~= nil then
+			if AllPlayed.db.global.cache.XPToNextLevel[build_version][level] ~= nil and 
+				AllPlayed.db.global.cache.XPToNextLevel[build_version][level] ~= 0 then
 				XPToNextLevelCache[level] = AllPlayed.db.global.cache.XPToNextLevel[build_version][level]
+			end
+			-- Remove entries that may have been inserted due to a bug
+			if AllPlayed.db.global.cache.XPToNextLevel[build_version][level] == 0 then
+				AllPlayed.db.global.cache.XPToNextLevel[build_version][level] = nil
 			end
 		end
 	end
