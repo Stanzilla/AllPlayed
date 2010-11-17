@@ -3,21 +3,46 @@ local AP_display_name, AP = ...
 -- AllPlayed.lua
 -- $Id$
 
-if not AllPlayed_revision then AllPlayed_revision = {} end
-AllPlayed_revision.main	= ("$Revision$"):match("(%d+)")
-AllPlayed_revision.toc  = GetAddOnMetadata("AllPlayed", "Version"):match("%$Revision:%s(%d+)")
-
 
 --[[ ================================================================= ]]--
 --[[                     Addon Initialisation                          ]]--
 --[[ ================================================================= ]]--
 
+-- Localize some lua globals
+local _G = getfenv(0)
+
+local floor = _G.floor
+local geterrorhandler = _G.geterrorhandler
+local gettime = _G.gettime
+local ipairs = _G.ipairs
+local min = _G.min
+local mod = _G.mod
+local pairs = _G.pairs
+local select = _G.select
+local sort = _G.sort
+local time = _G.time
+local tinsert = _G.tinsert
+local tostring = _G.tostring
+local tremove = _G.tremove
+local type = _G.type
+local wipe = _G.wipe
+
+-- Non Blizzard globals that need to be localized
+local LibStub = _G.LibStub
+
+-- Revision
+if not _G.AllPlayed_revision then _G.AllPlayed_revision = {} end
+local AllPlayed_revision = _G.AllPlayed_revision
+AllPlayed_revision.main	= ("$Revision$"):match("(%d+)")
+AllPlayed_revision.toc  = GetAddOnMetadata("AllPlayed", "Version"):match("%$Revision:%s(%d+)")
+
 -- Backward and forward compatilility when playing Cataclysm
 local IS_40 = (select(4, GetBuildInfo()) >= 40000)
-local GetArenaCurrency = GetArenaCurrency or function() return 0 end
-local GetHonorCurrency = GetHonorCurrency or function() return select(2,GetCurrencyInfo(392)) or 0 end
-local GetConquestCurrency = GetConquestCurrency or function() return ( GetCurrencyInfo and select(2,GetCurrencyInfo(390)) ) or 0 end
-local GetJusticeCurrency = GetJusticeCurrency or function() return ( GetCurrencyInfo and select(2,GetCurrencyInfo(395)) ) or 0 end
+local GetArenaCurrency = _G.GetArenaCurrency or function() return 0 end
+local GetHonorCurrency = _G.GetHonorCurrency or function() return select(2,_G.GetCurrencyInfo(392)) or 0 end
+local GetConquestCurrency = _G.GetConquestCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(390)) ) or 0 end
+local GetJusticeCurrency = _G.GetJusticeCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(395)) ) or 0 end
+
 
 -- Define static values for the addon
 -- Ten days in second, needed to estimate the rested XP
@@ -48,19 +73,24 @@ local CLASS_COLOURS = {}
 local XPToNextLevelCache = {}
 
 -- Creation fo the main "object" with librairies (mixins) directly attach to the object (use self:functions)
-AllPlayed = LibStub("AceAddon-3.0"):NewAddon("AllPlayed", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0")
+local AllPlayed = LibStub("AceAddon-3.0"):NewAddon("AllPlayed", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0")
+_G[AP_display_name] = AllPlayed
+
 
 -- For debuging
 --AllPlayed.AP = AP
 AllPlayed.debugging = false
 function AllPlayed:Debug(msg,...)
 	if not self.debugging then return end
-	geterrorhandler()(format(msg,...))
+	geterrorhandler()(msg:format(...))
 end
 
 function AllPlayed:Trace(msg,...)
-	geterrorhandler()(format("%.2f: %s", gettime(), msg,...))
+	geterrorhandler()(("%.2f: %s"):format(gettime(), msg,...))
 end
+
+-- Local objects
+local AllPlayedLDB
 
 -- Local function prototypes
 local AcquireTable
@@ -78,7 +108,7 @@ local FormatCharacterName
 local buildSortedTable
 local PCSortByLevel
 local PCSortByRevLevel
-local PCSortByXP              
+local PCSortByXP
 local PCSortByRevXP
 local PCSortByRestedXP
 local PCSortByRevRestedXP
@@ -109,16 +139,16 @@ do
 	-- Cleans the table and stores it in the cache
 	function ReleaseTable(tbl)
 		if not tbl then return end
-		
+
 		-- Nested tables ?
 		for i=1,#tbl do
 			if type(tbl[i]) == "table" then ReleaseTable(tbl[i]) end
 		end
-		
+
 		wipe(tbl)
 		tinsert(table_cache, tbl)
 	end
-	
+
 	-- Release and Acquire in one go
 	function ClearTable(tbl)
 		ReleaseTable(tbl)
@@ -131,7 +161,7 @@ end	-- do block
 --[[ ================================================================= ]]--
 
 -- Default values for the save variables
-default_options = {
+local default_options = {
 	global = {
 		data = {
 			-- Faction
@@ -220,21 +250,22 @@ function AllPlayed:OnInitialize()
    --self:SetDebugging(true) -- to have debugging through your whole app.
 
 	-- Initialize the SaveVariables table if it's the first time that AllPlayed is loaded
-	AllPlayedDB = AllPlayedDB or {}
+	_G.AllPlayedDB = _G.AllPlayedDB or {}
+	local AllPlayedDB = _G.AllPlayedDB
 
 
 	-- Register the command line
 	-- /ap and /allplayed will open the blizard interface panel
-	SLASH_ALLPLAYED_CONFIG1 = L["/ap"]
-	SLASH_ALLPLAYED_CONFIG2 = L["/allplayed"]
-	SlashCmdList["ALLPLAYED_CONFIG"] = function()
-		InterfaceOptionsFrame_OpenToCategory(AP_display_name)
+	_G.SLASH_ALLPLAYED_CONFIG1 = L["/ap"]
+	_G.SLASH_ALLPLAYED_CONFIG2 = L["/allplayed"]
+	_G.SlashCmdList["ALLPLAYED_CONFIG"] = function()
+		_G.InterfaceOptionsFrame_OpenToCategory(AP_display_name)
 	end
-	
+
 	-- Conversion of old data
 	AllPlayedDB.global = AllPlayedDB.global or {}
 	if AllPlayedDB.global.data_version ~= "30300-2" and AllPlayedDB.account then
-	
+
 		local function tcopy(t)
 		  local t2 = AcquireTable()
 		  for k,v in pairs(t) do
@@ -246,7 +277,7 @@ function AllPlayed:OnInitialize()
 		  end
 		  return t2
 		end
-	
+
 		AllPlayedDB.global = tcopy(AllPlayedDB.account)
 		AllPlayedDB.profiles = nil
 		AllPlayedDB.currentProfile = nil
@@ -258,7 +289,7 @@ function AllPlayed:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
 	self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
 	self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
-	
+
 	-- Initial setup is done by OnEnable (not mush to do here)
 	-- We set total variables to zero and create the tables that will never
 	-- be deleted
@@ -271,8 +302,8 @@ function AllPlayed:OnInitialize()
 	self.sort_tables_done    = false
 
     -- Find the max level
-    self.max_pc_level = 60  +  10 * GetAccountExpansionLevel()
-    if GetAccountExpansionLevel() == 3 then self.max_pc_level = 85 end
+    self.max_pc_level = 60  +  10 * _G.GetAccountExpansionLevel()
+    if _G.GetAccountExpansionLevel() == 3 then self.max_pc_level = 85 end
 
 	-- Initialize the cache
 	InitXPToLevelCache()
@@ -283,7 +314,7 @@ function AllPlayed:OnEnable()
     --self:Debug("AllPlayed:OnEnable()")
 
     -- code here, executed after everything is loaded.
-    
+
     -- Configuration initialization
     AP.db = self.db
     AP.InitConfig()
@@ -307,9 +338,9 @@ function AllPlayed:OnEnable()
     self:Hook("Quit",   true)
 
     -- Initialize values that don't change between reloads
-    self.faction, self.loc_faction	= UnitFactionGroup("player")
-    self.realm      						= GetRealmName()
-    self.pc         						= UnitName("player")
+    self.faction, self.loc_faction	= _G.UnitFactionGroup("player")
+    self.realm      						= _G.GetRealmName()
+    self.pc         						= _G.UnitName("player")
 
     -- Initial update of values
 
@@ -350,9 +381,9 @@ function AllPlayed:OnEnable()
     self:ScheduleTimer("RequestTimePlayed", 10)
 
 	-- Set the callback for !ClassColor if present
-	if CUSTOM_CLASS_COLORS then
-		CUSTOM_CLASS_COLORS:RegisterCallback(function()
-			for class in pairs(CUSTOM_CLASS_COLORS) do
+	if _G.CUSTOM_CLASS_COLORS then
+		_G.CUSTOM_CLASS_COLORS:RegisterCallback(function()
+			for class in pairs(_G.CUSTOM_CLASS_COLORS) do
 				 CLASS_COLOURS[class] = AllPlayed.GetClassHexColour(class)
 			end
 
@@ -371,25 +402,25 @@ function AllPlayed:OnEnable()
 	--self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
 	self.timer = self:ScheduleRepeatingTimer("MyUpdate", self:GetOption('refresh_rate'))
 
-	-- Create a frame with an OnUpdate event to deal with the disposal of the tooltip created for LDB 
-	self.OnUpdate_frame = CreateFrame("frame")
+	-- Create a frame with an OnUpdate event to deal with the disposal of the tooltip created for LDB
+	self.OnUpdate_frame = _G.CreateFrame("frame")
 	self.OnUpdate_frame:Hide() -- to prevent the OnUpdate until it is needed.
 	self.elapsed = 0
 	self.OnUpdate_frame:SetScript("OnUpdate", function(self, elap)
 		AllPlayed.elapsed = AllPlayed.elapsed + elap
-		
+
 		if AllPlayed.elapsed < .2 then return end
 		if (AllPlayed.tooltip and AllPlayed.tooltip:IsMouseOver()) or
 		   (AllPlayed.tooltip_anchor and AllPlayed.tooltip_anchor:IsMouseOver()) then
 		   AllPlayed.elapsed = 0
 		   return
 		end
-		   
+
 		AllPlayed.tooltip = lqt:Release(AllPlayed.tooltip)
 		AllPlayed.tooltip_anchor = nil
 		AllPlayed.OnUpdate_frame:Hide()
 	end)
-	
+
 	-- LDB Minimap Icon support (for users without a LDB Broker)
 	ldbicon:Register("AllPlayed", AllPlayedLDB, self.db.profile.options.ldbicon)
 
@@ -413,9 +444,9 @@ function AllPlayed:MyUpdate(...)
 
 	self:OnDataUpdate()
    AllPlayedLDB.text = self:FormatTime(self.total.time_played)
-   
+
    if self.tooltip then
-		self:DrawTooltip()		
+		self:DrawTooltip()
 	end
 end
 
@@ -424,7 +455,7 @@ function AllPlayed:OnDataUpdate()
     --self:Debug("AllPlayed:OnDataUpdate()")
 
     -- Update the data that may have changed but are not tracked by an event
-    self.db.global.data[self.faction][self.realm][self.pc].is_resting = IsResting()
+    self.db.global.data[self.faction][self.realm][self.pc].is_resting = _G.IsResting()
 
     -- Recompute the totals
     self:ComputeTotal()
@@ -438,7 +469,7 @@ function AllPlayed:RefreshConfig()
 	self:SetOption('tooltip_scale',self:GetOption('tooltip_scale'))
 	self:SetOption('opacity',self:GetOption('opacity'))
 	self:SetOption('show_minimap_icon',self:GetOption('show_minimap_icon'))
-	
+
 	-- Recompute all the totals
 	self:ComputeTotal()
 	self:ComputeTotalHonor()
@@ -620,11 +651,11 @@ end
 -- Utility function to set the tooltip alpha
 function AllPlayed:SetTTOpacity(opacity)
 	if not self.tooltip then return end
-	
+
 	--for i=1,self.tooltip:GetColumnCount() do
 	--	self.tooltip:SetColumnColor(i,0,0,0,opacity)
 	--end
-	
+
 	self.tooltip:SetBackdropColor(0,0,0,opacity)
 end
 
@@ -663,8 +694,8 @@ function AllPlayed:DrawTooltip(anchor)
 							self:GetOption('show_conquest_points')
 	if need_pvp then nb_columns = nb_columns + 1 end
 	]]--
-	
-	-- De we need to display the Justice Points 
+
+	-- De we need to display the Justice Points
 	local need_jp =	self:GetOption('show_justice_points')
 	if need_jp then nb_columns = nb_columns + 1 end
 
@@ -676,24 +707,24 @@ function AllPlayed:DrawTooltip(anchor)
 		or self:GetOption('percent_rest') ~= "0" then
 		nb_columns = nb_columns + 1
 	end
-	
+
 	if not self.tooltip then
 		self.tooltip = lqt:Acquire("AllPlayedTooltip", nb_columns)
 	end
-	
+
 	local tooltip = self.tooltip
-	
+
 	-- Set the scale
 	tooltip:SetScale(self:GetOption('tooltip_scale'))
 
 	tooltip:Clear()
 
 	tooltip:SmartAnchorTo(self.tooltip_anchor)
-	
+
 	local line, column = tooltip:AddHeader()
 	tooltip:SetCell(line, 1, C:White(L["All Played Breakdown"]), "CENTER", nb_columns)
 	tooltip:AddSeparator()
-	
+
 	-- We group by factions, then by realm, then by PC
 	for _, faction in ipairs (self.sort_faction) do
 		-- We do not print the faction if no option to select it is on
@@ -712,7 +743,7 @@ function AllPlayed:DrawTooltip(anchor)
 					----self:Debug("self.total_realm[faction][realm].time_played: ",self.total_realm[faction][realm].time_played)
 
 					-- Build the Realm aggregated line
-					local text_realm = string.format( C:Yellow(L["%s %s characters "]), realm, faction )
+					local text_realm = C:Yellow(L["%s %s characters "]):format(realm, faction)
 
 					local text_realm_optional = ""
 					local first_option = true
@@ -727,8 +758,7 @@ function AllPlayed:DrawTooltip(anchor)
 							text_realm_optional = FormatMoney(self.total_realm[faction][realm].coin)
 							first_option = false
 						else
-							text_realm_optional = string.format(
-										"%s " .. C:Green(" : ") .. "%s",
+							text_realm_optional = ("%s " .. C:Green(" : ") .. "%s"):format(
 										text_realm_optional,
 										FormatMoney(self.total_realm[faction][realm].coin)
 							)
@@ -740,8 +770,7 @@ function AllPlayed:DrawTooltip(anchor)
 							text_realm_optional = FormatXP(self.total_realm[faction][realm].xp)
 							first_option = false
 						else
-							text_realm_optional = string.format(
-									"%s " .. C:Green(" : %s"),
+							text_realm_optional = ("%s " .. C:Green(" : %s")):format(
 									text_realm_optional,
 									FormatXP(self.total_realm[faction][realm].xp)
 							)
@@ -861,8 +890,8 @@ function AllPlayed:DrawTooltip(anchor)
 							end
 
 							-- Is the last column needed ?
-							if self:GetOption('show_coins') or 
-								self:GetOption('show_rested_xp') or 
+							if self:GetOption('show_coins') or
+								self:GetOption('show_rested_xp') or
 							   self:GetOption('show_rested_xp_countdown') or
 							   self:GetOption('percent_rest') ~= "0"
 							then
@@ -873,7 +902,7 @@ function AllPlayed:DrawTooltip(anchor)
 								col_no = col_no - 1
 							end
 
-						
+
 							--local text_coin = ""
 							if self:GetOption('show_coins') then
 								col_text[col_no] = FormatMoney(pc_data.coin)
@@ -899,8 +928,7 @@ function AllPlayed:DrawTooltip(anchor)
 									if col_text[col_no] ~= "" then
 										col_text[col_no] = col_text[col_no] .. FactionColour( faction, " : " )
 									end
-									col_text[col_no] = col_text[col_no] .. string.format(
-																	FactionColour( faction, L["%d rested XP"] ),
+									col_text[col_no] = col_text[col_no] .. FactionColour( faction, L["%d rested XP"] ):format(
 																	estimated_rested_xp
 															 )
 								end
@@ -910,10 +938,10 @@ function AllPlayed:DrawTooltip(anchor)
 								if pc_data.level == self.max_pc_level - 1 then
 									-- Last level before max
 									percent_for_colour
-										= math.min(estimated_rested_xp, XPToNextLevelCache[self.max_pc_level - 1] - pc_data.xp) 
+										= min(estimated_rested_xp, XPToNextLevelCache[self.max_pc_level - 1] - pc_data.xp)
 										  / (XPToNextLevelCache[self.max_pc_level - 1] - pc_data.xp)
-									rested_percent 
-										= math.floor(estimated_rested_xp / XPToNextLevelCache[self.max_pc_level - 1] * 100  +  0.5) / 100
+									rested_percent
+										= floor(estimated_rested_xp / XPToNextLevelCache[self.max_pc_level - 1] * 100  +  0.5) / 100
 								end
 								local countdown_seconds  = floor( TEN_DAYS * (1 - percent_for_colour) )
 
@@ -937,13 +965,13 @@ function AllPlayed:DrawTooltip(anchor)
 								end
 								-- Do we show the percent XP rested and/or the countdown until 100% rested?
 								if percent_rest ~= "0" and self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
-									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s, -%s)"),
+									col_text[col_no] = col_text[col_no] .. PercentColour(percent_for_colour, " (%d%% %s, -%s)"):format(
 																						 percent_rest * rested_percent,
 																						 L["rested"],
 																						 text_countdown
 																	 )
 								elseif self:GetOption('percent_rest') ~= "0" then
-									col_text[col_no] = col_text[col_no] .. string.format( PercentColour(percent_for_colour, " (%d%% %s)"),
+									col_text[col_no] = col_text[col_no] .. PercentColour(percent_for_colour, " (%d%% %s)"):format(
 																						 percent_rest * rested_percent,
 																						 L["rested"]
 																	 )
@@ -964,7 +992,7 @@ function AllPlayed:DrawTooltip(anchor)
 	end
 
 	-- Print the totals
-	
+
 	if self:GetOption('show_played_time') or
 	   self:GetOption('show_coins') or
 	   (self:GetOption('show_pvp_totals') and need_pvp) or
@@ -974,7 +1002,7 @@ function AllPlayed:DrawTooltip(anchor)
 		tooltip:SetCell(line, 1, " ")
 		tooltip:AddSeparator()
 	end
-	
+
 	if self:GetOption('show_played_time') then
 		line, column = tooltip:AddLine()
 		tooltip:SetCell(line, 1, C:Orange( L["Total Time Played: "] ), "LEFT", nb_columns - 1)
@@ -997,14 +1025,14 @@ function AllPlayed:DrawTooltip(anchor)
 		line, column = tooltip:AddLine()
 		tooltip:SetCell(line, 1, C:Orange( L["Total PvP: "] ), "LEFT", nb_columns - 1)
 		tooltip:SetCell(
-				line, 
-				nb_columns, 
+				line,
+				nb_columns,
 				FormatHonor(self.faction,
 								self.total.honor_kills,
 								self.total.honor_points,
 								self.total.arena_points,
 								self.total.conquest_points
-				), 
+				),
 				"RIGHT"
 		)
 	end
@@ -1014,15 +1042,15 @@ function AllPlayed:DrawTooltip(anchor)
 		tooltip:SetCell(line, 1, C:Orange( L["Total XP: "] ), "LEFT", nb_columns - 1)
 		tooltip:SetCell(line, nb_columns, C:Yellow( FormatXP(self.total.xp) ), "RIGHT")
 	end
-	
+
 	-- Set the opacity
 	self:SetTTOpacity(self:GetOption('opacity'))
 
 	-- Adjust the hight of the tooltip so that it fits in the screen
 	--tooltip:UpdateScrolling(GetScreenHeight() - 30)
 	tooltip:UpdateScrolling()
-	
-	
+
+
 	tooltip:Show()
 	self.OnUpdate_frame:Show() -- Start the OnUpdate script
 end
@@ -1052,8 +1080,6 @@ end
 
 -- Event handler for the other events registered
 function AllPlayed:EventHandler(msg)
-    self:Debug("EventHandler(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
-
     -- We save a new copy of the vars
     self:SaveVar()
 
@@ -1082,38 +1108,38 @@ end
 -- is not called very often, I don't see the needs to do more special cases
 function AllPlayed:SaveVar()
     --self:Debug("AllPlayed:SaveVar()")
-    local unit_xp_max = UnitXPMax("player")
+    local unit_xp_max = _G.UnitXPMax("player")
 
     -- Fill some of the SaveVariables
     local pc = self.db.global.data[self.faction][self.realm][self.pc]
-    pc.class_loc, pc.class	= UnitClass("player")
-    pc.level           		= UnitLevel("player")
-    pc.xp              		= UnitXP("player")
+    pc.class_loc, pc.class	= _G.UnitClass("player")
+    pc.level           		= _G.UnitLevel("player")
+    pc.xp              		= _G.UnitXP("player")
     pc.max_rested_xp   		= unit_xp_max * 1.5
     pc.last_update     		= time()
-    pc.is_resting      		= IsResting()
-    pc.zone_text       		= GetZoneText()
-    pc.subzone_text    		= GetSubZoneText()
+    pc.is_resting      		= _G.IsResting()
+    pc.zone_text       		= _G.GetZoneText()
+    pc.subzone_text    		= _G.GetSubZoneText()
 	 pc.arena_points    		= GetArenaCurrency()
 	 pc.conquest_points		= GetConquestCurrency()
 	 pc.justice_points		= GetJusticeCurrency()
-	 
+
 	 -- Statistical stuff
-	 
+
 
     -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
-    if unit_xp_max ~=0 and unit_xp_max ~= XPToNextLevel(UnitLevel("player")) then
-    	local _, build_version = GetBuildInfo()
-    	self.db.global.cache.XPToNextLevel[build_version][UnitLevel("player")] = unit_xp_max
+    if unit_xp_max ~=0 and unit_xp_max ~= XPToNextLevel(_G.UnitLevel("player")) then
+    	local _, build_version = _G.GetBuildInfo()
+    	self.db.global.cache.XPToNextLevel[build_version][_G.UnitLevel("player")] = unit_xp_max
     end
 
     --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.global.data[self.faction][self.realm][self.pc].zone_text)
 
     -- Make sure that coin is not nil
-    pc.coin = GetMoney() or 0
+    pc.coin = _G.GetMoney() or 0
 
     -- Make sure that rested_xp is not nil
-    pc.rested_xp = GetXPExhaustion() or 0
+    pc.rested_xp = _G.GetXPExhaustion() or 0
 
 	 -- PvPstuff
 	 self:SaveVarHonor()
@@ -1127,7 +1153,7 @@ function AllPlayed:SaveVarHonor()
 	local pc = self.db.global.data[self.faction][self.realm][self.pc]
 
 	pc.honor_points	 					= GetHonorCurrency()
-	pc.honor_kills, pc.highest_rank 	= GetPVPLifetimeStats()
+	pc.honor_kills, pc.highest_rank 	= _G.GetPVPLifetimeStats()
 end
 
 -- Set the value seconds_played that will be saved in the save variables
@@ -1156,36 +1182,36 @@ function AllPlayed:GetOption( option, ... )
 
 	-- The sort direction is kept in the sort name
 	elseif option == 'reverse_sort' then
-		if string.find(self.db.profile.options.sort_type, "rev-") == 1 then
+		if self.db.profile.options.sort_type:find("rev-") == 1 then
 			return true
 		else
 			return false
 		end
 	elseif option == 'sort_type' then
-		if string.find(self.db.profile.options.sort_type, "rev-") == 1 then
-			return string.sub(self.db.profile.options.sort_type, 5)
+		if self.db.profile.options.sort_type:find("rev-") == 1 then
+			return self.db.profile.options.sort_type:sub(5)
 		else
 			return self.db.profile.options.sort_type
 		end
 	elseif option == 'display_sort_type' then
 		-- For display, we need the complete thing
 		return self.db.profile.options.sort_type
-		
+
 	elseif option == 'show_minimap_icon' then
 		return not self.db.profile.options.ldbicon.hide
 	end
-	
+
 	-- Some options are not available before Cataclysm
 	if not IS_40 then
-		if option == 'show_conquest_points' or 
-		   option == 'show_justice_points' or 
+		if option == 'show_conquest_points' or
+		   option == 'show_justice_points' or
 		   option == 'show_justice_total'
-		then 
-			return false 
+		then
+			return false
 		end
 	end
-	
-	
+
+
 	-- Some options need to be set to false for Cataclysm
 	if IS_40 then
 		if option == 'show_arena_points' then return false end
@@ -1252,11 +1278,11 @@ function AllPlayed:SetOption( option, value, ... )
 	-- Set the scale of the tooltip
 	elseif option == 'tooltip_scale' and self.tooltip then
 		self.tooltip:SetScale(value)
-	
+
 	-- Set the opacity of the tablet frame
 	elseif option == 'opacity' then
 		self:SetTTOpacity(value)
-		
+
 	-- Ajust the sort type with the direction
 	elseif option == 'sort_type' then
 	    if self:GetOption('reverse_sort') then
@@ -1271,7 +1297,7 @@ function AllPlayed:SetOption( option, value, ... )
 	elseif option == 'reverse_sort' then
 		local sort_type
 		if self:GetOption('reverse_sort') then
-			sort_type = string.sub(self.db.profile.options.sort_type,5)
+			sort_type = self.db.profile.options.sort_type:sub(5)
 		else
 			sort_type = self.db.profile.options.sort_type
 		end
@@ -1292,7 +1318,7 @@ function AllPlayed:SetOption( option, value, ... )
 			self.db.profile.options.ldbicon.hide = true
 			ldbicon:Hide("AllPlayed")
 		end
-		
+
 		ldbicon:Refresh("AllPlayed", self.db.profile.options.ldbicon)
 
 		already_set = true
@@ -1356,17 +1382,17 @@ function AllPlayed:EstimateRestedXP( pc, realm, level, rested_xp, max_rested_xp,
     -- otherwise it takes 40 days.
     local estimated_rested_xp
     if is_resting then
-        estimated_rested_xp = math.min( rested_xp + math.floor( ( time()-last_update ) * ( max_rested_xp/TEN_DAYS ) ), max_rested_xp )
+        estimated_rested_xp = min( rested_xp + floor( ( time()-last_update ) * ( max_rested_xp/TEN_DAYS ) ), max_rested_xp )
     else
-        estimated_rested_xp = math.min( rested_xp + math.floor( ( time()-last_update ) * ( max_rested_xp/(4 * TEN_DAYS) ) ), max_rested_xp )
+        estimated_rested_xp = min( rested_xp + floor( ( time()-last_update ) * ( max_rested_xp/(4 * TEN_DAYS) ) ), max_rested_xp )
     end
-    
-    -- If the character is at the last level before max level, he cannot have more rest 
+
+    -- If the character is at the last level before max level, he cannot have more rest
     -- then what remains to level
-    if level == self.max_pc_level - 1 then 
-    	estimated_rested_xp = math.min( estimated_rested_xp, XPToNextLevelCache[self.max_pc_level - 1] - curent_xp )
+    if level == self.max_pc_level - 1 then
+    	estimated_rested_xp = min( estimated_rested_xp, XPToNextLevelCache[self.max_pc_level - 1] - curent_xp )
     end
-    
+
     return estimated_rested_xp
 end
 
@@ -1377,21 +1403,21 @@ do -- Time Played functions closure
 
 	-- Time Played display function that is hooked to prevent chat spam from AllPlayed
 	-- Thanks to Phanx for the code
-	local o = ChatFrame_DisplayTimePlayed
-	ChatFrame_DisplayTimePlayed = function(...)
+	local o = _G.ChatFrame_DisplayTimePlayed
+	_G.ChatFrame_DisplayTimePlayed = function(...)
 		if requesting then
 			requesting = false
 			return
 		end
 		return o(...)
 	end
-	
+
 	-- Function that Send a request to the server to get an update of the time played.
 	function AllPlayed:RequestTimePlayed()
 		-- We only send the event if the message has not been seen for 10 seconds
 		if time() - self.db.global.data[self.faction][self.realm][self.pc].seconds_played_last_update > 10 then
 			requesting = true
-			RequestTimePlayed()
+			_G.RequestTimePlayed()
 		end
 	end
 
@@ -1408,13 +1434,13 @@ function FormatXP(xp)
 
    if xp > 1000000 then
       -- Millions of XP
-      display_xp = string.format( L["%.1f M XP"], xp / 1000000 )
+      display_xp = (L["%.1f M XP"]):format( xp / 1000000 )
    elseif xp > 1000 then
       -- Thousands of XP
-      display_xp = string.format( L["%.1f K XP"], xp / 1000 )
+      display_xp = (L["%.1f K XP"]):format( xp / 1000 )
    else
       -- Very few XP
-      display_xp = string.format( L["%d XP"] , xp )
+      display_xp = (L["%d XP"]):format( xp )
    end
 
    return display_xp
@@ -1424,22 +1450,22 @@ end
 -- The result is a string with embeded coin icons
 function FormatMoney(money)
 	local goldString, silverString, copperString;
-	local gold = floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD));
-	local silver = floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER);
-	local copper = mod(money, COPPER_PER_SILVER);
-	
+	local gold = floor(money / (_G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD));
+	local silver = floor((money - (gold * _G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD)) / _G.COPPER_PER_SILVER);
+	local copper = mod(money, _G.COPPER_PER_SILVER);
+
 	if ( not AllPlayed:GetOption('use_icons') ) then
-		goldString = gold..C:Gold(GOLD_AMOUNT_SYMBOL);
-		silverString = silver..C:Silver(SILVER_AMOUNT_SYMBOL);
-		copperString = copper..C:Copper(COPPER_AMOUNT_SYMBOL);
+		goldString = gold..C:Gold(_G.GOLD_AMOUNT_SYMBOL);
+		silverString = silver..C:Silver(_G.SILVER_AMOUNT_SYMBOL);
+		copperString = copper..C:Copper(_G.COPPER_AMOUNT_SYMBOL);
 	else
-		goldString = format(GOLD_AMOUNT_TEXTURE, gold, 0, 0);
-		silverString = format(SILVER_AMOUNT_TEXTURE, silver, 0, 0);
-		copperString = format(COPPER_AMOUNT_TEXTURE, copper, 0, 0);
+		goldString = _G.GOLD_AMOUNT_TEXTURE:format(gold, 0, 0);
+		silverString = _G.SILVER_AMOUNT_TEXTURE:format(silver, 0, 0);
+		copperString = _G.COPPER_AMOUNT_TEXTURE:format(copper, 0, 0);
 	end
-	
+
 	local moneyString = "";
-	local separator = "";	
+	local separator = "";
 	if ( gold > 0 ) then
 		moneyString = goldString;
 		separator = " ";
@@ -1451,7 +1477,7 @@ function FormatMoney(money)
 	if ( copper > 0 or moneyString == "" ) then
 		moneyString = moneyString..separator..copperString;
 	end
-	
+
 	return moneyString;
 
 end
@@ -1488,9 +1514,9 @@ end
 -- Function that produce the justice points string
 function FormatJustice( justice_points )
 	if AllPlayed:GetOption('use_icons') then
-		return format(honor_strings.icons.jp, justice_points)
+		return honor_strings.icons.jp:format(justice_points)
 	else
-		return format(honor_strings.no_icons.jp, justice_points)
+		return honor_strings.no_icons.jp:format(justice_points)
 	end
 end
 
@@ -1505,20 +1531,20 @@ function FormatHonor( faction, honor_kills, honor_points, arena_points, conquest
 	end
 
 	if AllPlayed:GetOption('show_honor_kills') and honor_kills ~= nil then
-		honor_string = honor_string .. format(fmt.hk, C:White(tostring(honor_kills))) .. '  '
+		honor_string = honor_string .. fmt.hk:format(C:White(tostring(honor_kills))) .. '  '
 	end
 	if AllPlayed:GetOption('show_honor_points') and honor_points ~= nil 		then
-		honor_string = honor_string .. format(fmt['hp-' .. faction], C:White(tostring(honor_points))) .. '  '
+		honor_string = honor_string .. (fmt['hp-' .. faction]):format(C:White(tostring(honor_points))) .. '  '
 	end
 	if AllPlayed:GetOption('show_arena_points') and arena_points ~= nil 		then
-		honor_string = honor_string .. format(fmt.ap, C:White(tostring(arena_points))) .. ' '
+		honor_string = honor_string .. fmt.ap:format(C:White(tostring(arena_points))) .. ' '
 	end
 	if AllPlayed:GetOption('show_conquest_points') and conquest_points ~= nil 		then
-		honor_string = honor_string .. format(fmt['cp-' .. faction], C:White(tostring(conquest_points))) .. '  '
+		honor_string = honor_string .. (fmt['cp-' .. faction]):format(C:White(tostring(conquest_points))) .. '  '
 	end
 
 	-- Return the string minus the last space
-	return (string.gsub(honor_string, "^%s*(.-)%s*$", "%1"))
+	return honor_string:gsub("^%s*(.-)%s*$", "%1")
 
 end
 
@@ -1565,9 +1591,9 @@ function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, f
 			progress = min( xp / XPToNextLevel(level), .99 )
 		end
 
-		level_string = string.format( "%.2f" , level + progress )
+		level_string = ("%.2f"):format( level + progress )
 	else
-		level_string = string.format( "%d" , level )
+		level_string = ("%d"):format(level)
 	end
 
 	-- Created use the all cap english name if the localized name is not present
@@ -1576,19 +1602,13 @@ function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, f
 	if class_display == "" then class_display = class end
 
 	if class_display ~= "" and AllPlayed:GetOption('show_class_name') then
-		level_string = string.format( "%s %s", class_display, level_string )
+		level_string = ("%s %s"):format( class_display, level_string )
 	end
 
-	result_string = string.format( ClassColour( class, faction, "%s (%s)" ),
-											  pc,
-											  level_string
-					  	 )
+	result_string = ClassColour( class, faction, "%s (%s)" ):format( pc, level_string )
 
 	if AllPlayed:GetOption('show_played_time') then
-		result_string = result_string .. string.format(
-														FactionColour( faction, " : %s" ),
-														AllPlayed:FormatTime(seconds_played)
-													)
+		result_string = result_string .. FactionColour(faction, " : %s"):format(AllPlayed:FormatTime(seconds_played))
 	end
 
 	-- Do we need to show the total XP
@@ -1746,10 +1766,10 @@ do
 
 
 		local sorted_key_table = AcquireTable()
-		for key in pairs(unsorted_table) do table.insert(sorted_key_table, key) end
+		for key in pairs(unsorted_table) do tinsert(sorted_key_table, key) end
 
 		table_to_sort = unsorted_table
-		table.sort(sorted_key_table, sort_function)
+		sort(sorted_key_table, sort_function)
 
 		return sorted_key_table
 	end
@@ -2024,11 +2044,11 @@ function InitXPToLevelCache( game_version, build_version )
 	local date, toc_number
 
 	if game_version == nil then
-		game_version, build_version, date, toc_number = GetBuildInfo()
+		game_version, build_version, date, toc_number = _G.GetBuildInfo()
 	elseif build_version == nil then
-		_, build_version, date, toc_number = GetBuildInfo()
+		build_version, date, toc_number = select(2, _G.GetBuildInfo())
 	else
-		_, _, date, toc_number = GetBuildInfo()
+		date, toc_number = select(3, _G.GetBuildInfo())
 	end
 
 	-- Values for the 2.3 patches as recorded on WoWWiki
@@ -2111,7 +2131,7 @@ function InitXPToLevelCache( game_version, build_version )
 	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]
 	if AllPlayed.db.global.cache.XPToNextLevel[build_version] ~= nil then
 		for level = 1, AllPlayed.max_pc_level do
-			if AllPlayed.db.global.cache.XPToNextLevel[build_version][level] ~= nil and 
+			if AllPlayed.db.global.cache.XPToNextLevel[build_version][level] ~= nil and
 				AllPlayed.db.global.cache.XPToNextLevel[build_version][level] ~= 0 then
 				XPToNextLevelCache[level] = AllPlayed.db.global.cache.XPToNextLevel[build_version][level]
 			end
@@ -2173,7 +2193,7 @@ function XPToNextLevel( level )
 		end
 
 		-- Round the result to the nearest 100
-		XPToNextLevelCache[level] = math.floor(XPToNextLevelCache[level] / 100 + 0.5) * 100
+		XPToNextLevelCache[level] = floor(XPToNextLevelCache[level] / 100 + 0.5) * 100
 
 		-- Fix the value for patch 2.3 and above (formula provided on WoWWiki)
 		--[[
@@ -2224,16 +2244,16 @@ end
 -- #################################################################################
 
 function AllPlayed.GetClassHexColour(class)
-	if (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class]) then
-		return string.format("%02x%02x%02x",
-									CUSTOM_CLASS_COLORS[class].r*255,
-									CUSTOM_CLASS_COLORS[class].g*255,
-									CUSTOM_CLASS_COLORS[class].b*255)
-	elseif (RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]) then
-		return string.format("%02x%02x%02x",
-									RAID_CLASS_COLORS[class].r*255,
-									RAID_CLASS_COLORS[class].g*255,
-									RAID_CLASS_COLORS[class].b*255)
+	if (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class]) then
+		return ("%02x%02x%02x"):format(
+									_G.CUSTOM_CLASS_COLORS[class].r*255,
+									_G.CUSTOM_CLASS_COLORS[class].g*255,
+									_G.CUSTOM_CLASS_COLORS[class].b*255)
+	elseif (_G.RAID_CLASS_COLORS and _G.RAID_CLASS_COLORS[class]) then
+		return ("%02x%02x%02x"):format(
+									_G.RAID_CLASS_COLORS[class].r*255,
+									_G.RAID_CLASS_COLORS[class].g*255,
+									_G.RAID_CLASS_COLORS[class].b*255)
 	else
 		return "a1a1a1"
 	end
@@ -2258,15 +2278,15 @@ AllPlayedLDB = ldb:NewDataObject("AllPlayed", {
 
 local ldb_options = { type = 'group' }
 function AllPlayedLDB:OnClick(button,down)
-	
+
 	-- The popup only when the button is release
 	if down then return end
-	
+
 	-- For tests of EasyMenu
 	if button ==  "RightButton" then
 		AP.DisplayConfigMenu()
 	end
-	
+
 	if AllPlayed.tooltip then
 		AllPlayed.tooltip = lqt:Release(AllPlayed.tooltip)
 		AllPlayed.tooltip_anchor = nil
@@ -2285,28 +2305,6 @@ end
 
 --AllPlayedLDB.tooltip = AllPlayed.tablet
 
-
--- test stuff
-function GSId(CategoryTitle, StatisticTitle)
-	local str = ""
-	for _, CategoryId in pairs(GetStatisticsCategoryList()) do
-		local Title, ParentCategoryId, Something
-		Title, ParentCategoryId, Something = GetCategoryInfo(CategoryId)
-		
-		if Title == CategoryTitle then
-			local i
-			local statisticCount = GetCategoryNumAchievements(CategoryId)
-			for i = 1, statisticCount do
-				local IDNumber, Name, Points, Completed, Month, Day, Year, Description, Flags, Image, RewardText
-				IDNumber, Name, Points, Completed, Month, Day, Year, Description, Flags, Image, RewardText = GetAchievementInfo(CategoryId, i)
-				if Name == StatisticTitle then
-					return IDNumber
-				end
-			end
-		end
-	end
-	return -1
-end
 
 --Total gold aquired = 328
 --Gold looted = 333

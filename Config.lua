@@ -3,8 +3,20 @@ local AP_display_name, AP = ...
 -- Config.lua
 -- $Id$
 
-if not AllPlayed_revision then AllPlayed_revision = {} end
-AllPlayed_revision.config	= ("$Revision$"):match("(%d+)")
+-- Localize some lua globals
+local _G = getfenv(0)
+
+local pairs = _G.pairs
+local tonumber = _G.tonumber
+local assert = _G.assert
+local pairs = _G.pairs
+
+local LibStub = _G.LibStub
+
+if not _G.AllPlayed_revision then _G.AllPlayed_revision = {} end
+_G.AllPlayed_revision.config	= ("$Revision$"):match("(%d+)")
+
+local AllPlayed = _G.AllPlayed
 
 -- Backward compatibility stuff
 local IS_40 = (select(4, GetBuildInfo()) >= 40000)
@@ -40,8 +52,8 @@ do
 		if not version_string then
 			-- Find the curent revision number from all the files revisions
 			local revision = 0
-			if AllPlayed_revision then
-				for _, rev in pairs(AllPlayed_revision) do
+			if _G.AllPlayed_revision then
+				for _, rev in pairs(_G.AllPlayed_revision) do
 					local rev = tonumber(rev)
 					if rev and rev > revision then revision = rev end
 				end
@@ -50,11 +62,11 @@ do
 			end
 
 			-- Find the curent version
-			local version = GetAddOnMetadata("AllPlayed", "Version"):match("([^ ]+)")
+			local version = _G.GetAddOnMetadata("AllPlayed", "Version"):match("([^ ]+)")
 
-			version_string = string.format(L["Version %s (r%s)"], version, revision)
+			version_string = (L["Version %s (r%s)"]):format(version, revision)
 		end
-		
+
 		return version_string
 	end
 end -- do
@@ -142,17 +154,17 @@ local function ReturnConfigMenu()
 					},
 				},
 				[9] = {
-					text = format(L["%s (%s)"],L["Justice Points"],justice_icon);
+					text = (L["%s (%s)"]):format(L["Justice Points"],justice_icon);
 					hasArrow = true;
 					menuList = {
 						[1] = {
-							text = format(L["Show %s"],L["Justice Points"]);
-							tooltipText = format(L["Display the %s each character pocess"],L["Justice Points"]);
+							text = (L["Show %s"]):format(L["Justice Points"]);
+							tooltipText = (L["Display the %s each character pocess"]):format(L["Justice Points"]);
 							checked = 'show_justice_points';
 						},
 						[2] = {
-							text = format(L["Show %s total"],L["Justice Points"]);
-							tooltipText = format(L["Show the total %s for all characters"],L["Justice Points"]);
+							text = (L["Show %s total"]):format(L["Justice Points"]);
+							tooltipText = (L["Show the total %s for all characters"]):format(L["Justice Points"]);
 							checked = 'show_justice_total';
 						},
 					},
@@ -202,18 +214,18 @@ local function ReturnConfigMenu()
 					hasArrow = true;
 					menuList = {
 						[1] = {
-							text = format(L["%s (%s)"], L["Honor Kills"], kill_icon);
+							text = (L["%s (%s)"]):format(L["Honor Kills"], kill_icon);
 							tooltipText = L["Show the character honor kills"];
 							checked = 'show_honor_kills';
 						},
 						[2] = {
-							text = format(L["%s (%s or %s)"], L["Honor Points"], honor_alliance_icon, honor_horde_icon);
-							tooltipText = format(L['Display the %s each character pocess'],L["Honor Points"]);
+							text = (L["%s (%s or %s)"]):format(L["Honor Points"], honor_alliance_icon, honor_horde_icon);
+							tooltipText = (L['Display the %s each character pocess']):format(L["Honor Points"]);
 							checked = 'show_honor_points';
 						},
 						[3] = {
-							text = format(L["%s (%s)"], L["Arena Points"], arena_icon);
-							tooltipText = format(L['Display the %s each character pocess'],L["Arena Points"]);
+							text = (L["%s (%s)"]):format(L["Arena Points"], arena_icon);
+							tooltipText = (L['Display the %s each character pocess']):format(L["Arena Points"]);
 							checked = 'show_arena_points';
 						},
 						[4] = {
@@ -314,20 +326,20 @@ local function ReturnConfigMenu()
 			text = L["Configuration"];
 			tooltipText = L["Open configuration dialog"];
 			tooltipOnButton = 1;
-			func = function() InterfaceOptionsFrame_OpenToCategory(AP_display_name) end;
+			func = function() _G.InterfaceOptionsFrame_OpenToCategory(AP_display_name) end;
 		},
-	}	
-	
+	}
+
 	-- No area points in Cataclysm, conquest point instead
 	if IS_40 then
-		config_menu[4].menuList[11].menuList[3].text = format(L["%s (%s or %s)"],
+		config_menu[4].menuList[11].menuList[3].text = (L['Display the %s each character pocess']):format(
 																			   L["Conquest Points"],
 																			   conquest_alliance_icon,
 																			   conquest_horde_icon)
-		config_menu[4].menuList[11].menuList[3].tooltipText = format(L['Display the %s each character pocess'],L["Conquest Points"])
+		config_menu[4].menuList[11].menuList[3].tooltipText = (L['Display the %s each character pocess']):format(L["Conquest Points"])
 		config_menu[4].menuList[11].menuList[3].checked = 'show_conquest_points'
 	end
-	
+
 	-- No Justice points before Cataclysm
 	if not IS_40 then
 		for i=9,14 do
@@ -338,13 +350,13 @@ local function ReturnConfigMenu()
 
 	-- Set version for display
 	config_menu[2].text = GetVersionString()
-	
+
 	-- All the checkbox options need to have their menu with the menu button
 	-- and a pair of function to get and set the options
 	local function AddCheckboxOption(menu)
-	
+
 		local foundCheck = false
-		
+
 		for i=1,#menu do
 			-- For Cataclysm only
 			if IS_40 then
@@ -354,39 +366,39 @@ local function ReturnConfigMenu()
 					menu[i].text = "|TInterface\Common\UI-SliderBar-Background:0:1.5:0:0:8:8|t" .. menu[i].text
 				end
 			end
-		
-			if menu[i].checked then 
-				menu[i].tooltipOnButton = 1 
+
+			if menu[i].checked then
+				menu[i].tooltipOnButton = 1
 				menu[i].keepShownOnClick = 1
 				menu[i].value = menu[i].checked
 				menu[i].checked = function() return AllPlayed:GetOption(menu[i].value) end
-				menu[i].func = function(dropdownmenu, arg1, arg2, checked) 
-					AllPlayed:SetOption(dropdownmenu.value, not AllPlayed:GetOption(dropdownmenu.value)) 
+				menu[i].func = function(dropdownmenu, arg1, arg2, checked)
+					AllPlayed:SetOption(dropdownmenu.value, not AllPlayed:GetOption(dropdownmenu.value))
 				end
 				foundCheck = true
 			end
-			
+
 			-- For options where you choose one choice from a list of set arguments
 			-- arg1 contains the choice
 			if menu[i].list then
 				if IS_40 then
 					menu[i].isNotRadio = nil
 				end
-				menu[i].tooltipOnButton = 1 
+				menu[i].tooltipOnButton = 1
 				menu[i].value = menu[i].list
 				menu[i].checked = function() return AllPlayed:GetOption(menu[i].value) == menu[i].arg1 end
-				menu[i].func = function(dropdownmenu, arg1, arg2, checked) 
-					AllPlayed:SetOption(dropdownmenu.value, arg1) 
+				menu[i].func = function(dropdownmenu, arg1, arg2, checked)
+					AllPlayed:SetOption(dropdownmenu.value, arg1)
 				end
 				menu[i].list = nil
 				foundCheck = true
 			end
-			
+
 			-- Submenus
 			if menu[i].menuList then AddCheckboxOption(menu[i].menuList) end
-			
+
 		end
-		
+
 		-- Set notCheckable if no checkable items were found
 		if not foundCheck then
 			for i=1,#menu do
@@ -395,31 +407,31 @@ local function ReturnConfigMenu()
 		end
 	end
 	AddCheckboxOption(config_menu)
-	
+
 	-- Build the ignored list
 	local i = 1
 	for faction, faction_table in pairs(AP.db.global.data) do
 		for realm, realm_table in pairs(faction_table) do
 			for pc, _ in pairs(realm_table) do
-				local pc_name = format(L["%s : %s"], realm, pc)
+				local pc_name = (L["%s : %s"]):format(realm, pc)
 				config_menu[6].menuList[i] = {
 					text = pc_name;
-					tooltipText = string.format(L["Hide %s of %s from display"], pc, realm);
+					tooltipText = (L["Hide %s of %s from display"]):format(pc, realm);
 					tooltipOnButton = 1;
 					keepShownOnClick = 1;
 					checked = function() return AllPlayed:GetOption('is_ignored',realm, pc) end;
-					func = function(dropdownmenu, arg1, arg2, checked) 
+					func = function(dropdownmenu, arg1, arg2, checked)
 						AllPlayed:SetOption(
-							'is_ignored', 
-							not AllPlayed:GetOption('is_ignored',realm, pc), 
-							realm, 
+							'is_ignored',
+							not AllPlayed:GetOption('is_ignored',realm, pc),
+							realm,
 							pc
 						)
 					end;
 				}
 				-- Specify no radial button for Cataclysm
 				if IS_40 then config_menu[6].menuList[i].isNotRadio = true end
-				
+
 				i = i + 1
 			end
 		end
@@ -438,8 +450,8 @@ do
 		else
 			anchor = "cursor"
 		end
-		
-		EasyMenu(AP.config_menu, dropdownFrame, anchor, nil, nil, "MENU")
+
+		_G.EasyMenu(AP.config_menu, dropdownFrame, anchor, nil, nil, "MENU")
 	end
 end -- do
 
@@ -454,8 +466,8 @@ local function GetOptions()
 			display = {
 				type = 'group', name = L["Display"], desc = L["Specify what to display"], args = {
 					main = {
-						type = 'header', 
-						name = L["Main Settings"], 
+						type = 'header',
+						name = L["Main Settings"],
 						order     = 1,
 					},
 					show_coins = {
@@ -513,29 +525,29 @@ local function GetOptions()
 						  order     = 1.6,
 					},
 					justice = {
-						type = 'header', 
-						name = format(L["%s (%s)"],L["Justice Points"],justice_icon),
+						type = 'header',
+						name = (L["%s (%s)"]):format(L["Justice Points"],justice_icon),
 						order     = 1.7,
 					},
 					show_justice_points = {
-						name      = format(L["Show %s"],L["Justice Points"]),
-						desc      = format(L["Display the %s each character pocess"],L["Justice Points"]),
+						name      = (L["Show %s"]):format(L["Justice Points"]),
+						desc      = (L["Display the %s each character pocess"]):format(L["Justice Points"]),
 						type      = 'toggle',
 						get       = function() return AllPlayed:GetOption('show_justice_points') end,
 						set       = function(info, v) AllPlayed:SetOption('show_justice_points',v) end,
 						order     = 1.71,
 					},
 					show_justice_total = {
-						name      = format(L["Show %s total"],L["Justice Points"]),
-						desc      = format(L["Show the total %s for all characters"],L["Justice Points"]),
+						name      = (L["Show %s total"]):format(L["Justice Points"]),
+						desc      = (L["Show the total %s for all characters"]):format(L["Justice Points"]),
 						type      = 'toggle',
 						get       = function() return AllPlayed:GetOption('show_justice_total') end,
 						set       = function(info, v) AllPlayed:SetOption('show_justice_total',v) end,
 						order     = 1.72,
 					},
 					faction_and_realms = {
-						type = 'header', 
-						name = L["Factions and Realms"], 
+						type = 'header',
+						name = L["Factions and Realms"],
 						order     = 2,
 					},
 					 all_factions = {
@@ -555,8 +567,8 @@ local function GetOptions()
 						  order     = 2.2,
 					 },
 					time = {
-						type = 'header', 
-						name = L["Time Played"], 
+						type = 'header',
+						name = L["Time Played"],
 						order     = 3,
 					},
 					 show_played_time = {
@@ -576,8 +588,8 @@ local function GetOptions()
 						  order     = 3.2,
 					 },
 					xp = {
-						type = 'header', 
-						name = L["Experience Points"], 
+						type = 'header',
+						name = L["Experience Points"],
 						order     = 5,
 					},
 					 show_progress = {
@@ -622,8 +634,8 @@ local function GetOptions()
 						 order       = 5.5,
 					},
 					sort = {
-						type = 'header', 
-						name = L["Sort Order"], 
+						type = 'header',
+						name = L["Sort Order"],
 						order = 9,
 					},
 					sort_type = {
@@ -652,14 +664,14 @@ local function GetOptions()
 					  order     = 9.2,
 					},
 					pvp = {
-						type = 'header', 
-						name = L["PVP"], 
-						desc = L["Set the PVP options"], 
+						type = 'header',
+						name = L["PVP"],
+						desc = L["Set the PVP options"],
 						order     = 11,
 					},
 					show_honor_kills= {
 						name        = L["Honor Kills"],
-						name        = format(L["%s (%s)"], L["Honor Kills"], kill_icon),
+						name        = (L["%s (%s)"]):format(L["Honor Kills"], kill_icon),
 						desc        = L["Show the character honor kills"],
 						type        = 'toggle',
 						get       	= function() return AllPlayed:GetOption('show_honor_kills') end,
@@ -667,16 +679,16 @@ local function GetOptions()
 						order = 11.1,
 					},
 					show_honor_points = {
-						name        = format(L["%s (%s or %s)"], L["Honor Points"], honor_alliance_icon, honor_horde_icon),
-						desc        = format(L['Display the %s each character pocess'],L["Honor Points"]),
+						name        = (L["%s (%s or %s)"]):format(L["Honor Points"], honor_alliance_icon, honor_horde_icon),
+						desc        = (L['Display the %s each character pocess']):format(L["Honor Points"]),
 						type        = 'toggle',
 						get       	= function() return AllPlayed:GetOption('show_honor_points') end,
 						set       	= function(info, v) AllPlayed:SetOption('show_honor_points',v) end,
 						order = 11.2,
 					},
 					show_arena_points	= {
-						name        = format(L["%s (%s)"], L["Arena Points"], arena_icon),
-						desc        = format(L['Display the %s each character pocess'],L["Arena Points"]),
+						name        = (L["%s (%s)"]):format(L["Arena Points"], arena_icon),
+						desc        = (L['Display the %s each character pocess']):format(L["Arena Points"]),
 						type        = 'toggle',
 						get       	= function() return AllPlayed:GetOption('show_arena_points') end,
 						set       	= function(info, v) AllPlayed:SetOption('show_arena_points',v) end,
@@ -691,7 +703,7 @@ local function GetOptions()
 						order = 11.4,
 					},
 				}, order = 10,
-			}, 
+			},
 			ignore = {
 				name    = L["Ignore Characters"],
 				desc    = L["Hide characters from display"],
@@ -707,7 +719,7 @@ local function GetOptions()
 						type = 'description',
 						order = .7,
 					},
-				}, 
+				},
 				order   = 20
 			},
 			ui = {
@@ -751,20 +763,20 @@ local function GetOptions()
 			},
 		},
 	}
-	
+
 	-- Arena points do not exists in Cataclysm but Conquest points do
 	if IS_40 then
 		options.args.display.args.show_arena_points = nil
 		options.args.display.args.show_conquest_points = {
-						name        = format(L["%s (%s or %s)"], L["Conquest Pts"], conquest_alliance_icon, conquest_horde_icon),
-						desc        = format(L['Display the %s each character pocess'],L["Conquest Points"]),
+						name        = (L["%s (%s or %s)"]):format(L["Conquest Pts"], conquest_alliance_icon, conquest_horde_icon),
+						desc        = (L['Display the %s each character pocess']):format(L["Conquest Points"]),
 						type        = 'toggle',
 						get       	= function() return AllPlayed:GetOption('show_conquest_points') end,
 						set       	= function(info, v) AllPlayed:SetOption('show_conquest_points',v) end,
 						order = 11.3,
 		}
 	end
-	
+
 	-- Justice Points shouuld not be displayed before Cataclysm
 	if not IS_40 then
 		options.args.display.args.justice = nil
@@ -777,42 +789,42 @@ local function GetOptions()
 	for faction, faction_table in pairs(AP.db.global.data) do
 		local faction_id = "faction" .. faction_order
 		options.args.ignore.args[faction_id] = {
-				type 	= 'group', 
-				name 	= faction, 
+				type 	= 'group',
+				name 	= faction,
 				args	= {},
 		}
 		faction_order = faction_order + 1
-		
+
 		local realm_order = 1
 		for realm, realm_table in pairs(faction_table) do
 			local realm_id = "realm" .. realm_order
 			options.args.ignore.args[faction_id].args[realm_id] = {
-				type 	= 'group', 
-				name 	= realm, 
+				type 	= 'group',
+				name 	= realm,
 				args	= {},
 			}
-	  	
+
 			local pc_order = 1
 			for pc, _ in pairs(realm_table) do
-				pc_id = "pc" .. pc_order
+				local pc_id = "pc" .. pc_order
 				options.args.ignore.args[faction_id].args[realm_id].args[pc_id] = {
 					name = pc,
-					desc = string.format(L["Hide %s of %s from display"], pc, realm),
+					desc = (L["Hide %s of %s from display"]):format(pc, realm),
 					type = 'toggle',
 					get  = function() return AllPlayed:GetOption('is_ignored',realm, pc) end,
 					set  = function(info, value) AllPlayed:SetOption('is_ignored', value, realm, pc) end
 				}
-				
+
 				pc_order = pc_order + 1
 			end
-			
+
 			realm_order = realm_order + 1
 	  	end
 	end
 
 	-- Profile section
 	options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(AP.db)
-	
+
 	return options
 
 end
@@ -821,7 +833,7 @@ end
 local function InitConfig()
 	-- Initialize config menu
 	AP.config_menu = ReturnConfigMenu()
-	
+
 	-- Initialized options panel
 	LibStub("AceConfig-3.0"):RegisterOptionsTable(AP_display_name, GetOptions())
 	AP.options_frame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AP_display_name)
