@@ -2051,32 +2051,33 @@ function InitXPToLevelCache( game_version, build_version )
 		date, toc_number = select(3, _G.GetBuildInfo())
 	end
 
-	-- Values for the 2.3 patches as recorded on WoWWiki
-	XPToNextLevelCache[11]    = 8700
-	XPToNextLevelCache[12]    = 9800
-	XPToNextLevelCache[13]    = 11000
-	XPToNextLevelCache[14]    = 12300
-	XPToNextLevelCache[15]    = 13600
-	XPToNextLevelCache[16]    = 15000
-	XPToNextLevelCache[17]    = 16400
-	XPToNextLevelCache[18]    = 17800
-	XPToNextLevelCache[19]    = 19300
-	XPToNextLevelCache[20]    = 20800
-	XPToNextLevelCache[21]    = 22400
-	XPToNextLevelCache[22]    = 24000
-	XPToNextLevelCache[23]    = 25500
-	XPToNextLevelCache[24]    = 27200
-	XPToNextLevelCache[25]    = 28900
-	XPToNextLevelCache[26]    = 30500
-	XPToNextLevelCache[27]    = 32200
-	XPToNextLevelCache[28]    = 33900
-	XPToNextLevelCache[29]    = 36300
-	XPToNextLevelCache[30]    = 38800
-	XPToNextLevelCache[31]    = 41600
-	XPToNextLevelCache[32]    = 44600
-	XPToNextLevelCache[33]    = 48000
-	XPToNextLevelCache[34]    = 51400
-	XPToNextLevelCache[35]    = 55000
+	-- Values for the 4.0.3 patches
+	XPToNextLevelCache[10]    = 6700
+	XPToNextLevelCache[11]    = 7000
+	XPToNextLevelCache[12]    = 7700
+	XPToNextLevelCache[13]    = 8700
+	XPToNextLevelCache[14]    = 9700
+	XPToNextLevelCache[15]    = 10800
+	XPToNextLevelCache[16]    = 11900
+	XPToNextLevelCache[17]    = 13100
+	XPToNextLevelCache[18]    = 14200
+	XPToNextLevelCache[19]    = 15400
+	XPToNextLevelCache[20]    = 16600
+	XPToNextLevelCache[21]    = 17900
+	XPToNextLevelCache[22]    = 19200
+	XPToNextLevelCache[23]    = 20400
+	XPToNextLevelCache[24]    = 21800
+	XPToNextLevelCache[25]    = 23100
+	XPToNextLevelCache[26]    = 24400
+	XPToNextLevelCache[27]    = 25800
+	XPToNextLevelCache[28]    = 27100
+	XPToNextLevelCache[29]    = 29000
+	XPToNextLevelCache[30]    = 31000
+	XPToNextLevelCache[31]    = 33300
+	XPToNextLevelCache[32]    = 35700
+	XPToNextLevelCache[33]    = 38400
+	XPToNextLevelCache[34]    = 41100
+	XPToNextLevelCache[35]    = 44000
 	XPToNextLevelCache[36]    = 58700
 	XPToNextLevelCache[37]    = 62400
 	XPToNextLevelCache[38]    = 66200
@@ -2111,10 +2112,10 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[67]	  = 585000
 	XPToNextLevelCache[68]	  = 648000
 	XPToNextLevelCache[69]	  = 717000
-	XPToNextLevelCache[70] 	  = 1523800
+	XPToNextLevelCache[70] 	  = 1219000
 	XPToNextLevelCache[71] 	  = 1539600
 	XPToNextLevelCache[72] 	  = 1555700
-	XPToNextLevelCache[73] 	  = 1571800
+	XPToNextLevelCache[73] 	  = 1257000
 	XPToNextLevelCache[74] 	  = 1587900
 	XPToNextLevelCache[75] 	  = 1604200
 	XPToNextLevelCache[76] 	  = 1620700
@@ -2122,10 +2123,10 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[78] 	  = 1653900
 	XPToNextLevelCache[79] 	  = 1670800
 	XPToNextLevelCache[80] 	  = 1686300
-	XPToNextLevelCache[81] 	  = 1686300
-	XPToNextLevelCache[82] 	  = 1686300
-	XPToNextLevelCache[83] 	  = 1686300
-	XPToNextLevelCache[84] 	  = 1686300
+	XPToNextLevelCache[81] 	  = 2121500
+	XPToNextLevelCache[82] 	  = 4004000
+	XPToNextLevelCache[83] 	  = 5203400
+	XPToNextLevelCache[84] 	  = 6546500
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]
