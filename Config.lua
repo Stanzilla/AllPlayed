@@ -831,6 +831,9 @@ end
 
 -- Configuration initialization
 local function InitConfig()
+	-- Get the AllPlayed global
+	AllPlayed = _G.AllPlayed
+
 	-- Initialize config menu
 	AP.config_menu = ReturnConfigMenu()
 
