@@ -31,6 +31,7 @@ local DisplayConfigMenu
 local InitConfig
 
 -- Icons
+local valor_icon = "\124TInterface\\Icons\\pvecurrency-valor:0:0:2:0:64:64\124t"
 local justice_icon = "\124TInterface\\Icons\\pvecurrency-justice:0:0:2:0:64:64\124t"
 local honor_alliance_icon = '\124TInterface\\PVPFrame\\PVP-Currency-Alliance:0:0:2:0:32:32\124t'
 local honor_horde_icon = '\124TInterface\\PVPFrame\\PVP-Currency-Horde:0:0:2:0:32:32\124t'
@@ -154,6 +155,22 @@ local function ReturnConfigMenu()
 					},
 				},
 				[9] = {
+					text = (L["%s (%s)"]):format(L["Valor Points"],valor_icon);
+					hasArrow = true;
+					menuList = {
+						[1] = {
+							text = (L["Show %s"]):format(L["Valor Points"]);
+							tooltipText = (L["Display the %s each character pocess"]):format(L["Valor Points"]);
+							checked = 'show_valor_points';
+						},
+						[2] = {
+							text = (L["Show %s total"]):format(L["Valor Points"]);
+							tooltipText = (L["Show the total %s for all characters"]):format(L["Valor Points"]);
+							checked = 'show_valor_total';
+						},
+					},
+				},
+				[10] = {
 					text = (L["%s (%s)"]):format(L["Justice Points"],justice_icon);
 					hasArrow = true;
 					menuList = {
@@ -169,7 +186,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[10] = {
+				[11] = {
 					text = L["Rested XP"];
 					tooltipText = L["Set the rested XP options"];
 					hasArrow = true;
@@ -208,7 +225,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[11] = {
+				[12] = {
 					text = L["PVP"];
 					tooltipText = L["Set the PVP options"];
 					hasArrow = true;
@@ -235,22 +252,22 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[12] = {
+				[13] = {
 					text = L["Show Class Name"];
 					tooltipText = L["Show the character class beside the level"];
 					checked = 'show_class_name';
 				},
-				[13] = {
+				[14] = {
 					text = L["Colorize Class"];
 					tooltipText = L["Colorize the character name based on class"];
 					checked = 'colorize_class';
 				},
-				[14] = {
+				[15] = {
 					text = L["Use Old Shaman Colour"];
 					tooltipText = L["Use the pre-210 patch colour for the Shaman class"];
 					checked = 'use_pre_210_shaman_colour';
 				},
-				[15] = {
+				[16] = {
 					text = L["Use Icons"];
 					tooltipText = L["Use graphics for coin and PvP currencies"];
 					checked = 'use_icons';
@@ -340,12 +357,13 @@ local function ReturnConfigMenu()
 		config_menu[4].menuList[11].menuList[3].checked = 'show_conquest_points'
 	end
 
-	-- No Justice points before Cataclysm
+	-- No Valor or Justice points before Cataclysm
 	if not IS_40 then
 		for i=9,14 do
-			config_menu[4].menuList[i] = config_menu[4].menuList[i+1]
+			config_menu[4].menuList[i] = config_menu[4].menuList[i+2]
 		end
 		config_menu[4].menuList[15] = nil
+		config_menu[4].menuList[16] = nil
 	end
 
 	-- Set version for display
@@ -524,10 +542,31 @@ local function GetOptions()
 						  },
 						  order     = 1.6,
 					},
+					valor = {
+						type = 'header',
+						name = (L["%s (%s)"]):format(L["Valor Points"],valor_icon),
+						order     = 1.7,
+					},
+					show_valor_points = {
+						name      = (L["Show %s"]):format(L["Valor Points"]),
+						desc      = (L["Display the %s each character pocess"]):format(L["Valor Points"]),
+						type      = 'toggle',
+						get       = function() return AllPlayed:GetOption('show_valor_points') end,
+						set       = function(info, v) AllPlayed:SetOption('show_valor_points',v) end,
+						order     = 1.71,
+					},
+					show_valor_total = {
+						name      = (L["Show %s total"]):format(L["Valor Points"]),
+						desc      = (L["Show the total %s for all characters"]):format(L["Valor Points"]),
+						type      = 'toggle',
+						get       = function() return AllPlayed:GetOption('show_valor_total') end,
+						set       = function(info, v) AllPlayed:SetOption('show_valor_total',v) end,
+						order     = 1.72,
+					},
 					justice = {
 						type = 'header',
 						name = (L["%s (%s)"]):format(L["Justice Points"],justice_icon),
-						order     = 1.7,
+						order     = 1.8,
 					},
 					show_justice_points = {
 						name      = (L["Show %s"]):format(L["Justice Points"]),
@@ -535,7 +574,7 @@ local function GetOptions()
 						type      = 'toggle',
 						get       = function() return AllPlayed:GetOption('show_justice_points') end,
 						set       = function(info, v) AllPlayed:SetOption('show_justice_points',v) end,
-						order     = 1.71,
+						order     = 1.81,
 					},
 					show_justice_total = {
 						name      = (L["Show %s total"]):format(L["Justice Points"]),
@@ -543,7 +582,7 @@ local function GetOptions()
 						type      = 'toggle',
 						get       = function() return AllPlayed:GetOption('show_justice_total') end,
 						set       = function(info, v) AllPlayed:SetOption('show_justice_total',v) end,
-						order     = 1.72,
+						order     = 1.82,
 					},
 					faction_and_realms = {
 						type = 'header',
@@ -780,6 +819,7 @@ local function GetOptions()
 	-- Justice Points shouuld not be displayed before Cataclysm
 	if not IS_40 then
 		options.args.display.args.justice = nil
+		options.args.display.args.show_valor_points = nil
 		options.args.display.args.show_justice_points = nil
 		options.args.display.args.show_justice_total = nil
 	end

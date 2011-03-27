@@ -42,7 +42,7 @@ local GetArenaCurrency = _G.GetArenaCurrency or function() return 0 end
 local GetHonorCurrency = _G.GetHonorCurrency or function() return select(2,_G.GetCurrencyInfo(392)) or 0 end
 local GetConquestCurrency = _G.GetConquestCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(390)) ) or 0 end
 local GetJusticeCurrency = _G.GetJusticeCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(395)) ) or 0 end
-
+local GetValorCurrency = _G.GetValorCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(396)) ) or 0 end
 
 -- Define static values for the addon
 -- Ten days in second, needed to estimate the rested XP
@@ -99,6 +99,7 @@ local ClearTable
 local FormatXP
 local FormatMoney
 local FormatJustice
+local FormatValor
 local FormatHonor
 --local FormatPVECurrency
 local FactionColour
@@ -183,6 +184,7 @@ local default_options = {
 						seconds_played_last_update	= 0,
 						zone_text                  = L["Unknown"],
 						subzone_text               = "",
+						valor_points					= 0,
 						justice_points					= 0,
 						arena_points					= 0,
 						honor_points					= 0,
@@ -217,6 +219,8 @@ local default_options = {
 			use_pre_210_shaman_colour	= false,
 			show_location              = "none",
 			show_xp_total              = true,
+			show_valor_points				= false,
+			show_valor_total				= false,
 			show_justice_points			= false,
 			show_justice_total			= false,
 			show_arena_points				= false,
@@ -224,7 +228,6 @@ local default_options = {
 			show_honor_points				= false,
 			show_honor_kills				= false,
 			show_pvp_totals				= false,
-			show_justice_points			= false,
 			tooltip_scale					= 1,
 			opacity							= .9,
 			sort_type						= "alpha",
@@ -488,14 +491,17 @@ function AllPlayed:ComputeTotal()
     self.total_faction["Horde"].coin             	= 0
     self.total_faction["Horde"].xp               	= 0
     self.total_faction["Horde"].justice_points   	= 0
+    self.total_faction["Horde"].valor_points   		= 0
     self.total_faction["Alliance"].time_played   	= 0
     self.total_faction["Alliance"].coin          	= 0
     self.total_faction["Alliance"].xp            	= 0
     self.total_faction["Alliance"].justice_points	= 0
+    self.total_faction["Alliance"].valor_points		= 0
     self.total.time_played                       	= 0
     self.total.coin                              	= 0
     self.total.xp                                	= 0
     self.total.justice_points                     	= 0
+    self.total.valor_points                     	= 0
 
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.global.data) do
@@ -508,6 +514,7 @@ function AllPlayed:ComputeTotal()
             self.total_realm[faction][realm].coin = 0
             self.total_realm[faction][realm].xp = 0
             self.total_realm[faction][realm].justice_points = 0
+            self.total_realm[faction][realm].valor_points = 0
             for pc, pc_table in pairs(realm_table) do
                 if not self:GetOption('is_ignored', realm, pc) then
 						-- Need to get the current seconds_played for the PC
@@ -528,10 +535,12 @@ function AllPlayed:ComputeTotal()
 						self.total_faction[faction].coin                = self.total_faction[faction].coin              	+ pc_table.coin
 						self.total_faction[faction].xp                  = self.total_faction[faction].xp                	+ pc_xp
 						self.total_faction[faction].justice_points      = self.total_faction[faction].justice_points    	+ pc_table.justice_points
+						self.total_faction[faction].valor_points      	= self.total_faction[faction].valor_points    		+ pc_table.valor_points
 						self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  	+ seconds_played
 						self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         	+ pc_table.coin
 						self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           	+ pc_xp
 						self.total_realm[faction][realm].justice_points = self.total_realm[faction][realm].justice_points	+ pc_table.justice_points
+						self.total_realm[faction][realm].valor_points 	= self.total_realm[faction][realm].valor_points		+ pc_table.valor_points
                 end
             end
         end
@@ -553,12 +562,16 @@ function AllPlayed:ComputeTotal()
             self.total.justice_points
                 =   self.total_faction["Horde"].justice_points
                   + self.total_faction["Alliance"].justice_points
+            self.total.valor_points
+                =   self.total_faction["Horde"].valor_points
+                  + self.total_faction["Alliance"].valor_points
         else
             -- Only the current faction count
             self.total.time_played 		= self.total_faction[self.faction].time_played
             self.total.coin        		= self.total_faction[self.faction].coin
             self.total.xp          		= self.total_faction[self.faction].xp
             self.total.justice_points	= self.total_faction[self.faction].justice_points
+            self.total.valor_points		= self.total_faction[self.faction].valor_points
         end
     else
         -- Only the current realm count (all_factions is ignore)
@@ -566,6 +579,7 @@ function AllPlayed:ComputeTotal()
         self.total.coin        		= self.total_realm[self.faction][self.realm].coin
         self.total.xp          		= self.total_realm[self.faction][self.realm].xp
         self.total.justice_points	= self.total_realm[self.faction][self.realm].justice_points
+        self.total.valor_points		= self.total_realm[self.faction][self.realm].valor_points
     end
 end
 
@@ -694,6 +708,10 @@ function AllPlayed:DrawTooltip(anchor)
 							self:GetOption('show_conquest_points')
 	if need_pvp then nb_columns = nb_columns + 1 end
 	]]--
+
+	-- De we need to display the Valor Points
+	local need_vp =	self:GetOption('show_valor_points')
+	if need_vp then nb_columns = nb_columns + 1 end
 
 	-- De we need to display the Justice Points
 	local need_jp =	self:GetOption('show_justice_points')
@@ -854,6 +872,13 @@ function AllPlayed:DrawTooltip(anchor)
 								col_text[col_no] = ''
 							end
 
+							if need_vp then
+								col_text[col_no] = FormatValor(pc_data.valor_points)
+								col_align[col_no] = 'CENTER'
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
 							if need_jp then
 								col_text[col_no] = FormatJustice(pc_data.justice_points)
 								col_align[col_no] = 'CENTER'
@@ -996,6 +1021,7 @@ function AllPlayed:DrawTooltip(anchor)
 	if self:GetOption('show_played_time') or
 	   self:GetOption('show_coins') or
 	   (self:GetOption('show_pvp_totals') and need_pvp) or
+	   (self:GetOption('show_valor_total') and need_vp) or
 	   (self:GetOption('show_justice_total') and need_jp)
 	then
 		line, column = tooltip:AddLine()
@@ -1013,6 +1039,12 @@ function AllPlayed:DrawTooltip(anchor)
 		line, column = tooltip:AddLine()
 		tooltip:SetCell(line, 1, C:Orange( L["Total Cash Value: "] ), "LEFT", nb_columns - 1)
 		tooltip:SetCell(line, nb_columns, FormatMoney(self.total.coin), "RIGHT")
+	end
+
+	if self:GetOption('show_valor_total') and need_vp then
+		line, column = tooltip:AddLine()
+		tooltip:SetCell(line, 1, C:Orange( L["Total Valor Points: "] ), "LEFT", nb_columns - 1)
+		tooltip:SetCell(line, nb_columns, FormatValor(self.total.valor_points), "RIGHT")
 	end
 
 	if self:GetOption('show_justice_total') and need_jp then
@@ -1123,14 +1155,15 @@ function AllPlayed:SaveVar()
 	 pc.arena_points    		= GetArenaCurrency()
 	 pc.conquest_points		= GetConquestCurrency()
 	 pc.justice_points		= GetJusticeCurrency()
+	 pc.valor_points			= GetValorCurrency()
 
 	 -- Statistical stuff
 
 
     -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
-    if unit_xp_max ~=0 and unit_xp_max ~= XPToNextLevel(_G.UnitLevel("player")) then
+    if unit_xp_max ~= 0 and unit_xp_max ~= XPToNextLevel(pc.level) then
     	local _, build_version = _G.GetBuildInfo()
-    	self.db.global.cache.XPToNextLevel[build_version][_G.UnitLevel("player")] = unit_xp_max
+    	self.db.global.cache.XPToNextLevel[build_version][pc.level] = unit_xp_max
     end
 
     --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.global.data[self.faction][self.realm][self.pc].zone_text)
@@ -1204,6 +1237,8 @@ function AllPlayed:GetOption( option, ... )
 	-- Some options are not available before Cataclysm
 	if not IS_40 then
 		if option == 'show_conquest_points' or
+		   option == 'show_valor_points' or
+		   option == 'show_valor_total' or
 		   option == 'show_justice_points' or
 		   option == 'show_justice_total'
 		then
@@ -1493,6 +1528,7 @@ local honor_strings = {
 		['cp-Alliance']	= '%s\124TInterface\\Icons\\PVPCurrency-Conquest-Alliance:0:0:2:0:64:64\124t',
 		['cp-Horde']		= '%s\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t',
 		jp						= '%s\124TInterface\\Icons\\pvecurrency-justice:0:0:2:0:64:64\124t',
+		vp						= '%s\124TInterface\\Icons\\pvecurrency-valor:0:0:2:0:64:64\124t',
 	},
 	no_icons = {
 		hk 					= L['%s HK'],
@@ -1502,6 +1538,7 @@ local honor_strings = {
 		['cp-Alliance']	= L['%s CP'],
 		['cp-Horde']		= L['%s CP'],
 		jp						= L['%s JP'],
+		vp						= L['%s VP'],
 	}
 }
 
@@ -1517,6 +1554,15 @@ function FormatJustice( justice_points )
 		return honor_strings.icons.jp:format(justice_points)
 	else
 		return honor_strings.no_icons.jp:format(justice_points)
+	end
+end
+
+-- Function that produce the justice points string
+function FormatValor( valor_points )
+	if AllPlayed:GetOption('use_icons') then
+		return honor_strings.icons.vp:format(valor_points)
+	else
+		return honor_strings.no_icons.vp:format(valor_points)
 	end
 end
 
@@ -2081,7 +2127,7 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[36]    = 58700
 	XPToNextLevelCache[37]    = 62400
 	XPToNextLevelCache[38]    = 66200
-	XPToNextLevelCache[39]    = 70200
+	XPToNextLevelCache[39]    = 56200
 	XPToNextLevelCache[40]    = 74300
 	XPToNextLevelCache[41]    = 78500
 	XPToNextLevelCache[42]    = 82800
