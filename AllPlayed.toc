@@ -1,4 +1,4 @@
-## Interface: 40000
+## Interface: 40100
 ## Author: LaoTseu
 ## Title: AllPlayed
 ## Notes: Track time played, rested XP and money for all characters
@@ -6,7 +6,7 @@
 ## Notes-koKR: 모든 캐릭터의 플레이 시간, 휴식경험치, 금전현황 기록
 ## Notes-zhCN: 追踪所有角色的在线时间，双倍经验与金钱
 ## Notes-zhTW: 追蹤所有角色的在線時間，雙倍經驗與金錢
-## Version: 40000-2 $Revision$
+## Version: 40100-1 $Revision$
 
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Always: delayed
