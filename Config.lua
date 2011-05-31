@@ -6,10 +6,11 @@ local AP_display_name, AP = ...
 -- Localize some lua globals
 local _G = getfenv(0)
 
-local pairs = _G.pairs
-local tonumber = _G.tonumber
 local assert = _G.assert
 local pairs = _G.pairs
+local pairs = _G.pairs
+local select = _G.select
+local tonumber = _G.tonumber
 
 local LibStub = _G.LibStub
 
@@ -19,7 +20,7 @@ _G.AllPlayed_revision.config	= ("$Revision$"):match("(%d+)")
 local AllPlayed = _G.AllPlayed
 
 -- Backward compatibility stuff
-local IS_40 = (select(4, GetBuildInfo()) >= 40000)
+local IS_40 = (select(4, _G.GetBuildInfo()) >= 40000)
 
 -- Localizations
 local L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
@@ -459,7 +460,7 @@ local function ReturnConfigMenu()
 end
 
 do
-	local dropdownFrame = CreateFrame("Frame", "AllPlayedDropdownMenu", nil, "UIDropDownMenuTemplate")
+	local dropdownFrame = _G.CreateFrame("Frame", "AllPlayedDropdownMenu", nil, "UIDropDownMenuTemplate")
 
 	function DisplayConfigMenu(anchorFrame)
 		local anchor

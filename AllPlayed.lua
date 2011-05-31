@@ -34,10 +34,10 @@ local LibStub = _G.LibStub
 if not _G.AllPlayed_revision then _G.AllPlayed_revision = {} end
 local AllPlayed_revision = _G.AllPlayed_revision
 AllPlayed_revision.main	= ("$Revision$"):match("(%d+)")
-AllPlayed_revision.toc  = GetAddOnMetadata("AllPlayed", "Version"):match("%$Revision:%s(%d+)")
+AllPlayed_revision.toc  = _G.GetAddOnMetadata("AllPlayed", "Version"):match("%$Revision:%s(%d+)")
 
 -- Backward and forward compatilility when playing Cataclysm
-local IS_40 = (select(4, GetBuildInfo()) >= 40000)
+local IS_40 = (select(4, _G.GetBuildInfo()) >= 40000)
 local GetArenaCurrency = _G.GetArenaCurrency or function() return 0 end
 local GetHonorCurrency = _G.GetHonorCurrency or function() return select(2,_G.GetCurrencyInfo(392)) or 0 end
 local GetConquestCurrency = _G.GetConquestCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(390)) ) or 0 end
