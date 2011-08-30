@@ -230,6 +230,8 @@ local default_options = {
 			show_pvp_totals				= false,
 			tooltip_scale					= 1,
 			opacity							= .9,
+			tooltip_delay					= 0.2,
+			tooltip_keep_on_mouseover	= true,
 			sort_type						= "alpha",
 			use_icons						= false,
 			is_ignored = {
@@ -412,8 +414,8 @@ function AllPlayed:OnEnable()
 	self.OnUpdate_frame:SetScript("OnUpdate", function(self, elap)
 		AllPlayed.elapsed = AllPlayed.elapsed + elap
 
-		if AllPlayed.elapsed < .2 then return end
-		if (AllPlayed.tooltip and AllPlayed.tooltip:IsMouseOver()) or
+		if AllPlayed.elapsed < AllPlayed:GetOption('tooltip_delay') then return end
+		if (AllPlayed.tooltip and AllPlayed.tooltip:IsMouseOver() and AllPlayed:GetOption('tooltip_keep_on_mouseover')) or
 		   (AllPlayed.tooltip_anchor and AllPlayed.tooltip_anchor:IsMouseOver()) then
 		   AllPlayed.elapsed = 0
 		   return

@@ -181,3 +181,11 @@ L['%s (%s)']																		= true
 L["%s (%s or %s)"]																= true
 -- <realm> <faction> characters.
 L["%s %s characters "]															= true
+
+-- New Stuff for 40200-2
+L["Display Delay"]																= true
+L["How long should the tooltip be displayed after the mouse is moved out."]
+																						= true
+L["Sticky Tooltip"]																= true
+L["Keep displaying the tooltip when the mouse is over it. If uncheck, the tooltip is displayed only when mousing over the icon."]
+																						= true
