@@ -119,6 +119,8 @@ local PCSortByCoin
 local PCSortByRevCoin
 local PCSortByRevTimePlayed
 local PCSortByTimePlayed
+local PCSortByiLevel
+local PCSortByReviLevel
 local XPToLevel
 local InitXPToLevelCache
 local XPToNextLevel
@@ -217,6 +219,7 @@ local default_options = {
 			show_class_name            = true,
 			colorize_class             = true,
 			use_pre_210_shaman_colour	= false,
+			show_ilevel						= false,
 			show_location              = "none",
 			show_xp_total              = true,
 			show_valor_points				= false,
@@ -874,6 +877,13 @@ function AllPlayed:DrawTooltip(anchor)
 								col_text[col_no] = ''
 							end
 
+							if self:GetOption('show_ilevel') then
+								col_text[col_no] = pc_data.ilevel and (L["%.2f iLvl"]):format(pc_data.ilevel) or ""
+								col_align[col_no] = 'CENTER'
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
 							if need_vp then
 								col_text[col_no] = FormatValor(pc_data.valor_points)
 								col_align[col_no] = 'CENTER'
@@ -1154,6 +1164,7 @@ function AllPlayed:SaveVar()
     pc.is_resting      		= _G.IsResting()
     pc.zone_text       		= _G.GetZoneText()
     pc.subzone_text    		= _G.GetSubZoneText()
+    pc.ilevel					= _G.GetAverageItemLevel()
 	 pc.arena_points    		= GetArenaCurrency()
 	 pc.conquest_points		= GetConquestCurrency()
 	 pc.justice_points		= GetJusticeCurrency()
@@ -1695,6 +1706,8 @@ function AllPlayed:BuildSortTables()
 	self.sort_faction_realm["rev-coin"] 			= AcquireTable()
 	self.sort_faction_realm["time_played"] 		= AcquireTable()
 	self.sort_faction_realm["rev-time_played"] 	= AcquireTable()
+	self.sort_faction_realm["ilevel"] 				= AcquireTable()
+	self.sort_faction_realm["rev-ilevel"] 			= AcquireTable()
 
 	self.sort_realm_pc = ClearTable(self.sort_realm_pc)
 	self.sort_realm_pc["alpha"]						= AcquireTable()
@@ -1711,6 +1724,8 @@ function AllPlayed:BuildSortTables()
 	self.sort_realm_pc["rev-coin"] 					= AcquireTable()
 	self.sort_realm_pc["time_played"] 				= AcquireTable()
 	self.sort_realm_pc["rev-time_played"]			= AcquireTable()
+	self.sort_realm_pc["ilevel"] 						= AcquireTable()
+	self.sort_realm_pc["rev-ilevel"] 				= AcquireTable()
 
 	for faction, faction_table in pairs(self.db.global.data) do
 
@@ -1744,6 +1759,10 @@ function AllPlayed:BuildSortTables()
 			= self.sort_faction_realm["alpha"][faction]
 		self.sort_faction_realm["rev-time_played"][faction]
 			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["ilevel"][faction]
+			= self.sort_faction_realm["alpha"][faction]
+		self.sort_faction_realm["rev-ilevel"][faction]
+			= self.sort_faction_realm["alpha"][faction]
 
 		-- Reset the pc tables
 		self.sort_realm_pc["alpha"][faction]        		= AcquireTable()
@@ -1760,6 +1779,8 @@ function AllPlayed:BuildSortTables()
 		self.sort_realm_pc["rev-coin"][faction] 			= AcquireTable()
 		self.sort_realm_pc["time_played"][faction]     	= AcquireTable()
 		self.sort_realm_pc["rev-time_played"][faction] 	= AcquireTable()
+		self.sort_realm_pc["ilevel"][faction]     		= AcquireTable()
+		self.sort_realm_pc["rev-ilevel"][faction] 		= AcquireTable()
 
 		for realm, realm_table in pairs(faction_table) do
 			-- PC in each realm are alpha sorted by name
@@ -1791,6 +1812,10 @@ function AllPlayed:BuildSortTables()
 				= buildSortedTable( realm_table, PCSortByTimePlayed )
 			self.sort_realm_pc["rev-time_played"][faction][realm]
 				= buildSortedTable( realm_table, PCSortByRevTimePlayed )
+			self.sort_realm_pc["ilevel"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByiLevel )
+			self.sort_realm_pc["rev-ilevel"][faction][realm]
+				= buildSortedTable( realm_table, PCSortByReviLevel )
 
 		end
 
@@ -2065,6 +2090,30 @@ do
 	function PCSortByRevTimePlayed(a,b)
 		if table_to_sort[b].seconds_played ~= table_to_sort[a].seconds_played then
 			return table_to_sort[b].seconds_played < table_to_sort[a].seconds_played
+		else
+			return a < b
+		end
+	end
+
+	-- Sort function to sort per iLevel, then per level and then per name
+	function PCSortByiLevel(a,b)
+		-- First per level
+		if table_to_sort[a].ilevel ~= table_to_sort[b].ilevel then
+			return (table_to_sort[a].ilevel or 0) < (table_to_sort[b].ilevel or 0)
+		elseif table_to_sort[a].level ~= table_to_sort[b].level then
+			return table_to_sort[a].level < table_to_sort[b].level
+		else
+			return a < b
+		end
+	end
+
+	-- Sort function to sort per reverse iLevel, then per reverse level and then per name
+	function PCSortByReviLevel(a,b)
+		-- First per level
+		if table_to_sort[a].ilevel ~= table_to_sort[b].ilevel then
+			return (table_to_sort[b].ilevel or 0) < (table_to_sort[a].ilevel or 0)
+		elseif table_to_sort[a].level ~= table_to_sort[b].level then
+			return table_to_sort[b].level < table_to_sort[a].level
 		else
 			return a < b
 		end

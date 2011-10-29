@@ -269,6 +269,11 @@ local function ReturnConfigMenu()
 					checked = 'use_pre_210_shaman_colour';
 				},
 				[16] = {
+					text = L["Show Item Level"];
+					tooltipText = L["Show the character item level (iLevel)"];
+					checked = 'show_ilevel';
+				},
+				[17] = {
 					text = L["Use Icons"];
 					tooltipText = L["Use graphics for coin and PvP currencies"];
 					checked = 'use_icons';
@@ -296,21 +301,26 @@ local function ReturnConfigMenu()
 							arg1 = "level";
 						},
 						[3] = {
+							text = L["By item level"];
+							list = 'sort_type';
+							arg1 = "ilevel";
+						},
+						[4] = {
 							text = L["By experience"];
 							list = 'sort_type';
 							arg1 = "xp";
 						},
-						[4] = {
+						[5] = {
 							text = L["By rested XP"];
 							list = 'sort_type';
 							arg1 = "rested_xp";
 						},
-						[5] = {
+						[6] = {
 							text = L["By money"];
 							list = 'sort_type';
 							arg1 = "coin";
 						},
-						[6] = {
+						[7] = {
 							text = L["By time played"];
 							list = 'sort_type';
 							arg1 = "time_played";
@@ -529,24 +539,32 @@ local function GetOptions()
 						set       = function(info, v) AllPlayed:SetOption('use_pre_210_shaman_colour',v) end,
 						order     = 1.5,
 					},
+					show_ilevel = {
+						name      = L["Show Item Level"],
+						desc      = L["Show the character item level (iLevel)"],
+						type      = 'toggle',
+						get       = function() return AllPlayed:GetOption('show_ilevel') end,
+						set       = function(info, v) AllPlayed:SetOption('show_ilevel',v) end,
+						order     = 1.6,
+					},
 					show_location = {
-						  name      = L["Show Location"],
-						  desc      = L["Show the character location"],
-						  width		 = "full",
-						  type      = 'select',
-						  get       = function() return AllPlayed:GetOption('show_location') end,
-						  set       = function(info, v) AllPlayed:SetOption('show_location',v) end,
-						  values    = { ["none"]      = L["Don't show location"],
-											 ["loc"]       = L["Show zone"],
-											 ["sub"]       = L["Show subzone"],
-											 ["loc/sub"]   = L["Show zone/subzone"]
-						  },
-						  order     = 1.6,
+						name      = L["Show Location"],
+						desc      = L["Show the character location"],
+						width		 = "full",
+						type      = 'select',
+						get       = function() return AllPlayed:GetOption('show_location') end,
+						set       = function(info, v) AllPlayed:SetOption('show_location',v) end,
+						values    = { ["none"]      = L["Don't show location"],
+										 ["loc"]       = L["Show zone"],
+										 ["sub"]       = L["Show subzone"],
+										 ["loc/sub"]   = L["Show zone/subzone"]
+						},
+						order     = 1.7,
 					},
 					valor = {
 						type = 'header',
 						name = (L["%s (%s)"]):format(L["Valor Points"],valor_icon),
-						order     = 1.7,
+						order     = 1.8,
 					},
 					show_valor_points = {
 						name      = (L["Show %s"]):format(L["Valor Points"]),
@@ -554,7 +572,7 @@ local function GetOptions()
 						type      = 'toggle',
 						get       = function() return AllPlayed:GetOption('show_valor_points') end,
 						set       = function(info, v) AllPlayed:SetOption('show_valor_points',v) end,
-						order     = 1.71,
+						order     = 1.81,
 					},
 					show_valor_total = {
 						name      = (L["Show %s total"]):format(L["Valor Points"]),
@@ -562,12 +580,12 @@ local function GetOptions()
 						type      = 'toggle',
 						get       = function() return AllPlayed:GetOption('show_valor_total') end,
 						set       = function(info, v) AllPlayed:SetOption('show_valor_total',v) end,
-						order     = 1.72,
+						order     = 1.82,
 					},
 					justice = {
 						type = 'header',
 						name = (L["%s (%s)"]):format(L["Justice Points"],justice_icon),
-						order     = 1.8,
+						order     = 1.9,
 					},
 					show_justice_points = {
 						name      = (L["Show %s"]):format(L["Justice Points"]),
@@ -575,7 +593,7 @@ local function GetOptions()
 						type      = 'toggle',
 						get       = function() return AllPlayed:GetOption('show_justice_points') end,
 						set       = function(info, v) AllPlayed:SetOption('show_justice_points',v) end,
-						order     = 1.81,
+						order     = 1.91,
 					},
 					show_justice_total = {
 						name      = (L["Show %s total"]):format(L["Justice Points"]),
@@ -583,7 +601,7 @@ local function GetOptions()
 						type      = 'toggle',
 						get       = function() return AllPlayed:GetOption('show_justice_total') end,
 						set       = function(info, v) AllPlayed:SetOption('show_justice_total',v) end,
-						order     = 1.82,
+						order     = 1.92,
 					},
 					faction_and_realms = {
 						type = 'header',
@@ -687,6 +705,7 @@ local function GetOptions()
 						values  = {
 									  ["alpha"] 			= L["By name"],
 									  ["level"] 			= L["By level"],
+									  ["ilevel"] 			= L["By item level"],
 									  ["xp"]					= L["By experience"],
 									  ["rested_xp"]		= L["By rested XP"],
 									  ["percent_rest"]	= L["By % rested"],

@@ -189,3 +189,8 @@ L["How long should the tooltip be displayed after the mouse is moved out."]
 L["Sticky Tooltip"]																= true
 L["Keep displaying the tooltip when the mouse is over it. If uncheck, the tooltip is displayed only when mousing over the icon."]
 																						= true
+-- New stuff for 40200-3
+L["Show Item Level"]																= true
+L["Show the character item level (iLevel)"]								= true
+L["%.2f iLvl"]																		= true
+L["By item level"]																= true
