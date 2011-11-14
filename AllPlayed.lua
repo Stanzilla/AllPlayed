@@ -187,6 +187,8 @@ local default_options = {
 						zone_text                  = L["Unknown"],
 						subzone_text               = "",
 						valor_points					= 0,
+						period_valor_points			= 0,
+						max_period_valor_points		= 0,
 						justice_points					= 0,
 						arena_points					= 0,
 						honor_points					= 0,
@@ -1169,6 +1171,8 @@ function AllPlayed:SaveVar()
 	 pc.conquest_points		= GetConquestCurrency()
 	 pc.justice_points		= GetJusticeCurrency()
 	 pc.valor_points			= GetValorCurrency()
+	 pc.period_valor_points, pc.max_period_valor_points
+	 								= select(7, GetLFGDungeonRewardCapBarInfo(301))
 
 	 -- Statistical stuff
 
