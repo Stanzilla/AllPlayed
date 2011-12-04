@@ -2220,7 +2220,7 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[74] 	  = 1270000
 	XPToNextLevelCache[75] 	  = 1283000
 	XPToNextLevelCache[76] 	  = 1297000
-	XPToNextLevelCache[77] 	  = 1310000
+	XPToNextLevelCache[77] 	  = 873000
 	XPToNextLevelCache[78] 	  = 1323000
 	XPToNextLevelCache[79] 	  = 1337000
 	XPToNextLevelCache[80] 	  = 1686300
