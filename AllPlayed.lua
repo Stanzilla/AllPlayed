@@ -342,6 +342,7 @@ function AllPlayed:OnEnable()
     --end
   	 self:RegisterEvent("CURRENCY_DISPLAY_UPDATE",     "EventHandler")
     self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
+	 self:RegisterEvent("BAG_UPDATE",     					"EventHandlerOnlySort")
 
     -- Hook the functions that need hooking
     self:Hook("Logout", true)
@@ -1111,6 +1112,14 @@ function AllPlayed:OnTimePlayedMsg(msg, seconds_played)
 
     -- Compute the totals
     self:ComputeTotal()
+end
+
+-- Event handler for the events that trigger a sort but do not require total recalculation
+function AllPlayed:EventHandlerOnlySort(msg)
+    --self:Debug("EventHandlerOnlySort(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
+
+    -- Trigger the sort
+	self.sort_tables_done = false
 end
 
 -- Event handler for the events that trigger a sort
