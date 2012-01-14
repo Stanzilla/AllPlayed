@@ -3,6 +3,7 @@
 if not AllPlayed_revision then AllPlayed_revision = {} end
 AllPlayed_revision.deDE	= ("$Revision$"):match("(%d+)")
 
+
 local L = LibStub("AceLocale-3.0"):NewLocale("AllPlayed", "deDE")
 if not L then return end
 
