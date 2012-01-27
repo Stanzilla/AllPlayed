@@ -360,12 +360,12 @@ local function ReturnConfigMenu()
 
 	-- No area points in Cataclysm, conquest point instead
 	if IS_40 then
-		config_menu[4].menuList[11].menuList[3].text = (L['Display the %s each character pocess']):format(
+		config_menu[4].menuList[12].menuList[3].text = (L['Display the %s each character pocess']):format(
 																			   L["Conquest Points"],
 																			   conquest_alliance_icon,
 																			   conquest_horde_icon)
-		config_menu[4].menuList[11].menuList[3].tooltipText = (L['Display the %s each character pocess']):format(L["Conquest Points"])
-		config_menu[4].menuList[11].menuList[3].checked = 'show_conquest_points'
+		config_menu[4].menuList[12].menuList[3].tooltipText = (L['Display the %s each character pocess']):format(L["Conquest Points"])
+		config_menu[4].menuList[12].menuList[3].checked = 'show_conquest_points'
 	end
 
 	-- No Valor or Justice points before Cataclysm
@@ -373,8 +373,8 @@ local function ReturnConfigMenu()
 		for i=9,14 do
 			config_menu[4].menuList[i] = config_menu[4].menuList[i+2]
 		end
-		config_menu[4].menuList[15] = nil
-		config_menu[4].menuList[16] = nil
+		config_menu[4].menuList[9] = nil
+		config_menu[4].menuList[10] = nil
 	end
 
 	-- Set version for display

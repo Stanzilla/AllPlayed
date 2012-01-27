@@ -717,6 +717,10 @@ function AllPlayed:DrawTooltip(anchor)
 	if need_pvp then nb_columns = nb_columns + 1 end
 	]]--
 
+	-- Do we need to display the item level
+	local need_ilevel = self:GetOption('show_ilevel')
+	if need_ilevel then nb_columns = nb_columns + 1 end
+
 	-- De we need to display the Valor Points
 	local need_vp =	self:GetOption('show_valor_points')
 	if need_vp then nb_columns = nb_columns + 1 end
@@ -880,7 +884,7 @@ function AllPlayed:DrawTooltip(anchor)
 								col_text[col_no] = ''
 							end
 
-							if self:GetOption('show_ilevel') then
+							if need_ilevel then
 								col_text[col_no] = pc_data.ilevel and (L["%.2f iLvl"]):format(pc_data.ilevel) or ""
 								col_align[col_no] = 'CENTER'
 								col_no = col_no + 1
