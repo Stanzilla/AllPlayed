@@ -7,6 +7,7 @@ local L = LibStub("AceLocale-3.0"):NewLocale("AllPlayed", "deDE")
 if not L then return end
 
 
+
 -- Generated from http://www.wowace.com/addons/all-played-laotseu/localization/
 -- Translators: kuja
 
