@@ -311,9 +311,12 @@ function AllPlayed:OnInitialize()
 
 	self.sort_tables_done    = false
 
-    -- Find the max level
-    self.max_pc_level = 60  +  10 * _G.GetAccountExpansionLevel()
-    if _G.GetAccountExpansionLevel() == 3 then self.max_pc_level = 85 end
+	-- Find the max level
+	if _G.GetAccountExpansionLevel() <= 2 then
+    	self.max_pc_level = 60  +  10 * _G.GetAccountExpansionLevel()
+   elseif _G.GetAccountExpansionLevel() >2 then
+   	self.max_pc_level = 80  +  5 * (_G.GetAccountExpansionLevel() - 2)
+   end
 
 	-- Initialize the cache
 	InitXPToLevelCache()
