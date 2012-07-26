@@ -312,11 +312,7 @@ function AllPlayed:OnInitialize()
 	self.sort_tables_done    = false
 
 	-- Find the max level
-	if _G.GetAccountExpansionLevel() <= 2 then
-    	self.max_pc_level = 60  +  10 * _G.GetAccountExpansionLevel()
-   elseif _G.GetAccountExpansionLevel() >2 then
-   	self.max_pc_level = 80  +  5 * (_G.GetAccountExpansionLevel() - 2)
-   end
+	self.max_pc_level = _G.MAX_PLAYER_LEVEL_TABLE[min(_G.GetExpansionLevel(),_G.GetAccountExpansionLevel())]
 
 	-- Initialize the cache
 	InitXPToLevelCache()
