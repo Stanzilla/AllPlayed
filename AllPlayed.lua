@@ -36,6 +36,7 @@ local AllPlayed_revision = _G.AllPlayed_revision
 AllPlayed_revision.main	= ("$Revision$"):match("(%d+)")
 AllPlayed_revision.toc  = _G.GetAddOnMetadata("AllPlayed", "Version"):match("%$Revision:%s(%d+)")
 
+
 -- Backward and forward compatilility when playing Cataclysm
 local IS_40 = (select(4, _G.GetBuildInfo()) >= 40000)
 local GetArenaCurrency = _G.GetArenaCurrency or function() return 0 end
