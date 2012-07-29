@@ -1185,7 +1185,7 @@ function AllPlayed:SaveVar()
 	 pc.justice_points		= GetJusticeCurrency()
 	 pc.valor_points			= GetValorCurrency()
 	 pc.period_valor_points, pc.max_period_valor_points
-	 								= select(7, GetLFGDungeonRewardCapBarInfo(301))
+	 								= select(7, _G.GetLFGDungeonRewardCapBarInfo(301))
 
 	 -- Statistical stuff
 

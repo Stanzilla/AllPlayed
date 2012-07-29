@@ -19,8 +19,8 @@ _G.AllPlayed_revision.config	= ("$Revision$"):match("(%d+)")
 
 local AllPlayed = _G.AllPlayed
 
--- Backward compatibility stuff
-local IS_40 = (select(4, _G.GetBuildInfo()) >= 40000)
+-- Forward compatibility with Mists of Pandaria
+local IS_MOP = select(4, _G.GetBuildInfo()) >= 50000
 
 -- Localizations
 local L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
@@ -34,12 +34,8 @@ local InitConfig
 -- Icons
 local valor_icon = "\124TInterface\\Icons\\pvecurrency-valor:0:0:2:0:64:64\124t"
 local justice_icon = "\124TInterface\\Icons\\pvecurrency-justice:0:0:2:0:64:64\124t"
-local honor_alliance_icon = '\124TInterface\\PVPFrame\\PVP-Currency-Alliance:0:0:2:0:32:32\124t'
-local honor_horde_icon = '\124TInterface\\PVPFrame\\PVP-Currency-Horde:0:0:2:0:32:32\124t'
-if IS_40 then
-	honor_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0:0:2:0:64:64\124t'
-	honor_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t'
-end
+local honor_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0:0:2:0:64:64\124t'
+local honor_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t'
 local conquest_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Alliance:0:0:2:0:64:64\124t'
 local conquest_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t'
 local arena_icon = '\124TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:2:0:32:32\124t'
@@ -242,9 +238,12 @@ local function ReturnConfigMenu()
 							checked = 'show_honor_points';
 						},
 						[3] = {
-							text = (L["%s (%s)"]):format(L["Arena Points"], arena_icon);
-							tooltipText = (L['Display the %s each character pocess']):format(L["Arena Points"]);
-							checked = 'show_arena_points';
+							text = (L['Display the %s each character pocess']):format(
+																			   L["Conquest Points"],
+																			   conquest_alliance_icon,
+																			   conquest_horde_icon);
+							tooltipText = (L['Display the %s each character pocess']):format(L["Conquest Points"]);
+							checked = 'show_conquest_points';
 						},
 						[4] = {
 							text = L["Show PVP Totals"];
@@ -358,25 +357,6 @@ local function ReturnConfigMenu()
 		},
 	}
 
-	-- No area points in Cataclysm, conquest point instead
-	if IS_40 then
-		config_menu[4].menuList[12].menuList[3].text = (L['Display the %s each character pocess']):format(
-																			   L["Conquest Points"],
-																			   conquest_alliance_icon,
-																			   conquest_horde_icon)
-		config_menu[4].menuList[12].menuList[3].tooltipText = (L['Display the %s each character pocess']):format(L["Conquest Points"])
-		config_menu[4].menuList[12].menuList[3].checked = 'show_conquest_points'
-	end
-
-	-- No Valor or Justice points before Cataclysm
-	if not IS_40 then
-		for i=9,14 do
-			config_menu[4].menuList[i] = config_menu[4].menuList[i+2]
-		end
-		config_menu[4].menuList[9] = nil
-		config_menu[4].menuList[10] = nil
-	end
-
 	-- Set version for display
 	config_menu[2].text = GetVersionString()
 
@@ -387,13 +367,10 @@ local function ReturnConfigMenu()
 		local foundCheck = false
 
 		for i=1,#menu do
-			-- For Cataclysm only
-			if IS_40 then
-				menu[i].isNotRadio = true
-				if not menu[i].checked and not menu[i].list then
-					menu[i].notCheckable = true
-					menu[i].text = "|TInterface\Common\UI-SliderBar-Background:0:1.5:0:0:8:8|t" .. menu[i].text
-				end
+			menu[i].isNotRadio = true
+			if not menu[i].checked and not menu[i].list then
+				menu[i].notCheckable = true
+				if not IS_MOP then menu[i].text = "|TInterface\Common\UI-SliderBar-Background:0:1.5:0:0:8:8|t" .. menu[i].text end
 			end
 
 			if menu[i].checked then
@@ -410,9 +387,7 @@ local function ReturnConfigMenu()
 			-- For options where you choose one choice from a list of set arguments
 			-- arg1 contains the choice
 			if menu[i].list then
-				if IS_40 then
-					menu[i].isNotRadio = nil
-				end
+				menu[i].isNotRadio = nil
 				menu[i].tooltipOnButton = 1
 				menu[i].value = menu[i].list
 				menu[i].checked = function() return AllPlayed:GetOption(menu[i].value) == menu[i].arg1 end
@@ -428,12 +403,6 @@ local function ReturnConfigMenu()
 
 		end
 
-		-- Set notCheckable if no checkable items were found
-		if not foundCheck then
-			for i=1,#menu do
-				menu[i].notCheckable = 1
-			end
-		end
 	end
 	AddCheckboxOption(config_menu)
 
@@ -448,6 +417,7 @@ local function ReturnConfigMenu()
 					tooltipText = (L["Hide %s of %s from display"]):format(pc, realm);
 					tooltipOnButton = 1;
 					keepShownOnClick = 1;
+					isNotRadio = true;
 					checked = function() return AllPlayed:GetOption('is_ignored',realm, pc) end;
 					func = function(dropdownmenu, arg1, arg2, checked)
 						AllPlayed:SetOption(
@@ -458,9 +428,6 @@ local function ReturnConfigMenu()
 						)
 					end;
 				}
-				-- Specify no radial button for Cataclysm
-				if IS_40 then config_menu[6].menuList[i].isNotRadio = true end
-
 				i = i + 1
 			end
 		end
@@ -745,12 +712,12 @@ local function GetOptions()
 						set       	= function(info, v) AllPlayed:SetOption('show_honor_points',v) end,
 						order = 11.2,
 					},
-					show_arena_points	= {
-						name        = (L["%s (%s)"]):format(L["Arena Points"], arena_icon),
-						desc        = (L['Display the %s each character pocess']):format(L["Arena Points"]),
+					show_conquest_points = {
+						name        = (L["%s (%s or %s)"]):format(L["Conquest Pts"], conquest_alliance_icon, conquest_horde_icon),
+						desc        = (L['Display the %s each character pocess']):format(L["Conquest Points"]),
 						type        = 'toggle',
-						get       	= function() return AllPlayed:GetOption('show_arena_points') end,
-						set       	= function(info, v) AllPlayed:SetOption('show_arena_points',v) end,
+						get       	= function() return AllPlayed:GetOption('show_conquest_points') end,
+						set       	= function(info, v) AllPlayed:SetOption('show_conquest_points',v) end,
 						order = 11.3,
 					},
 					show_pvp_totals = {
@@ -844,27 +811,6 @@ local function GetOptions()
 			},
 		},
 	}
-
-	-- Arena points do not exists in Cataclysm but Conquest points do
-	if IS_40 then
-		options.args.display.args.show_arena_points = nil
-		options.args.display.args.show_conquest_points = {
-						name        = (L["%s (%s or %s)"]):format(L["Conquest Pts"], conquest_alliance_icon, conquest_horde_icon),
-						desc        = (L['Display the %s each character pocess']):format(L["Conquest Points"]),
-						type        = 'toggle',
-						get       	= function() return AllPlayed:GetOption('show_conquest_points') end,
-						set       	= function(info, v) AllPlayed:SetOption('show_conquest_points',v) end,
-						order = 11.3,
-		}
-	end
-
-	-- Justice Points shouuld not be displayed before Cataclysm
-	if not IS_40 then
-		options.args.display.args.justice = nil
-		options.args.display.args.show_valor_points = nil
-		options.args.display.args.show_justice_points = nil
-		options.args.display.args.show_justice_total = nil
-	end
 
 	-- Ignore section
 	local faction_order = 1
