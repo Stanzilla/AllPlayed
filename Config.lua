@@ -1,4 +1,4 @@
-local AP_display_name, AP = ...
+﻿local AP_display_name, AP = ...
 
 -- Config.lua
 -- $Id$
@@ -38,7 +38,6 @@ local honor_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0
 local honor_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t'
 local conquest_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Alliance:0:0:2:0:64:64\124t'
 local conquest_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t'
-local arena_icon = '\124TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:2:0:32:32\124t'
 local kill_icon = '\124TInterface\\Icons\\Spell_Holy_BlessingOfStrength:0:0:2:0:64:64\124t'
 local ap_icon = '\124TInterface\\Icons\\INV_Misc_PocketWatch_02:0:0\124t'
 

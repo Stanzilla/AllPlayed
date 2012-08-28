@@ -1,4 +1,4 @@
-local AP_display_name, AP = ...
+﻿local AP_display_name, AP = ...
 
 -- AllPlayed.lua
 -- $Id$
@@ -36,14 +36,14 @@ local AllPlayed_revision = _G.AllPlayed_revision
 AllPlayed_revision.main	= ("$Revision$"):match("(%d+)")
 AllPlayed_revision.toc  = _G.GetAddOnMetadata("AllPlayed", "Version"):match("%$Revision:%s(%d+)")
 
-
 -- Backward and forward compatilility when playing Cataclysm
-local IS_40 = (select(4, _G.GetBuildInfo()) >= 40000)
-local GetArenaCurrency = _G.GetArenaCurrency or function() return 0 end
 local GetHonorCurrency = _G.GetHonorCurrency or function() return select(2,_G.GetCurrencyInfo(392)) or 0 end
 local GetConquestCurrency = _G.GetConquestCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(390)) ) or 0 end
 local GetJusticeCurrency = _G.GetJusticeCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(395)) ) or 0 end
 local GetValorCurrency = _G.GetValorCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(396)) ) or 0 end
+
+-- Mists of Pandaria support
+local IS_MOP = select(4, _G.GetBuildInfo()) >= 50000
 
 -- Define static values for the addon
 -- Ten days in second, needed to estimate the rested XP
@@ -1181,7 +1181,6 @@ function AllPlayed:SaveVar()
     pc.zone_text       		= _G.GetZoneText()
     pc.subzone_text    		= _G.GetSubZoneText()
     pc.ilevel					= _G.GetAverageItemLevel()
-	 pc.arena_points    		= GetArenaCurrency()
 	 pc.conquest_points		= GetConquestCurrency()
 	 pc.justice_points		= GetJusticeCurrency()
 	 pc.valor_points			= GetValorCurrency()
@@ -1265,22 +1264,13 @@ function AllPlayed:GetOption( option, ... )
 		return not self.db.profile.options.ldbicon.hide
 	end
 
-	-- Some options are not available before Cataclysm
-	if not IS_40 then
-		if option == 'show_conquest_points' or
-		   option == 'show_valor_points' or
-		   option == 'show_valor_total' or
-		   option == 'show_justice_points' or
-		   option == 'show_justice_total'
-		then
-			return false
-		end
-	end
-
-
-	-- Some options need to be set to false for Cataclysm
-	if IS_40 then
-		if option == 'show_arena_points' then return false end
+	if option == 'show_conquest_points' or
+		option == 'show_valor_points' or
+		option == 'show_valor_total' or
+		option == 'show_justice_points' or
+		option == 'show_justice_total'
+	then
+		return false
 	end
 
 	return self.db.profile.options[option]
@@ -1553,8 +1543,8 @@ local honor_strings = {
 --		hk 					= '%s|TInterface\\LootFrame\\LootPanel-Icon:0|t',
 --		hk 					= '%s\124TInterface\\GossipFrame\\BattleMasterGossipIcon:0:0:2:0:16:16\124t',
 		hk 					= '%s\124TInterface\\Icons\\Spell_Holy_BlessingOfStrength:0:0:2:0:64:64\124t',
-		['hp-Alliance']	= '%s\124TInterface\\PVPFrame\\PVP-Currency-Alliance:0:0:2:0:32:32\124t',
-		['hp-Horde']		= '%s\124TInterface\\PVPFrame\\PVP-Currency-Horde:0:0:2:0:32:32\124t',
+		['hp-Alliance']	= '%s\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0:0:2:0:64:64\124t',
+		['hp-Horde']		= '%s\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t',
 		ap 					= '%s\124TInterface\\PVPFrame\\PVP-ArenaPoints-Icon:0:0:2:0:32:32\124t',
 		['cp-Alliance']	= '%s\124TInterface\\Icons\\PVPCurrency-Conquest-Alliance:0:0:2:0:64:64\124t',
 		['cp-Horde']		= '%s\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t',
@@ -1572,12 +1562,6 @@ local honor_strings = {
 		vp						= L['%s VP'],
 	}
 }
-
--- New icons for Cataclysm
-if IS_40 then
-	honor_strings.icons['hp-Alliance']	= '%s\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0:0:2:0:64:64\124t'
-	honor_strings.icons['hp-Horde']		= '%s\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t'
-end
 
 -- Function that produce the justice points string
 function FormatJustice( justice_points )
@@ -2239,9 +2223,15 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[79] 	  = 891000
 	XPToNextLevelCache[80] 	  = 1686300
 	XPToNextLevelCache[81] 	  = 2121500
-	XPToNextLevelCache[82] 	  = 4004000
-	XPToNextLevelCache[83] 	  = 5203400
-	XPToNextLevelCache[84] 	  = 9165100
+	if not IS_MOP then
+		XPToNextLevelCache[82] 	  = 4004000
+		XPToNextLevelCache[83] 	  = 5203400
+		XPToNextLevelCache[84] 	  = 9165100
+	else
+		XPToNextLevelCache[82] 	  = 2669000
+		XPToNextLevelCache[83] 	  = 3469000
+		XPToNextLevelCache[84] 	  = 4583000
+	end
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]
