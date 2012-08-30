@@ -1,4 +1,4 @@
-﻿local AP_display_name, AP = ...
+local AP_display_name, AP = ...
 
 -- AllPlayed.lua
 -- $Id$
@@ -1264,14 +1264,14 @@ function AllPlayed:GetOption( option, ... )
 		return not self.db.profile.options.ldbicon.hide
 	end
 
-	if option == 'show_conquest_points' or
-		option == 'show_valor_points' or
-		option == 'show_valor_total' or
-		option == 'show_justice_points' or
-		option == 'show_justice_total'
-	then
-		return false
-	end
+	--if option == 'show_conquest_points' or
+	--	option == 'show_valor_points' or
+	--	option == 'show_valor_total' or
+	--	option == 'show_justice_points' or
+	--	option == 'show_justice_total'
+	--then
+	--	return false
+	--end
 
 	return self.db.profile.options[option]
 end
