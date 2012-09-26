@@ -306,6 +306,7 @@ function AllPlayed:OnInitialize()
 	-- be deleted
 	self.total_faction      = { ["Horde"]    = { time_played = 0, coin = 0 },
 									    ["Alliance"] = { time_played = 0, coin = 0 },
+									    ["Neutral"] = { time_played = 0, coin = 0 },
 	}
 	self.total_realm        = { }
 	self.total              = { time_played = 0, coin = 0, xp = 0 }
@@ -506,6 +507,11 @@ function AllPlayed:ComputeTotal()
     self.total_faction["Alliance"].xp            	= 0
     self.total_faction["Alliance"].justice_points	= 0
     self.total_faction["Alliance"].valor_points		= 0
+    self.total_faction["Neutral"].time_played   	= 0
+    self.total_faction["Neutral"].coin          	= 0
+    self.total_faction["Neutral"].xp            	= 0
+    self.total_faction["Neutral"].justice_points	= 0
+    self.total_faction["Neutral"].valor_points		= 0
     self.total.time_played                       	= 0
     self.total.coin                              	= 0
     self.total.xp                                	= 0
@@ -562,18 +568,23 @@ function AllPlayed:ComputeTotal()
             self.total.time_played
                 =   self.total_faction["Horde"].time_played
                   + self.total_faction["Alliance"].time_played
+                  + self.total_faction["Neutral"].time_played
             self.total.coin
                 =   self.total_faction["Horde"].coin
                   + self.total_faction["Alliance"].coin
+                  + self.total_faction["Neutral"].coin
             self.total.xp
                 =   self.total_faction["Horde"].xp
                   + self.total_faction["Alliance"].xp
+                  + self.total_faction["Neutral"].xp
             self.total.justice_points
                 =   self.total_faction["Horde"].justice_points
                   + self.total_faction["Alliance"].justice_points
+                  + self.total_faction["Neutral"].justice_points
             self.total.valor_points
                 =   self.total_faction["Horde"].valor_points
                   + self.total_faction["Alliance"].valor_points
+                  + self.total_faction["Neutral"].valor_points
         else
             -- Only the current faction count
             self.total.time_played 		= self.total_faction[self.faction].time_played
@@ -604,6 +615,11 @@ function AllPlayed:ComputeTotalHonor()
 	self.total_faction["Alliance"].honor_points  			= 0
 	self.total_faction["Alliance"].arena_points  			= 0
 	self.total_faction["Alliance"].conquest_points 			= 0
+
+	self.total_faction["Neutral"].honor_kills   			= 0
+	self.total_faction["Neutral"].honor_points  			= 0
+	self.total_faction["Neutral"].arena_points  			= 0
+	self.total_faction["Neutral"].conquest_points 			= 0
 
 	self.total.honor_kills                          			= 0
 	self.total.honor_points                         			= 0
@@ -646,15 +662,19 @@ function AllPlayed:ComputeTotalHonor()
             self.total.honor_kills
                 =   self.total_faction["Horde"].honor_kills
                   + self.total_faction["Alliance"].honor_kills
+                  + self.total_faction["Neutral"].honor_kills
             self.total.honor_points
                 =   self.total_faction["Horde"].honor_points
                   + self.total_faction["Alliance"].honor_points
+                  + self.total_faction["Neutral"].honor_points
             self.total.arena_points
                 =   self.total_faction["Horde"].arena_points
                   + self.total_faction["Alliance"].arena_points
+                  + self.total_faction["Neutral"].arena_points
             self.total.conquest_points
                 =   self.total_faction["Horde"].conquest_points
                   + self.total_faction["Alliance"].conquest_points
+                  + self.total_faction["Neutral"].conquest_points
         else
             -- Only the current faction count
             self.total.honor_kills 				= self.total_faction[self.faction].honor_kills
@@ -1691,7 +1711,7 @@ function AllPlayed:BuildSortTables()
 	self:Debug("Sorting done: %d",time())
 
 	-- Static sort for the factions
-	if not self.sort_faction then self.sort_faction = { "Horde", "Alliance" } end
+	if not self.sort_faction then self.sort_faction = { "Horde", "Alliance", "Neutral" } end
 
 	self.sort_faction_realm = ClearTable(self.sort_faction_realm)
 	self.sort_faction_realm["alpha"] 				= AcquireTable()
