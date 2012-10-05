@@ -380,7 +380,10 @@ function AllPlayed:OnEnable()
 
     -- Get the values for the current character
     self:SaveVar()
-
+    
+    -- Detect faction change
+    self:DetectFactionChange()
+    
     -- Compute Honor at least once (it will be computed only if it change afterward
     self:ComputeTotalHonor()
 
@@ -442,6 +445,9 @@ end
 
 function AllPlayed:OnDisable()
 	self:CancelScheduledEvent(self.name)
+
+	-- Detect faction change
+	self:DetectFactionChange()
 end
 
 function AllPlayed:IsDebugging() return self.db.profile.debugging end
@@ -1176,6 +1182,19 @@ function AllPlayed:EventHandlerHonorGain()
 
     -- Compute totals
     self:ComputeTotalHonor()
+end
+
+-- Detect faction change and remove old character entry
+function AllPlayed:DetectFactionChange()
+	for faction in pairs(self.db.global.data) do
+		if faction ~= self.faction and
+		   self.db.global.data[faction] and
+		   self.db.global.data[faction][self.realm] and
+		   self.db.global.data[faction][self.realm][self.pc]
+		then
+		   self.db.global.data[faction][self.realm][self.pc] = nil
+		end
+	end
 end
 
 
