@@ -176,6 +176,8 @@ local default_options = {
 					['*'] = {
 						class                      = "",   -- English class name
 						class_loc                  = "",   -- Localized class name
+						race								= "",   -- English race name
+						race_loc							= "",   -- Localized race name
 						level                      = 0,
 						coin                       = 0,
 						rested_xp                  = 0,
@@ -761,7 +763,8 @@ function AllPlayed:DrawTooltip(anchor)
 	if self:GetOption('show_coins')
 		or self:GetOption('show_rested_xp')
 		or self:GetOption('show_rested_xp_countdown')
-		or self:GetOption('percent_rest') ~= "0" then
+		or self:GetOption('percent_rest') ~= "0"
+	then
 		nb_columns = nb_columns + 1
 	end
 
@@ -1029,11 +1032,17 @@ function AllPlayed:DrawTooltip(anchor)
 									text_countdown = self:FormatTime(countdown_seconds)
 								end
 
-								-- Force the display to 100% for the last level before max
 								local percent_rest = self:GetOption('percent_rest')
+								-- If it's a panda (Inner Peace) and if the % rest is shown based on the level max XP,
+								-- a fully rested panda is % is 300
+								if pc_data.race == "Pandaren" and percent_rest == "150" then
+									percent_rest = 300
+								end
+								-- Force the display to 100% for the last level before max
 								if percent_rest ~= "0" and pc_data.level == self.max_pc_level -1 then
 									percent_rest = 100
 								end
+								
 								-- Do we show the percent XP rested and/or the countdown until 100% rested?
 								if percent_rest ~= "0" and self:GetOption('show_rested_xp_countdown') and text_countdown ~= "" then
 									col_text[col_no] = col_text[col_no] .. PercentColour(percent_for_colour, " (%d%% %s, -%s)"):format(
@@ -1211,10 +1220,14 @@ function AllPlayed:SaveVar()
 
     -- Fill some of the SaveVariables
     local pc = self.db.global.data[self.faction][self.realm][self.pc]
+    -- Make sure that rested_xp is not nil
+    pc.rested_xp = _G.GetXPExhaustion() or 0
     pc.class_loc, pc.class	= _G.UnitClass("player")
+    pc.race_loc, pc.race	= _G.UnitRace("player")
     pc.level           		= _G.UnitLevel("player")
     pc.xp              		= _G.UnitXP("player")
-    pc.max_rested_xp   		= unit_xp_max * 1.5
+    -- Inner Peace, the Padaren racial passive, allow for twice the normal amount of rested XP
+    pc.max_rested_xp   		= unit_xp_max * 1.5 * (1 + (_G.IsSpellKnown(107074) and 1 or 0))
     pc.last_update     		= time()
     pc.is_resting      		= _G.IsResting()
     pc.zone_text       		= _G.GetZoneText()
@@ -1239,9 +1252,6 @@ function AllPlayed:SaveVar()
 
     -- Make sure that coin is not nil
     pc.coin = _G.GetMoney() or 0
-
-    -- Make sure that rested_xp is not nil
-    pc.rested_xp = _G.GetXPExhaustion() or 0
 
 	 -- PvPstuff
 	 self:SaveVarHonor()
@@ -1472,7 +1482,7 @@ function AllPlayed:EstimateRestedXP( pc, realm, level, rested_xp, max_rested_xp,
     if pc == AllPlayed.pc and realm == self.realm and not is_resting then
         return rested_xp
     end
-
+    
     -- It takes 10 days to for a character to be fully rested if he is in an Inn,
     -- otherwise it takes 40 days.
     local estimated_rested_xp
