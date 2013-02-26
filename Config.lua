@@ -1,4 +1,6 @@
-﻿local AP_display_name, AP = ...
+local AP_display_name, AP = ...
+
+local function err(msg,...) _G.geterrorhandler()(msg:format(_G.tostringall(...)) .. " - " .. time()) end
 
 -- Config.lua
 -- $Id$
@@ -7,11 +9,15 @@
 local _G = getfenv(0)
 
 local assert = _G.assert
+local geterrorhandler = _G.geterrorhandler
 local pairs = _G.pairs
 local pairs = _G.pairs
 local select = _G.select
+local time = _G.time
 local tonumber = _G.tonumber
+local tostringall = _G.tostringall
 
+local function err(msg,...) geterrorhandler()(msg:format(tostringall(...)) .. " - " .. time()) end
 local LibStub = _G.LibStub
 
 if not _G.AllPlayed_revision then _G.AllPlayed_revision = {} end
@@ -431,7 +437,7 @@ local function ReturnConfigMenu()
 			end
 		end
 	end
-
+	
 	return config_menu
 end
 
@@ -747,6 +753,24 @@ local function GetOptions()
 				},
 				order   = 20
 			},
+			delete = {
+				name    = L["Delete Characters"],
+				desc    = L["Erase character data permanantely"],
+				type    = 'group',
+				args    = {
+					delete_desc = {
+						name = L["Erase character data permanantely"],
+						type = 'description',
+						order = .5,
+					},
+					delete_desc2 = {
+						name = " ",
+						type = 'description',
+						order = .7,
+					},
+				},
+				order   = 25
+			},
 			ui = {
 				type = 'group', name = L["UI"], desc = L["Set UI options"], args = {
 					show_minimap_icon = {
@@ -849,12 +873,91 @@ local function GetOptions()
 	  	end
 	end
 
+	-- Delete section
+	faction_order = 1
+	for faction, faction_table in pairs(AP.db.global.data) do
+		local faction_id = "faction" .. faction_order
+		options.args.delete.args[faction_id] = {
+				type 	= 'group',
+				name 	= faction,
+				args	= {},
+		}
+		faction_order = faction_order + 1
+
+		local realm_order = 1
+		for realm, realm_table in pairs(faction_table) do
+			local realm_id = "realm" .. realm_order
+			options.args.delete.args[faction_id].args[realm_id] = {
+				type 	= 'group',
+				name 	= realm,
+				args	= {},
+			}
+
+			local pc_order = 1
+			for pc, _ in pairs(realm_table) do
+				-- Skip the current toon
+				if pc ~= _G.UnitName("player") or realm ~= _G.GetRealmName() then
+				
+					local pc_id = "pc" .. pc_order
+					options.args.delete.args[faction_id].args[realm_id].args[pc_id] = {
+						name = pc,
+						desc = (L["Erase data for %s of %s"]):format(pc, realm),
+						type = 'execute',
+						icon = [[Interface\GossipFrame\Unlearngossipicon]],
+						func = function(info)
+							_G.ericinfo = info
+							local dialog = _G.StaticPopupDialogs.ALLPLAYED_CONFIRM_DELETE
+							dialog.text = (L.DELETE_WARNING):format(pc, realm, pc, realm)
+							dialog.OnAccept = function()
+								AllPlayed:Print(L["Erasing data for %s of %s"], pc, realm)
+								
+								-- Remove the options button
+								options.args.delete.args[faction_id].args[realm_id].args[pc_id] = nil
+								LibStub("AceConfigRegistry-3.0"):NotifyChange("AllPlayed")
+								
+								-- Erase the character data
+								realm_table[pc] = nil
+								if not next(realm_table) then faction_table[realm] = nil end
+								if not next(faction_table) then AP.db.global.data[faction] = nil end
+								
+								-- Force addon refresh
+								AllPlayed.sort_tables_done = nil
+								AllPlayed:MyUpdate()
+							end
+							_G.StaticPopup_Show("ALLPLAYED_CONFIRM_DELETE")
+						end
+					}
+
+					pc_order = pc_order + 1
+				
+				end
+			end
+
+			realm_order = realm_order + 1
+	  	end
+	end
+
 	-- Profile section
 	options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(AP.db)
 
 	return options
 
 end
+
+_G.StaticPopupDialogs.ALLPLAYED_CONFIRM_DELETE = {
+  preferredIndex = _G.STATICPOPUPS_NUMDIALOGS,
+
+  text = "",
+  button1 = _G.YES,
+  button2 = _G.NO,
+  OnAccept = function()
+      err("No function defined for StaticPopupDialogs.ALLPLAYED_CONFIRM_DELETE")
+  end,
+  timeout = 0,
+  whileDead = true,
+  hideOnEscape = true,
+};
+
 
 -- Configuration initialization
 local function InitConfig()

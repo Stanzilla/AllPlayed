@@ -77,6 +77,26 @@ local XPToNextLevelCache = {}
 local AllPlayed = LibStub("AceAddon-3.0"):NewAddon("AllPlayed", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0")
 _G[AP_display_name] = AllPlayed
 
+-- Print function
+local default_channel = nil
+local function setDefaultChanelForPrint()
+	default_channel = nil
+	for i=1, _G.NUM_CHAT_WINDOWS do
+		local name = _G.GetChatWindowInfo(i)
+		if name and name:lower() == 'output' then
+			default_channel = i
+		end
+	end
+end
+
+function AllPlayed:Print(message, ...)
+	if default_channel then
+		_G["ChatFrame"..default_channel]:AddMessage(("|cff00dbba"..AP_display_name.."|r: "..message):format(...));
+	else
+		_G.SELECTED_CHAT_FRAME:AddMessage(("|cff00dbba"..AP_display_name.."|r: "..message):format(...))
+	end
+end
+
 
 -- For debuging
 --AllPlayed.AP = AP
@@ -327,6 +347,9 @@ function AllPlayed:OnEnable()
     --self:Debug("AllPlayed:OnEnable()")
 
     -- code here, executed after everything is loaded.
+
+	 -- Find the default channel
+	 setDefaultChanelForPrint()
 
     -- Configuration initialization
     AP.db = self.db

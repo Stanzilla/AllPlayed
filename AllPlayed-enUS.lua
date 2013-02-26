@@ -194,3 +194,16 @@ L["Show Item Level"]																= true
 L["Show the character item level (iLevel)"]								= true
 L["%.2f iLvl"]																		= true
 L["By item level"]																= true
+
+
+-- New stuff for 50100-1
+L["Delete Characters"]															= true
+L["Erase character data permanantely"]										= true
+L["Erase data for %s of %s"]													= true
+L["Erasing data for %s of %s"]												= true
+L.DELETE_WARNING = 
+[[WARNING!
+
+You are about to permanantely erase the data for |cffffff00%s|r of |cffffff00%s|r. You will not be able to recreate this data if the character has been deleted from your account.
+
+Are you sure you want to erase the data for |cffffff00%s|r of |cffffff00%s|r permanantely?]]

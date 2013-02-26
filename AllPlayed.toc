@@ -38,8 +38,13 @@ embeds.xml
 
 AllPlayed-enUS.lua
 AllPlayed-deDE.lua
+AllPlayed-esES.lua
+AllPlayed-esMX.lua
 AllPlayed-frFR.lua
+AllPlayed-itIT.lua
 AllPlayed-koKR.lua
+AllPlayed-ptBR.lua
+AllPlayed-ruRU.lua
 AllPlayed-zhCN.lua
 AllPlayed-zhTW.lua
 Config.lua
