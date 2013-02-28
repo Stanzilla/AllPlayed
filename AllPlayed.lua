@@ -17,6 +17,7 @@ local gettime = _G.gettime
 local ipairs = _G.ipairs
 local min = _G.min
 local mod = _G.mod
+local next = _G.next
 local pairs = _G.pairs
 local select = _G.select
 local sort = _G.sort
@@ -41,9 +42,6 @@ local GetHonorCurrency = _G.GetHonorCurrency or function() return select(2,_G.Ge
 local GetConquestCurrency = _G.GetConquestCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(390)) ) or 0 end
 local GetJusticeCurrency = _G.GetJusticeCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(395)) ) or 0 end
 local GetValorCurrency = _G.GetValorCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(396)) ) or 0 end
-
--- Mists of Pandaria support
-local IS_MOP = select(4, _G.GetBuildInfo()) >= 50000
 
 -- Define static values for the addon
 -- Ten days in second, needed to estimate the rested XP
@@ -1219,12 +1217,24 @@ end
 -- Detect faction change and remove old character entry
 function AllPlayed:DetectFactionChange()
 	for faction in pairs(self.db.global.data) do
+		self.faction = _G.UnitFactionGroup("player")
+		
 		if faction ~= self.faction and
 		   self.db.global.data[faction] and
 		   self.db.global.data[faction][self.realm] and
 		   self.db.global.data[faction][self.realm][self.pc]
 		then
 		   self.db.global.data[faction][self.realm][self.pc] = nil
+		   if not next(self.db.global.data[faction][self.realm]) then 
+		   	self.db.global.data[faction][self.realm] = nil
+		   end
+		   if not next(self.db.global.data[faction]) then
+		   	self.db.global.data[faction] = nil
+		   end
+		   
+			-- Force addon refresh
+			AllPlayed.sort_tables_done = nil
+			AllPlayed:MyUpdate()
 		end
 	end
 end
@@ -1689,9 +1699,12 @@ end
 function FactionColour( faction, string )
     if faction == "Horde" then
         return C:Red(string)
-    else
+    elseif faction == "Alliance" then
         -- Blue
         return C:Colorize( "007fff", string )
+    else
+    	  -- Neutral (for Panda that have not left the Wandering Isle)
+    	  return C:White(string)
     end
 end
 
@@ -2299,15 +2312,9 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[79] 	  = 891000
 	XPToNextLevelCache[80] 	  = 1686300
 	XPToNextLevelCache[81] 	  = 2121500
-	if not IS_MOP then
-		XPToNextLevelCache[82] 	  = 4004000
-		XPToNextLevelCache[83] 	  = 5203400
-		XPToNextLevelCache[84] 	  = 9165100
-	else
-		XPToNextLevelCache[82] 	  = 2669000
-		XPToNextLevelCache[83] 	  = 3469000
-		XPToNextLevelCache[84] 	  = 4583000
-	end
+	XPToNextLevelCache[82] 	  = 2669000
+	XPToNextLevelCache[83] 	  = 3469000
+	XPToNextLevelCache[84] 	  = 4583000
 	XPToNextLevelCache[85] 	  = 13000000
 	XPToNextLevelCache[86] 	  = 15080000
 	XPToNextLevelCache[87] 	  = 18980000

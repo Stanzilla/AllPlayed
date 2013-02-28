@@ -1,7 +1,5 @@
 local AP_display_name, AP = ...
 
-local function err(msg,...) _G.geterrorhandler()(msg:format(_G.tostringall(...)) .. " - " .. time()) end
-
 -- Config.lua
 -- $Id$
 
@@ -10,6 +8,7 @@ local _G = getfenv(0)
 
 local assert = _G.assert
 local geterrorhandler = _G.geterrorhandler
+local next = _G.next
 local pairs = _G.pairs
 local pairs = _G.pairs
 local select = _G.select
@@ -24,9 +23,6 @@ if not _G.AllPlayed_revision then _G.AllPlayed_revision = {} end
 _G.AllPlayed_revision.config	= ("$Revision$"):match("(%d+)")
 
 local AllPlayed = _G.AllPlayed
-
--- Forward compatibility with Mists of Pandaria
-local IS_MOP = select(4, _G.GetBuildInfo()) >= 50000
 
 -- Localizations
 local L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
@@ -375,7 +371,6 @@ local function ReturnConfigMenu()
 			menu[i].isNotRadio = true
 			if not menu[i].checked and not menu[i].list then
 				menu[i].notCheckable = true
-				if not IS_MOP then menu[i].text = "|TInterface\Common\UI-SliderBar-Background:0:1.5:0:0:8:8|t" .. menu[i].text end
 			end
 
 			if menu[i].checked then
