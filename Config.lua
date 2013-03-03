@@ -126,6 +126,11 @@ local function ReturnConfigMenu()
 					checked = 'show_xp_total';
 				},
 				[8] = {
+					text = L["Show level total"];
+					tooltipText = L["Show the total levels for all characters"];
+					checked = 'show_lvl_totals';
+				},
+				[9] = {
 					text = L["Show Location"];
 					tooltipText = L["Show the character location"];
 					hasArrow = true;
@@ -152,7 +157,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[9] = {
+				[10] = {
 					text = (L["%s (%s)"]):format(L["Valor Points"],valor_icon);
 					hasArrow = true;
 					menuList = {
@@ -168,7 +173,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[10] = {
+				[11] = {
 					text = (L["%s (%s)"]):format(L["Justice Points"],justice_icon);
 					hasArrow = true;
 					menuList = {
@@ -184,7 +189,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[11] = {
+				[12] = {
 					text = L["Rested XP"];
 					tooltipText = L["Set the rested XP options"];
 					hasArrow = true;
@@ -223,7 +228,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[12] = {
+				[13] = {
 					text = L["PVP"];
 					tooltipText = L["Set the PVP options"];
 					hasArrow = true;
@@ -253,27 +258,27 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[13] = {
+				[14] = {
 					text = L["Show Class Name"];
 					tooltipText = L["Show the character class beside the level"];
 					checked = 'show_class_name';
 				},
-				[14] = {
+				[15] = {
 					text = L["Colorize Class"];
 					tooltipText = L["Colorize the character name based on class"];
 					checked = 'colorize_class';
 				},
-				[15] = {
+				[16] = {
 					text = L["Use Old Shaman Colour"];
 					tooltipText = L["Use the pre-210 patch colour for the Shaman class"];
 					checked = 'use_pre_210_shaman_colour';
 				},
-				[16] = {
+				[17] = {
 					text = L["Show Item Level"];
 					tooltipText = L["Show the character item level (iLevel)"];
 					checked = 'show_ilevel';
 				},
-				[17] = {
+				[18] = {
 					text = L["Use Icons"];
 					tooltipText = L["Use graphics for coin and PvP currencies"];
 					checked = 'use_icons';
@@ -632,6 +637,14 @@ local function GetOptions()
 						  get       = function() return AllPlayed:GetOption('show_xp_total') end,
 						  set       = function(info, v) AllPlayed:SetOption('show_xp_total',v) end,
 						  order     = 5.2,
+					 },
+					 show_lvl_totals = {
+						  name      = L["Show level total"],
+						  desc      = L["Show the total levels for all characters"],
+						  type      = 'toggle',
+						  get       = function() return AllPlayed:GetOption('show_lvl_totals') end,
+						  set       = function(info, v) AllPlayed:SetOption('show_lvl_totals',v) end,
+						  order     = 5.25,
 					 },
 					 show_rested_xp = {
 						 name        = L["Rested XP Total"],

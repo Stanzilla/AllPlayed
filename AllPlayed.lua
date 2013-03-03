@@ -254,6 +254,7 @@ local default_options = {
 			show_honor_points				= false,
 			show_honor_kills				= false,
 			show_pvp_totals				= false,
+			show_lvl_totals				= false,
 			tooltip_scale					= 1,
 			opacity							= .9,
 			tooltip_delay					= 0.2,
@@ -531,21 +532,25 @@ function AllPlayed:ComputeTotal()
     self.total_faction["Horde"].xp               	= 0
     self.total_faction["Horde"].justice_points   	= 0
     self.total_faction["Horde"].valor_points   		= 0
+    self.total_faction["Horde"].levels   				= 0
     self.total_faction["Alliance"].time_played   	= 0
     self.total_faction["Alliance"].coin          	= 0
     self.total_faction["Alliance"].xp            	= 0
     self.total_faction["Alliance"].justice_points	= 0
     self.total_faction["Alliance"].valor_points		= 0
+    self.total_faction["Alliance"].levels   			= 0
     self.total_faction["Neutral"].time_played   	= 0
     self.total_faction["Neutral"].coin          	= 0
     self.total_faction["Neutral"].xp            	= 0
     self.total_faction["Neutral"].justice_points	= 0
     self.total_faction["Neutral"].valor_points		= 0
+    self.total_faction["Neutral"].levels   			= 0
     self.total.time_played                       	= 0
     self.total.coin                              	= 0
     self.total.xp                                	= 0
     self.total.justice_points                     	= 0
     self.total.valor_points                     	= 0
+    self.total.levels                  		   	= 0
 
     -- Let all the factions, realms and PC be counted
     for faction, faction_table in pairs(self.db.global.data) do
@@ -559,6 +564,7 @@ function AllPlayed:ComputeTotal()
             self.total_realm[faction][realm].xp = 0
             self.total_realm[faction][realm].justice_points = 0
             self.total_realm[faction][realm].valor_points = 0
+            self.total_realm[faction][realm].levels = 0
             for pc, pc_table in pairs(realm_table) do
                 if not self:GetOption('is_ignored', realm, pc) then
 						-- Need to get the current seconds_played for the PC
@@ -580,11 +586,13 @@ function AllPlayed:ComputeTotal()
 						self.total_faction[faction].xp                  = self.total_faction[faction].xp                	+ pc_xp
 						self.total_faction[faction].justice_points      = self.total_faction[faction].justice_points    	+ pc_table.justice_points
 						self.total_faction[faction].valor_points      	= self.total_faction[faction].valor_points    		+ pc_table.valor_points
+						self.total_faction[faction].levels      			= self.total_faction[faction].levels    				+ pc_table.level
 						self.total_realm[faction][realm].time_played    = self.total_realm[faction][realm].time_played  	+ seconds_played
 						self.total_realm[faction][realm].coin           = self.total_realm[faction][realm].coin         	+ pc_table.coin
 						self.total_realm[faction][realm].xp             = self.total_realm[faction][realm].xp           	+ pc_xp
 						self.total_realm[faction][realm].justice_points = self.total_realm[faction][realm].justice_points	+ pc_table.justice_points
 						self.total_realm[faction][realm].valor_points 	= self.total_realm[faction][realm].valor_points		+ pc_table.valor_points
+						self.total_realm[faction][realm].levels 			= self.total_realm[faction][realm].levels				+ pc_table.level
                 end
             end
         end
@@ -614,6 +622,10 @@ function AllPlayed:ComputeTotal()
                 =   self.total_faction["Horde"].valor_points
                   + self.total_faction["Alliance"].valor_points
                   + self.total_faction["Neutral"].valor_points
+            self.total.levels
+                =   self.total_faction["Horde"].levels
+                  + self.total_faction["Alliance"].levels
+                  + self.total_faction["Neutral"].levels
         else
             -- Only the current faction count
             self.total.time_played 		= self.total_faction[self.faction].time_played
@@ -621,6 +633,7 @@ function AllPlayed:ComputeTotal()
             self.total.xp          		= self.total_faction[self.faction].xp
             self.total.justice_points	= self.total_faction[self.faction].justice_points
             self.total.valor_points		= self.total_faction[self.faction].valor_points
+            self.total.levels				= self.total_faction[self.faction].levels
         end
     else
         -- Only the current realm count (all_factions is ignore)
@@ -629,6 +642,7 @@ function AllPlayed:ComputeTotal()
         self.total.xp          		= self.total_realm[self.faction][self.realm].xp
         self.total.justice_points	= self.total_realm[self.faction][self.realm].justice_points
         self.total.valor_points		= self.total_realm[self.faction][self.realm].valor_points
+        self.total.levels				= self.total_realm[self.faction][self.realm].levels
     end
 end
 
@@ -854,6 +868,18 @@ function AllPlayed:DrawTooltip(anchor)
 							text_realm_optional = ("%s " .. C:Green(" : %s")):format(
 									text_realm_optional,
 									FormatXP(self.total_realm[faction][realm].xp)
+							)
+						end
+					end
+
+					if self:GetOption('show_lvl_totals') then
+						if first_option then
+							text_realm_optional = C:White((L["Lvls: %d"]):format(self.total_realm[faction][realm].levels))
+							first_option = false
+						else
+							text_realm_optional = ("%s " .. C:Green(" : %s")):format(
+									text_realm_optional,
+									C:White((L["Lvl: %d"]):format(self.total_realm[faction][realm].levels))
 							)
 						end
 					end
@@ -1096,6 +1122,7 @@ function AllPlayed:DrawTooltip(anchor)
 
 	if self:GetOption('show_played_time') or
 	   self:GetOption('show_coins') or
+	   self:GetOption('show_lvl_totals') or
 	   (self:GetOption('show_pvp_totals') and need_pvp) or
 	   (self:GetOption('show_valor_total') and need_vp) or
 	   (self:GetOption('show_justice_total') and need_jp)
@@ -1115,6 +1142,12 @@ function AllPlayed:DrawTooltip(anchor)
 		line, column = tooltip:AddLine()
 		tooltip:SetCell(line, 1, C:Orange( L["Total Cash Value: "] ), "LEFT", nb_columns - 1)
 		tooltip:SetCell(line, nb_columns, FormatMoney(self.total.coin), "RIGHT")
+	end
+
+	if self:GetOption('show_lvl_totals') then
+		line, column = tooltip:AddLine()
+		tooltip:SetCell(line, 1, C:Orange( L["Total Character Levels: "] ), "LEFT", nb_columns - 1)
+		tooltip:SetCell(line, nb_columns, C:White(self.total.levels), "RIGHT")
 	end
 
 	if self:GetOption('show_valor_total') and need_vp then

@@ -207,3 +207,7 @@ L.DELETE_WARNING =
 You are about to permanantely erase the data for |cffffff00%s|r of |cffffff00%s|r. You will not be able to recreate this data if the character has been deleted from your account.
 
 Are you sure you want to erase the data for |cffffff00%s|r of |cffffff00%s|r permanantely?]]
+L["Lvl: %d"]																		= true
+L["Total Character Levels: "]													= true
+L["Show level total"]															= true
+L["Show the total levels for all characters"]							= true
