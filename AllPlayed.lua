@@ -196,6 +196,7 @@ local default_options = {
 						class_loc                  = "",   -- Localized class name
 						race								= "",   -- English race name
 						race_loc							= "",   -- Localized race name
+						guild								= "",   -- Guild name
 						level                      = 0,
 						coin                       = 0,
 						rested_xp                  = 0,
@@ -244,6 +245,7 @@ local default_options = {
 			use_pre_210_shaman_colour	= false,
 			show_ilevel						= false,
 			show_location              = "none",
+			show_guild						= false,
 			show_xp_total              = true,
 			show_valor_points				= false,
 			show_valor_total				= false,
@@ -366,6 +368,7 @@ function AllPlayed:OnEnable()
     	self:RegisterEvent("PLAYER_MONEY",      "EventHandler")
     --end
   	 self:RegisterEvent("CURRENCY_DISPLAY_UPDATE",     "EventHandler")
+  	 self:RegisterEvent("PLAYER_GUILD_UPDATE",			"EventHandler")
     self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
 	 self:RegisterEvent("BAG_UPDATE",     					"EventHandlerOnlySort")
 
@@ -764,6 +767,12 @@ function AllPlayed:DrawTooltip(anchor)
 	if self:GetOption('show_location') ~= "none" then
 		nb_columns = nb_columns + 1
 	end
+	
+	-- Is the Guild column needed?
+	if self:GetOption('show_guild') then
+		nb_columns = nb_columns + 1
+	end
+	
 
 	-- Do we have PvP columns?
 	local need_pvp = false
@@ -773,13 +782,6 @@ function AllPlayed:DrawTooltip(anchor)
 			nb_columns = nb_columns + 1
 		end
 	end
-	--[[
-	local need_pvp =	self:GetOption('show_arena_points') or
-							self:GetOption('show_honor_points') or
-							self:GetOption('show_honor_kills') or
-							self:GetOption('show_conquest_points')
-	if need_pvp then nb_columns = nb_columns + 1 end
-	]]--
 
 	-- Do we need to display the item level
 	local need_ilevel = self:GetOption('show_ilevel')
@@ -792,7 +794,6 @@ function AllPlayed:DrawTooltip(anchor)
 	-- De we need to display the Justice Points
 	local need_jp =	self:GetOption('show_justice_points')
 	if need_jp then nb_columns = nb_columns + 1 end
-
 
 	-- Is the gold/rested XP column needed?
 	if self:GetOption('show_coins')
@@ -956,6 +957,13 @@ function AllPlayed:DrawTooltip(anchor)
 													)
 								end
 
+								col_align[col_no] = 'CENTER'
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+							
+							if self:GetOption('show_guild') then
+								col_text[col_no] = FactionColour(faction, pc_data.guild)
 								col_align[col_no] = 'CENTER'
 								col_no = col_no + 1
 								col_text[col_no] = ''
@@ -1292,6 +1300,7 @@ function AllPlayed:SaveVar()
     pc.race_loc, pc.race	= _G.UnitRace("player")
     pc.level           		= _G.UnitLevel("player")
     pc.xp              		= _G.UnitXP("player")
+    pc.guild					= _G.GetGuildInfo("player")
     -- Inner Peace, the Padaren racial passive, allow for twice the normal amount of rested XP
     pc.max_rested_xp   		= unit_xp_max * 1.5 * (1 + (_G.IsSpellKnown(107074) and 1 or 0))
     pc.last_update     		= time()
@@ -1378,15 +1387,6 @@ function AllPlayed:GetOption( option, ... )
 	elseif option == 'show_minimap_icon' then
 		return not self.db.profile.options.ldbicon.hide
 	end
-
-	--if option == 'show_conquest_points' or
-	--	option == 'show_valor_points' or
-	--	option == 'show_valor_total' or
-	--	option == 'show_justice_points' or
-	--	option == 'show_justice_total'
-	--then
-	--	return false
-	--end
 
 	return self.db.profile.options[option]
 end

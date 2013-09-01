@@ -211,3 +211,6 @@ L["Lvl: %d"]																		= true
 L["Total Character Levels: "]													= true
 L["Show level total"]															= true
 L["Show the total levels for all characters"]							= true
+
+L["Show Guild Name"]																= true
+L["Show the character guild name"]											= true

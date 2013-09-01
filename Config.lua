@@ -269,19 +269,24 @@ local function ReturnConfigMenu()
 					checked = 'colorize_class';
 				},
 				[16] = {
-					text = L["Use Old Shaman Colour"];
-					tooltipText = L["Use the pre-210 patch colour for the Shaman class"];
-					checked = 'use_pre_210_shaman_colour';
-				},
-				[17] = {
 					text = L["Show Item Level"];
 					tooltipText = L["Show the character item level (iLevel)"];
 					checked = 'show_ilevel';
+				},
+				[17] = {
+					text = L["Show Guild Name"];
+					tooltipText = L["Show the character guild name"];
+					checked = 'show_guild';
 				},
 				[18] = {
 					text = L["Use Icons"];
 					tooltipText = L["Use graphics for coin and PvP currencies"];
 					checked = 'use_icons';
+				},
+				[19] = {
+					text = L["Use Old Shaman Colour"];
+					tooltipText = L["Use the pre-210 patch colour for the Shaman class"];
+					checked = 'use_pre_210_shaman_colour';
 				},
 			},
 		},
@@ -503,20 +508,28 @@ local function GetOptions()
 						set       = function(info, v) AllPlayed:SetOption('colorize_class',v) end,
 						order     = 1.4,
 					},
-					use_pre_210_shaman_colour = {
-						name      = L["Use Old Shaman Colour"],
-						desc      = L["Use the pre-210 patch colour for the Shaman class"],
-						type      = 'toggle',
-						get       = function() return AllPlayed:GetOption('use_pre_210_shaman_colour') end,
-						set       = function(info, v) AllPlayed:SetOption('use_pre_210_shaman_colour',v) end,
-						order     = 1.5,
-					},
 					show_ilevel = {
 						name      = L["Show Item Level"],
 						desc      = L["Show the character item level (iLevel)"],
 						type      = 'toggle',
 						get       = function() return AllPlayed:GetOption('show_ilevel') end,
 						set       = function(info, v) AllPlayed:SetOption('show_ilevel',v) end,
+						order     = 1.5,
+					},
+					show_guild = {
+						name      = L["Show Guild Name"],
+						desc      = L["Show the character guild name"],
+						type      = 'toggle',
+						get       = function() return AllPlayed:GetOption('show_guild') end,
+						set       = function(info, v) AllPlayed:SetOption('show_guild',v) end,
+						order     = 1.55,
+					},
+					use_pre_210_shaman_colour = {
+						name      = L["Use Old Shaman Colour"],
+						desc      = L["Use the pre-210 patch colour for the Shaman class"],
+						type      = 'toggle',
+						get       = function() return AllPlayed:GetOption('use_pre_210_shaman_colour') end,
+						set       = function(info, v) AllPlayed:SetOption('use_pre_210_shaman_colour',v) end,
 						order     = 1.6,
 					},
 					show_location = {
