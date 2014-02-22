@@ -902,7 +902,7 @@ function AllPlayed:DrawTooltip(anchor)
 					tooltip:SetCell(line, 1, text_realm, "LEFT", nb_columns)
 
 
-					for _, pc in ipairs(self.sort_realm_pc[self:GetOption('display_sort_type')][faction][realm]) do
+					for i, pc in ipairs(self.sort_realm_pc[self:GetOption('display_sort_type')][faction][realm]) do
 						if not self:GetOption('is_ignored', realm, pc) then
 							local pc_data = self.db.global.data[faction][realm][pc]
 
@@ -1116,6 +1116,8 @@ function AllPlayed:DrawTooltip(anchor)
 							end
 
 							line, column = tooltip:AddLine()
+							local color = (i % 2) == 1 and .4 or nil
+							if color then tooltip:SetLineColor(line, color, color, color, self:GetOption('opacity')) end
 							for i=1,nb_columns do
 								tooltip:SetCell(line, i, "  "..col_text[i], col_align[i])
 							end
@@ -1314,7 +1316,10 @@ function AllPlayed:SaveVar()
 	 pc.period_valor_points, pc.max_period_valor_points
 	 								= select(7, _G.GetLFGDungeonRewardCapBarInfo(301))
 
-	 -- Statistical stuff
+	 -- To fix a bug in 5.4.7 where the rested XP is bigger then the remaining XP needed to level to 90
+	 if pc.level == self.max_pc_level - 1 then
+	 	pc.rested_xp = min(pc.rested_xp, unit_xp_max - pc.xp)
+	 end
 
 
     -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
@@ -2272,7 +2277,7 @@ function InitXPToLevelCache( game_version, build_version )
 		date, toc_number = select(3, _G.GetBuildInfo())
 	end
 
-	-- Values for the 4.0.3 patches
+	-- Values for the 5.4.7 patches
 	XPToNextLevelCache[10]    = 6700
 	XPToNextLevelCache[11]    = 7000
 	XPToNextLevelCache[12]    = 7700
@@ -2348,11 +2353,11 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[82] 	  = 2669000
 	XPToNextLevelCache[83] 	  = 3469000
 	XPToNextLevelCache[84] 	  = 4583000
-	XPToNextLevelCache[85] 	  = 13000000
-	XPToNextLevelCache[86] 	  = 15080000
-	XPToNextLevelCache[87] 	  = 18980000
-	XPToNextLevelCache[88] 	  = 22880000
-	XPToNextLevelCache[89] 	  = 27560000
+	XPToNextLevelCache[85] 	  = 8670000
+	XPToNextLevelCache[86] 	  = 10050000
+	XPToNextLevelCache[87] 	  = 12650000
+	XPToNextLevelCache[88] 	  = 15250000
+	XPToNextLevelCache[89] 	  = 18370000
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]
