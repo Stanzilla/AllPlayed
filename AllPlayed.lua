@@ -364,11 +364,10 @@ function AllPlayed:OnEnable()
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA", 		"EventHandler")
     self:RegisterEvent("ZONE_CHANGED",          		"EventHandler")
     self:RegisterEvent("MINIMAP_ZONE_CHANGED",  		"EventHandler")
-    --if(self:GetOption('show_coins')) then
-    	self:RegisterEvent("PLAYER_MONEY",      "EventHandler")
-    --end
-  	 self:RegisterEvent("CURRENCY_DISPLAY_UPDATE",     "EventHandler")
+    self:RegisterEvent("PLAYER_MONEY",      				"EventHandler")
+    self:RegisterEvent("CURRENCY_DISPLAY_UPDATE",     "EventHandler")
   	 self:RegisterEvent("PLAYER_GUILD_UPDATE",			"EventHandler")
+  	 self:RegisterEvent("PLAYER_UPDATE_RESTING",			"EventHandler")
     self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
 	 self:RegisterEvent("BAG_UPDATE",     					"EventHandlerOnlySort")
 
@@ -1297,7 +1296,7 @@ function AllPlayed:SaveVar()
     -- Fill some of the SaveVariables
     local pc = self.db.global.data[self.faction][self.realm][self.pc]
     -- Make sure that rested_xp is not nil
-    pc.rested_xp = _G.GetXPExhaustion() or 0
+    pc.rested_xp 				= _G.GetXPExhaustion() or 0
     pc.class_loc, pc.class	= _G.UnitClass("player")
     pc.race_loc, pc.race	= _G.UnitRace("player")
     pc.level           		= _G.UnitLevel("player")
