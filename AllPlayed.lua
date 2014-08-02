@@ -2504,7 +2504,8 @@ end
 AllPlayedLDB = ldb:NewDataObject("AllPlayed", {
 	type = "data source",
 	text = "***AllPlayed***",
-	icon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp",
+	-- icon = "Interface\\Icons\\INV_Misc_PocketWatch_02.blp",
+	icon = "Interface\\Icons\\INV_Misc_PocketWatch_02",
 })
 
 local ldb_options = { type = 'group' }
