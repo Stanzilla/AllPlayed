@@ -364,7 +364,7 @@ local function ReturnConfigMenu()
 			text = L["Configuration"];
 			tooltipText = L["Open configuration dialog"];
 			tooltipOnButton = 1;
-			func = function() _G.InterfaceOptionsFrame_OpenToCategory(AP_display_name) end;
+			func = function() _G.InterfaceOptionsFrame_OpenToCategory(AP_display_name); _G.InterfaceOptionsFrame_OpenToCategory(AP_display_name) end;
 		},
 	}
 
