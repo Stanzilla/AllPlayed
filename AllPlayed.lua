@@ -11,22 +11,22 @@ local AP_display_name, AP = ...
 -- Localize some lua globals
 local _G = getfenv(0)
 
-local floor = _G.floor
-local geterrorhandler = _G.geterrorhandler
-local gettime = _G.gettime
-local ipairs = _G.ipairs
-local min = _G.min
-local mod = _G.mod
-local next = _G.next
-local pairs = _G.pairs
-local select = _G.select
-local sort = _G.sort
-local time = _G.time
-local tinsert = _G.tinsert
-local tostring = _G.tostring
-local tremove = _G.tremove
-local type = _G.type
-local wipe = _G.wipe
+local floor					= _G.floor
+local geterrorhandler	= _G.geterrorhandler
+local gettime				= _G.gettime
+local ipairs				= _G.ipairs
+local min					= _G.min
+local mod					= _G.mod
+local next					= _G.next
+local pairs					= _G.pairs
+local select				= _G.select
+local sort					= _G.sort
+local time					= _G.time
+local tinsert				= _G.tinsert
+local tostring				= _G.tostring
+local tremove				= _G.tremove
+local type					= _G.type
+local wipe					= _G.wipe
 
 -- Non Blizzard globals that need to be localized
 local LibStub = _G.LibStub
@@ -38,10 +38,10 @@ AllPlayed_revision.main	= ("$Revision$"):match("(%d+)")
 AllPlayed_revision.toc  = _G.GetAddOnMetadata("AllPlayed", "Version"):match("%$Revision:%s(%d+)")
 
 -- Backward and forward compatilility when playing Cataclysm
-local GetHonorCurrency = _G.GetHonorCurrency or function() return select(2,_G.GetCurrencyInfo(392)) or 0 end
-local GetConquestCurrency = _G.GetConquestCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(390)) ) or 0 end
-local GetJusticeCurrency = _G.GetJusticeCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(395)) ) or 0 end
-local GetValorCurrency = _G.GetValorCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(396)) ) or 0 end
+local GetHonorCurrency		= _G.GetHonorCurrency or function() return select(2,_G.GetCurrencyInfo(392)) or 0 end
+local GetConquestCurrency	= _G.GetConquestCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(390)) ) or 0 end
+local GetJusticeCurrency	= _G.GetJusticeCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(395)) ) or 0 end
+local GetValorCurrency		= _G.GetValorCurrency or function() return ( _G.GetCurrencyInfo and select(2,_G.GetCurrencyInfo(396)) ) or 0 end
 
 -- Define static values for the addon
 -- Ten days in second, needed to estimate the rested XP
@@ -178,6 +178,7 @@ do
 	end
 end	-- do block
 
+
 --[[ ================================================================= ]]--
 --[[                      Ace Framework Init                           ]]--
 --[[ ================================================================= ]]--
@@ -227,6 +228,9 @@ local default_options = {
 				['*'] = {}
 			}
 		},
+		options = {
+			show_deprecated				= false,
+		},
 	},
 	profile = {
 		options = {
@@ -247,15 +251,6 @@ local default_options = {
 			show_location              = "none",
 			show_guild						= false,
 			show_xp_total              = true,
-			show_valor_points				= false,
-			show_valor_total				= false,
-			show_justice_points			= false,
-			show_justice_total			= false,
-			show_arena_points				= false,
-			show_conquest_points			= false,
-			show_honor_points				= false,
-			show_honor_kills				= false,
-			show_pvp_totals				= false,
 			show_lvl_totals				= false,
 			tooltip_scale					= 1,
 			opacity							= .9,
@@ -273,6 +268,18 @@ local default_options = {
 			ldbicon = {
 			  hide = nil,
 			},
+
+			-- Deprecated values that will be removed
+			show_valor_points				= false,
+			show_valor_total				= false,
+			show_justice_points			= false,
+			show_justice_total			= false,
+			show_arena_points				= false,
+			show_conquest_points			= false,
+			show_honor_points				= false,
+			show_honor_kills				= false,
+			show_pvp_totals				= false,
+
 		},
 	},
 }
@@ -281,7 +288,7 @@ local default_options = {
 -- This function is called by the Ace2 framework one time after the addon is loaded
 function AllPlayed:OnInitialize()
 	-- code here, executed only once.
-   --self:SetDebugging(true) -- to have debugging through your whole app.
+	--self:SetDebugging(true) -- to have debugging through your whole app.
 
 	-- Initialize the SaveVariables table if it's the first time that AllPlayed is loaded
 	_G.AllPlayedDB = _G.AllPlayedDB or {}
@@ -303,11 +310,11 @@ function AllPlayed:OnInitialize()
 		local function tcopy(t)
 		  local t2 = AcquireTable()
 		  for k,v in pairs(t) do
-		  	 if type(v) == 'table' then
-		  	 	t2[k] = tcopy(v)
-		  	 else
-		  	 	t2[k] = v
-		  	 end
+			 if type(v) == 'table' then
+				t2[k] = tcopy(v)
+			 else
+				t2[k] = v
+			 end
 		  end
 		  return t2
 		end
@@ -328,8 +335,8 @@ function AllPlayed:OnInitialize()
 	-- We set total variables to zero and create the tables that will never
 	-- be deleted
 	self.total_faction      = { ["Horde"]    = { time_played = 0, coin = 0 },
-									    ["Alliance"] = { time_played = 0, coin = 0 },
-									    ["Neutral"] = { time_played = 0, coin = 0 },
+										 ["Alliance"] = { time_played = 0, coin = 0 },
+										 ["Neutral"] = { time_played = 0, coin = 0 },
 	}
 	self.total_realm        = { }
 	self.total              = { time_played = 0, coin = 0, xp = 0 }
@@ -345,42 +352,42 @@ end
 
 function AllPlayed:OnEnable()
 
-    --self:Debug("AllPlayed:OnEnable()")
+	 --self:Debug("AllPlayed:OnEnable()")
 
-    -- code here, executed after everything is loaded.
+	 -- code here, executed after everything is loaded.
 
 	 -- Find the default channel
 	 setDefaultChanelForPrint()
 
-    -- Configuration initialization
-    AP.db = self.db
-    AP.InitConfig()
+	 -- Configuration initialization
+	 AP.db = self.db
+	 AP.InitConfig()
 
-    -- Register the events we need
-    -- (event unregistering is done automagicaly by ACE)
-    self:RegisterEvent("TIME_PLAYED_MSG",       		"OnTimePlayedMsg")
-    self:RegisterEvent("PLAYER_LEVEL_UP",       		"EventHandlerWithSort")
-    self:RegisterEvent("PLAYER_XP_UPDATE",      		"EventHandlerWithSort")
-    self:RegisterEvent("ZONE_CHANGED_NEW_AREA", 		"EventHandler")
-    self:RegisterEvent("ZONE_CHANGED",          		"EventHandler")
-    self:RegisterEvent("MINIMAP_ZONE_CHANGED",  		"EventHandler")
-    self:RegisterEvent("PLAYER_MONEY",      				"EventHandler")
-    self:RegisterEvent("CURRENCY_DISPLAY_UPDATE",     "EventHandler")
-  	 self:RegisterEvent("PLAYER_GUILD_UPDATE",			"EventHandler")
-  	 self:RegisterEvent("PLAYER_UPDATE_RESTING",			"EventHandler")
-    self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
+	 -- Register the events we need
+	 -- (event unregistering is done automagicaly by ACE)
+	 self:RegisterEvent("TIME_PLAYED_MSG",       		"OnTimePlayedMsg")
+	 self:RegisterEvent("PLAYER_LEVEL_UP",       		"EventHandlerWithSort")
+	 self:RegisterEvent("PLAYER_XP_UPDATE",      		"EventHandlerWithSort")
+	 self:RegisterEvent("ZONE_CHANGED_NEW_AREA", 		"EventHandler")
+	 self:RegisterEvent("ZONE_CHANGED",          		"EventHandler")
+	 self:RegisterEvent("MINIMAP_ZONE_CHANGED",  		"EventHandler")
+	 self:RegisterEvent("PLAYER_MONEY",      				"EventHandler")
+	 self:RegisterEvent("CURRENCY_DISPLAY_UPDATE",     "EventHandler")
+	 self:RegisterEvent("PLAYER_GUILD_UPDATE",			"EventHandler")
+	 self:RegisterEvent("PLAYER_UPDATE_RESTING",			"EventHandler")
+	 self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
 	 self:RegisterEvent("BAG_UPDATE",     					"EventHandlerOnlySort")
 
-    -- Hook the functions that need hooking
-    self:Hook("Logout", true)
-    self:Hook("Quit",   true)
+	 -- Hook the functions that need hooking
+	 self:Hook("Logout", true)
+	 self:Hook("Quit",   true)
 
-    -- Initialize values that don't change between reloads
-    self.faction, self.loc_faction	= _G.UnitFactionGroup("player")
-    self.realm      						= _G.GetRealmName()
-    self.pc         						= _G.UnitName("player")
+	 -- Initialize values that don't change between reloads
+	 self.faction, self.loc_faction	= _G.UnitFactionGroup("player")
+	 self.realm      						= _G.GetRealmName()
+	 self.pc         						= _G.UnitName("player")
 
-    -- Initial update of values
+	 -- Initial update of values
 
 	 -- Class colours
 	 CLASS_COLOURS['DEATHKNIGHT']	= AllPlayed.GetClassHexColour("DEATHKNIGHT")
@@ -397,30 +404,30 @@ function AllPlayed:OnEnable()
 	 CLASS_COLOURS['PRE-210-SHAMAN'] = "00dbba"
 
 
-    -- What colour should be used for Shaman?
-    if(self:GetOption('use_pre_210_shaman_colour')) then
-    	CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
-    else
+	 -- What colour should be used for Shaman?
+	 if(self:GetOption('use_pre_210_shaman_colour')) then
+		CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
+	 else
 		CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
-    end
+	 end
 
-    -- Get the values for the current character
-    self:SaveVar()
-    
-    -- Detect faction change
-    self:DetectFactionChange()
-    
-    -- Compute Honor at least once (it will be computed only if it change afterward
-    self:ComputeTotalHonor()
+	 -- Get the values for the current character
+	 self:SaveVar()
+	 
+	 -- Detect faction change
+	 self:DetectFactionChange()
+	 
+	 -- Compute Honor at least once (it will be computed only if it change afterward
+	 self:ComputeTotalHonor()
 
-    -- Build the sorting tables
-  	 self:BuildSortTables()
+	 -- Build the sorting tables
+	 self:BuildSortTables()
 
-    -- Request the time played so we can populate seconds_played
-    --self:RequestTimePlayed()
-    -- Wait 10 seconds so that the call is not made if another addon already do it
-    -- at load time
-    self:ScheduleTimer("RequestTimePlayed", 10)
+	 -- Request the time played so we can populate seconds_played
+	 --self:RequestTimePlayed()
+	 -- Wait 10 seconds so that the call is not made if another addon already do it
+	 -- at load time
+	 self:ScheduleTimer("RequestTimePlayed", 10)
 
 	-- Set the callback for !ClassColor if present
 	if _G.CUSTOM_CLASS_COLORS then
@@ -439,8 +446,8 @@ function AllPlayed:OnEnable()
 		end)
 	end
 
-   -- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
-   -- or 20 seconds depending on the refresh_rate setting
+	-- Start the timer event to get an OnDataUpdate, OnUpdateText and OnUpdateTooltip every second
+	-- or 20 seconds depending on the refresh_rate setting
 	--self:ScheduleRepeatingEvent(self.name, self.MyUpdate, self:GetOption('refresh_rate'), self)
 	self.timer = self:ScheduleRepeatingTimer("MyUpdate", self:GetOption('refresh_rate'))
 
@@ -453,9 +460,9 @@ function AllPlayed:OnEnable()
 
 		if AllPlayed.elapsed < AllPlayed:GetOption('tooltip_delay') then return end
 		if (AllPlayed.tooltip and AllPlayed.tooltip:IsMouseOver() and AllPlayed:GetOption('tooltip_keep_on_mouseover')) or
-		   (AllPlayed.tooltip_anchor and AllPlayed.tooltip_anchor:IsMouseOver()) then
-		   AllPlayed.elapsed = 0
-		   return
+			(AllPlayed.tooltip_anchor and AllPlayed.tooltip_anchor:IsMouseOver()) then
+			AllPlayed.elapsed = 0
+			return
 		end
 
 		AllPlayed.tooltip = lqt:Release(AllPlayed.tooltip)
@@ -488,22 +495,22 @@ function AllPlayed:MyUpdate(...)
 	self:Debug("MyUpdate: %d",time())
 
 	self:OnDataUpdate()
-   AllPlayedLDB.text = self:FormatTime(self.total.time_played)
+	AllPlayedLDB.text = self:FormatTime(self.total.time_played)
 
-   if self.tooltip then
+	if self.tooltip then
 		self:DrawTooltip()
 	end
 end
 
 
 function AllPlayed:OnDataUpdate()
-    --self:Debug("AllPlayed:OnDataUpdate()")
+	 --self:Debug("AllPlayed:OnDataUpdate()")
 
-    -- Update the data that may have changed but are not tracked by an event
-    self.db.global.data[self.faction][self.realm][self.pc].is_resting = _G.IsResting()
+	 -- Update the data that may have changed but are not tracked by an event
+	 self.db.global.data[self.faction][self.realm][self.pc].is_resting = _G.IsResting()
 
-    -- Recompute the totals
-    self:ComputeTotal()
+	 -- Recompute the totals
+	 self:ComputeTotal()
 end
 
 function AllPlayed:RefreshConfig()
@@ -526,49 +533,49 @@ end
 
 -- Get the totals per faction and realm
 function AllPlayed:ComputeTotal()
-    self:Debug("AllPlayed:ComputeTotal(): %d",time())
+	 self:Debug("AllPlayed:ComputeTotal(): %d",time())
 
-    -- Let's start from scratch
-    self.total_faction["Horde"].time_played      	= 0
-    self.total_faction["Horde"].coin             	= 0
-    self.total_faction["Horde"].xp               	= 0
-    self.total_faction["Horde"].justice_points   	= 0
-    self.total_faction["Horde"].valor_points   		= 0
-    self.total_faction["Horde"].levels   				= 0
-    self.total_faction["Alliance"].time_played   	= 0
-    self.total_faction["Alliance"].coin          	= 0
-    self.total_faction["Alliance"].xp            	= 0
-    self.total_faction["Alliance"].justice_points	= 0
-    self.total_faction["Alliance"].valor_points		= 0
-    self.total_faction["Alliance"].levels   			= 0
-    self.total_faction["Neutral"].time_played   	= 0
-    self.total_faction["Neutral"].coin          	= 0
-    self.total_faction["Neutral"].xp            	= 0
-    self.total_faction["Neutral"].justice_points	= 0
-    self.total_faction["Neutral"].valor_points		= 0
-    self.total_faction["Neutral"].levels   			= 0
-    self.total.time_played                       	= 0
-    self.total.coin                              	= 0
-    self.total.xp                                	= 0
-    self.total.justice_points                     	= 0
-    self.total.valor_points                     	= 0
-    self.total.levels                  		   	= 0
+	 -- Let's start from scratch
+	 self.total_faction["Horde"].time_played      	= 0
+	 self.total_faction["Horde"].coin             	= 0
+	 self.total_faction["Horde"].xp               	= 0
+	 self.total_faction["Horde"].justice_points   	= 0
+	 self.total_faction["Horde"].valor_points   		= 0
+	 self.total_faction["Horde"].levels   				= 0
+	 self.total_faction["Alliance"].time_played   	= 0
+	 self.total_faction["Alliance"].coin          	= 0
+	 self.total_faction["Alliance"].xp            	= 0
+	 self.total_faction["Alliance"].justice_points	= 0
+	 self.total_faction["Alliance"].valor_points		= 0
+	 self.total_faction["Alliance"].levels   			= 0
+	 self.total_faction["Neutral"].time_played   	= 0
+	 self.total_faction["Neutral"].coin          	= 0
+	 self.total_faction["Neutral"].xp            	= 0
+	 self.total_faction["Neutral"].justice_points	= 0
+	 self.total_faction["Neutral"].valor_points		= 0
+	 self.total_faction["Neutral"].levels   			= 0
+	 self.total.time_played                       	= 0
+	 self.total.coin                              	= 0
+	 self.total.xp                                	= 0
+	 self.total.justice_points                     	= 0
+	 self.total.valor_points                     	= 0
+	 self.total.levels                  		   	= 0
 
-    -- Let all the factions, realms and PC be counted
-    for faction, faction_table in pairs(self.db.global.data) do
-        for realm, realm_table in pairs(faction_table) do
-            --self:Debug("faction: %s realm: %s", faction, realm)
+	 -- Let all the factions, realms and PC be counted
+	 for faction, faction_table in pairs(self.db.global.data) do
+		  for realm, realm_table in pairs(faction_table) do
+				--self:Debug("faction: %s realm: %s", faction, realm)
 
-            if not self.total_realm[faction] then self.total_realm[faction] = {} end
-            if not self.total_realm[faction][realm] then self.total_realm[faction][realm] = {} end
-            self.total_realm[faction][realm].time_played = 0
-            self.total_realm[faction][realm].coin = 0
-            self.total_realm[faction][realm].xp = 0
-            self.total_realm[faction][realm].justice_points = 0
-            self.total_realm[faction][realm].valor_points = 0
-            self.total_realm[faction][realm].levels = 0
-            for pc, pc_table in pairs(realm_table) do
-                if not self:GetOption('is_ignored', realm, pc) then
+				if not self.total_realm[faction] then self.total_realm[faction] = {} end
+				if not self.total_realm[faction][realm] then self.total_realm[faction][realm] = {} end
+				self.total_realm[faction][realm].time_played = 0
+				self.total_realm[faction][realm].coin = 0
+				self.total_realm[faction][realm].xp = 0
+				self.total_realm[faction][realm].justice_points = 0
+				self.total_realm[faction][realm].valor_points = 0
+				self.total_realm[faction][realm].levels = 0
+				for pc, pc_table in pairs(realm_table) do
+					 if not self:GetOption('is_ignored', realm, pc) then
 						-- Need to get the current seconds_played for the PC
 						local seconds_played = self:EstimateTimePlayed(pc,
 																		realm,
@@ -595,57 +602,57 @@ function AllPlayed:ComputeTotal()
 						self.total_realm[faction][realm].justice_points = self.total_realm[faction][realm].justice_points	+ pc_table.justice_points
 						self.total_realm[faction][realm].valor_points 	= self.total_realm[faction][realm].valor_points		+ pc_table.valor_points
 						self.total_realm[faction][realm].levels 			= self.total_realm[faction][realm].levels				+ pc_table.level
-                end
-            end
-        end
-    end
+					 end
+				end
+		  end
+	 end
 
-    -- The Grand Total varies according to the options
-    if self:GetOption('all_realms') then
-        if self:GetOption('all_factions') then
-            -- Everything count
-            self.total.time_played
-                =   self.total_faction["Horde"].time_played
-                  + self.total_faction["Alliance"].time_played
-                  + self.total_faction["Neutral"].time_played
-            self.total.coin
-                =   self.total_faction["Horde"].coin
-                  + self.total_faction["Alliance"].coin
-                  + self.total_faction["Neutral"].coin
-            self.total.xp
-                =   self.total_faction["Horde"].xp
-                  + self.total_faction["Alliance"].xp
-                  + self.total_faction["Neutral"].xp
-            self.total.justice_points
-                =   self.total_faction["Horde"].justice_points
-                  + self.total_faction["Alliance"].justice_points
-                  + self.total_faction["Neutral"].justice_points
-            self.total.valor_points
-                =   self.total_faction["Horde"].valor_points
-                  + self.total_faction["Alliance"].valor_points
-                  + self.total_faction["Neutral"].valor_points
-            self.total.levels
-                =   self.total_faction["Horde"].levels
-                  + self.total_faction["Alliance"].levels
-                  + self.total_faction["Neutral"].levels
-        else
-            -- Only the current faction count
-            self.total.time_played 		= self.total_faction[self.faction].time_played
-            self.total.coin        		= self.total_faction[self.faction].coin
-            self.total.xp          		= self.total_faction[self.faction].xp
-            self.total.justice_points	= self.total_faction[self.faction].justice_points
-            self.total.valor_points		= self.total_faction[self.faction].valor_points
-            self.total.levels				= self.total_faction[self.faction].levels
-        end
-    else
-        -- Only the current realm count (all_factions is ignore)
-        self.total.time_played 		= self.total_realm[self.faction][self.realm].time_played
-        self.total.coin        		= self.total_realm[self.faction][self.realm].coin
-        self.total.xp          		= self.total_realm[self.faction][self.realm].xp
-        self.total.justice_points	= self.total_realm[self.faction][self.realm].justice_points
-        self.total.valor_points		= self.total_realm[self.faction][self.realm].valor_points
-        self.total.levels				= self.total_realm[self.faction][self.realm].levels
-    end
+	 -- The Grand Total varies according to the options
+	 if self:GetOption('all_realms') then
+		  if self:GetOption('all_factions') then
+				-- Everything count
+				self.total.time_played
+					 =   self.total_faction["Horde"].time_played
+						+ self.total_faction["Alliance"].time_played
+						+ self.total_faction["Neutral"].time_played
+				self.total.coin
+					 =   self.total_faction["Horde"].coin
+						+ self.total_faction["Alliance"].coin
+						+ self.total_faction["Neutral"].coin
+				self.total.xp
+					 =   self.total_faction["Horde"].xp
+						+ self.total_faction["Alliance"].xp
+						+ self.total_faction["Neutral"].xp
+				self.total.justice_points
+					 =   self.total_faction["Horde"].justice_points
+						+ self.total_faction["Alliance"].justice_points
+						+ self.total_faction["Neutral"].justice_points
+				self.total.valor_points
+					 =   self.total_faction["Horde"].valor_points
+						+ self.total_faction["Alliance"].valor_points
+						+ self.total_faction["Neutral"].valor_points
+				self.total.levels
+					 =   self.total_faction["Horde"].levels
+						+ self.total_faction["Alliance"].levels
+						+ self.total_faction["Neutral"].levels
+		  else
+				-- Only the current faction count
+				self.total.time_played 		= self.total_faction[self.faction].time_played
+				self.total.coin        		= self.total_faction[self.faction].coin
+				self.total.xp          		= self.total_faction[self.faction].xp
+				self.total.justice_points	= self.total_faction[self.faction].justice_points
+				self.total.valor_points		= self.total_faction[self.faction].valor_points
+				self.total.levels				= self.total_faction[self.faction].levels
+		  end
+	 else
+		  -- Only the current realm count (all_factions is ignore)
+		  self.total.time_played 		= self.total_realm[self.faction][self.realm].time_played
+		  self.total.coin        		= self.total_realm[self.faction][self.realm].coin
+		  self.total.xp          		= self.total_realm[self.faction][self.realm].xp
+		  self.total.justice_points	= self.total_realm[self.faction][self.realm].justice_points
+		  self.total.valor_points		= self.total_realm[self.faction][self.realm].valor_points
+		  self.total.levels				= self.total_realm[self.faction][self.realm].levels
+	 end
 end
 
 function AllPlayed:ComputeTotalHonor()
@@ -671,21 +678,21 @@ function AllPlayed:ComputeTotalHonor()
 	self.total.arena_points                        				= 0
 	self.total.conquest_points                     				= 0
 
-    -- Let all the factions, realms and PC be counted
-    for faction, faction_table in pairs(self.db.global.data) do
-        for realm, realm_table in pairs(faction_table) do
-            --self:Debug("faction: %s realm: %s", faction, realm)
+	 -- Let all the factions, realms and PC be counted
+	 for faction, faction_table in pairs(self.db.global.data) do
+		  for realm, realm_table in pairs(faction_table) do
+				--self:Debug("faction: %s realm: %s", faction, realm)
 
-            if not self.total_realm[faction] then self.total_realm[faction] = {} end
-            if not self.total_realm[faction][realm] then self.total_realm[faction][realm] = {} end
+				if not self.total_realm[faction] then self.total_realm[faction] = {} end
+				if not self.total_realm[faction][realm] then self.total_realm[faction][realm] = {} end
 
-            self.total_realm[faction][realm].honor_kills = 0
-            self.total_realm[faction][realm].honor_points = 0
-            self.total_realm[faction][realm].arena_points = 0
-            self.total_realm[faction][realm].conquest_points = 0
+				self.total_realm[faction][realm].honor_kills = 0
+				self.total_realm[faction][realm].honor_points = 0
+				self.total_realm[faction][realm].arena_points = 0
+				self.total_realm[faction][realm].conquest_points = 0
 
-            for pc, pc_table in pairs(realm_table) do
-                if not self:GetOption('is_ignored', realm, pc) then
+				for pc, pc_table in pairs(realm_table) do
+					 if not self:GetOption('is_ignored', realm, pc) then
 						self.total_faction[faction].honor_kills         	= self.total_faction[faction].honor_kills       	+ (pc_table.honor_kills or 0)
 						self.total_faction[faction].honor_points        	= self.total_faction[faction].honor_points      	+ (pc_table.honor_points or 0)
 						self.total_faction[faction].arena_points        	= self.total_faction[faction].arena_points      	+ (pc_table.arena_points or 0)
@@ -695,45 +702,45 @@ function AllPlayed:ComputeTotalHonor()
 						self.total_realm[faction][realm].honor_points   		= self.total_realm[faction][realm].honor_points 			+ (pc_table.honor_points or 0)
 						self.total_realm[faction][realm].arena_points   		= self.total_realm[faction][realm].arena_points 			+ (pc_table.arena_points or 0)
 						self.total_realm[faction][realm].conquest_points   	= self.total_realm[faction][realm].conquest_points 		+ (pc_table.conquest_points or 0)
-                end
-            end
-        end
-    end
+					 end
+				end
+		  end
+	 end
 
-    -- The Grand Total varies according to the options
-    if self:GetOption('all_realms') then
-        if self:GetOption('all_factions') then
-            -- Everything count
-            self.total.honor_kills
-                =   self.total_faction["Horde"].honor_kills
-                  + self.total_faction["Alliance"].honor_kills
-                  + self.total_faction["Neutral"].honor_kills
-            self.total.honor_points
-                =   self.total_faction["Horde"].honor_points
-                  + self.total_faction["Alliance"].honor_points
-                  + self.total_faction["Neutral"].honor_points
-            self.total.arena_points
-                =   self.total_faction["Horde"].arena_points
-                  + self.total_faction["Alliance"].arena_points
-                  + self.total_faction["Neutral"].arena_points
-            self.total.conquest_points
-                =   self.total_faction["Horde"].conquest_points
-                  + self.total_faction["Alliance"].conquest_points
-                  + self.total_faction["Neutral"].conquest_points
-        else
-            -- Only the current faction count
-            self.total.honor_kills 				= self.total_faction[self.faction].honor_kills
-            self.total.honor_points 			= self.total_faction[self.faction].honor_points
-            self.total.arena_points 			= self.total_faction[self.faction].arena_points
-            self.total.conquest_points 		= self.total_faction[self.faction].conquest_points
-        end
-    else
-        -- Only the current realm count (all_factions is ignore)
-        self.total.honor_kills 				= self.total_realm[self.faction][self.realm].honor_kills
-        self.total.honor_points  			= self.total_realm[self.faction][self.realm].honor_points
-        self.total.arena_points  			= self.total_realm[self.faction][self.realm].arena_points
-        self.total.conquest_points  		= self.total_realm[self.faction][self.realm].conquest_points
-    end
+	 -- The Grand Total varies according to the options
+	 if self:GetOption('all_realms') then
+		  if self:GetOption('all_factions') then
+				-- Everything count
+				self.total.honor_kills
+					 =   self.total_faction["Horde"].honor_kills
+						+ self.total_faction["Alliance"].honor_kills
+						+ self.total_faction["Neutral"].honor_kills
+				self.total.honor_points
+					 =   self.total_faction["Horde"].honor_points
+						+ self.total_faction["Alliance"].honor_points
+						+ self.total_faction["Neutral"].honor_points
+				self.total.arena_points
+					 =   self.total_faction["Horde"].arena_points
+						+ self.total_faction["Alliance"].arena_points
+						+ self.total_faction["Neutral"].arena_points
+				self.total.conquest_points
+					 =   self.total_faction["Horde"].conquest_points
+						+ self.total_faction["Alliance"].conquest_points
+						+ self.total_faction["Neutral"].conquest_points
+		  else
+				-- Only the current faction count
+				self.total.honor_kills 				= self.total_faction[self.faction].honor_kills
+				self.total.honor_points 			= self.total_faction[self.faction].honor_points
+				self.total.arena_points 			= self.total_faction[self.faction].arena_points
+				self.total.conquest_points 		= self.total_faction[self.faction].conquest_points
+		  end
+	 else
+		  -- Only the current realm count (all_factions is ignore)
+		  self.total.honor_kills 				= self.total_realm[self.faction][self.realm].honor_kills
+		  self.total.honor_points  			= self.total_realm[self.faction][self.realm].honor_points
+		  self.total.arena_points  			= self.total_realm[self.faction][self.realm].arena_points
+		  self.total.conquest_points  		= self.total_realm[self.faction][self.realm].conquest_points
+	 end
 end
 
 -- Utility function to set the tooltip alpha
@@ -925,7 +932,7 @@ function AllPlayed:DrawTooltip(anchor)
 															pc_data.class,
 															pc_data.class_loc,
 															faction
-							                   )
+													 )
 							col_align[col_no] = 'LEFT'
 
 							col_no = col_no + 1
@@ -1020,8 +1027,8 @@ function AllPlayed:DrawTooltip(anchor)
 							-- Is the last column needed ?
 							if self:GetOption('show_coins') or
 								self:GetOption('show_rested_xp') or
-							   self:GetOption('show_rested_xp_countdown') or
-							   self:GetOption('percent_rest') ~= "0"
+								self:GetOption('show_rested_xp_countdown') or
+								self:GetOption('percent_rest') ~= "0"
 							then
 								col_align[col_no] = 'RIGHT'
 							else
@@ -1037,7 +1044,7 @@ function AllPlayed:DrawTooltip(anchor)
 							end
 
 							if (pc_data.level < self.max_pc_level) and
-							   (pc_data.level > 1 or pc_data.xp > 0)
+								(pc_data.level > 1 or pc_data.xp > 0)
 							then
 								-- How much rested XP do we have?
 								local estimated_rested_xp = self:EstimateRestedXP(
@@ -1130,11 +1137,11 @@ function AllPlayed:DrawTooltip(anchor)
 	-- Print the totals
 
 	if self:GetOption('show_played_time') or
-	   self:GetOption('show_coins') or
-	   self:GetOption('show_lvl_totals') or
-	   (self:GetOption('show_pvp_totals') and need_pvp) or
-	   (self:GetOption('show_valor_total') and need_vp) or
-	   (self:GetOption('show_justice_total') and need_jp)
+		self:GetOption('show_coins') or
+		self:GetOption('show_lvl_totals') or
+		(self:GetOption('show_pvp_totals') and need_pvp) or
+		(self:GetOption('show_valor_total') and need_vp) or
+		(self:GetOption('show_justice_total') and need_jp)
 	then
 		line, column = tooltip:AddLine()
 		tooltip:SetCell(line, 1, " ")
@@ -1207,29 +1214,29 @@ end
 
 -- Function trigered when the TIME_PLAYED_MSG event is fired
 function AllPlayed:OnTimePlayedMsg(msg, seconds_played)
-    --self:Debug("OnTimePlayedMsg(): ",seconds_played)
+	 --self:Debug("OnTimePlayedMsg(): ",seconds_played)
 
-    -- We save the normal variables and the seconds played
-    self:SetSecondsPlayed(seconds_played)
-    self:SaveVar()
+	 -- We save the normal variables and the seconds played
+	 self:SetSecondsPlayed(seconds_played)
+	 self:SaveVar()
 
-    -- Compute the totals
-    self:ComputeTotal()
+	 -- Compute the totals
+	 self:ComputeTotal()
 end
 
 -- Event handler for the events that trigger a sort but do not require total recalculation
 function AllPlayed:EventHandlerOnlySort(msg)
-    --self:Debug("EventHandlerOnlySort(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
+	 --self:Debug("EventHandlerOnlySort(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
 
-    -- Trigger the sort
+	 -- Trigger the sort
 	self.sort_tables_done = false
 end
 
 -- Event handler for the events that trigger a sort
 function AllPlayed:EventHandlerWithSort(msg)
-    --self:Debug("EventHandlerWithSort(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
+	 --self:Debug("EventHandlerWithSort(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
 
-    -- Trigger the sort
+	 -- Trigger the sort
 	self.sort_tables_done = false
 
 	-- Call the global event handler
@@ -1238,22 +1245,22 @@ end
 
 -- Event handler for the other events registered
 function AllPlayed:EventHandler(msg)
-    -- We save a new copy of the vars
-    self:SaveVar()
+	 -- We save a new copy of the vars
+	 self:SaveVar()
 
-    -- Compute totals
-    self:ComputeTotal()
+	 -- Compute totals
+	 self:ComputeTotal()
 end
 
 -- Event handler for the other events registered
 function AllPlayed:EventHandlerHonorGain()
-    --self:Debug("EventHandlerHonorGain(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
+	 --self:Debug("EventHandlerHonorGain(): [arg1: %s] [arg2: %s] [arg3: %s]", arg1, arg2, arg3)
 
-    -- We save a new copy of the vars
-    self:SaveVarHonor()
+	 -- We save a new copy of the vars
+	 self:SaveVarHonor()
 
-    -- Compute totals
-    self:ComputeTotalHonor()
+	 -- Compute totals
+	 self:ComputeTotalHonor()
 end
 
 -- Detect faction change and remove old character entry
@@ -1262,18 +1269,18 @@ function AllPlayed:DetectFactionChange()
 		self.faction = _G.UnitFactionGroup("player")
 		
 		if faction ~= self.faction and
-		   self.db.global.data[faction] and
-		   self.db.global.data[faction][self.realm] and
-		   self.db.global.data[faction][self.realm][self.pc]
+			self.db.global.data[faction] and
+			self.db.global.data[faction][self.realm] and
+			self.db.global.data[faction][self.realm][self.pc]
 		then
-		   self.db.global.data[faction][self.realm][self.pc] = nil
-		   if not next(self.db.global.data[faction][self.realm]) then 
-		   	self.db.global.data[faction][self.realm] = nil
-		   end
-		   if not next(self.db.global.data[faction]) then
-		   	self.db.global.data[faction] = nil
-		   end
-		   
+			self.db.global.data[faction][self.realm][self.pc] = nil
+			if not next(self.db.global.data[faction][self.realm]) then 
+				self.db.global.data[faction][self.realm] = nil
+			end
+			if not next(self.db.global.data[faction]) then
+				self.db.global.data[faction] = nil
+			end
+			
 			-- Force addon refresh
 			AllPlayed.sort_tables_done = nil
 			AllPlayed:MyUpdate()
@@ -1290,47 +1297,47 @@ end
 -- I know that some data never change until the user log out but since the function
 -- is not called very often, I don't see the needs to do more special cases
 function AllPlayed:SaveVar()
-    --self:Debug("AllPlayed:SaveVar()")
-    local unit_xp_max = _G.UnitXPMax("player")
+	 --self:Debug("AllPlayed:SaveVar()")
+	 local unit_xp_max = _G.UnitXPMax("player")
 
-    -- Fill some of the SaveVariables
-    local pc = self.db.global.data[self.faction][self.realm][self.pc]
-    -- Make sure that rested_xp is not nil
-    pc.rested_xp 				= _G.GetXPExhaustion() or 0
-    pc.class_loc, pc.class	= _G.UnitClass("player")
-    pc.race_loc, pc.race	= _G.UnitRace("player")
-    pc.level           		= _G.UnitLevel("player")
-    pc.xp              		= _G.UnitXP("player")
-    pc.guild					= _G.GetGuildInfo("player")
-    -- Inner Peace, the Padaren racial passive, allow for twice the normal amount of rested XP
-    pc.max_rested_xp   		= unit_xp_max * 1.5 * (1 + (_G.IsSpellKnown(107074) and 1 or 0))
-    pc.last_update     		= time()
-    pc.is_resting      		= _G.IsResting()
-    pc.zone_text       		= _G.GetZoneText()
-    pc.subzone_text    		= _G.GetSubZoneText()
-    pc.ilevel					= _G.GetAverageItemLevel()
+	 -- Fill some of the SaveVariables
+	 local pc = self.db.global.data[self.faction][self.realm][self.pc]
+	 -- Make sure that rested_xp is not nil
+	 pc.rested_xp 				= _G.GetXPExhaustion() or 0
+	 pc.class_loc, pc.class	= _G.UnitClass("player")
+	 pc.race_loc, pc.race	= _G.UnitRace("player")
+	 pc.level           		= _G.UnitLevel("player")
+	 pc.xp              		= _G.UnitXP("player")
+	 pc.guild					= _G.GetGuildInfo("player")
+	 -- Inner Peace, the Padaren racial passive, allow for twice the normal amount of rested XP
+	 pc.max_rested_xp   		= unit_xp_max * 1.5 * (1 + (_G.IsSpellKnown(107074) and 1 or 0))
+	 pc.last_update     		= time()
+	 pc.is_resting      		= _G.IsResting()
+	 pc.zone_text       		= _G.GetZoneText()
+	 pc.subzone_text    		= _G.GetSubZoneText()
+	 pc.ilevel					= _G.GetAverageItemLevel()
 	 pc.conquest_points		= GetConquestCurrency()
 	 pc.justice_points		= GetJusticeCurrency()
 	 pc.valor_points			= GetValorCurrency()
 	 pc.period_valor_points, pc.max_period_valor_points
-	 								= select(7, _G.GetLFGDungeonRewardCapBarInfo(301))
+									= select(7, _G.GetLFGDungeonRewardCapBarInfo(301))
 
 	 -- To fix a bug in 5.4.7 where the rested XP is bigger then the remaining XP needed to level to 90
 	 if pc.level == self.max_pc_level - 1 then
-	 	pc.rested_xp = min(pc.rested_xp, unit_xp_max - pc.xp)
+		pc.rested_xp = min(pc.rested_xp, unit_xp_max - pc.xp)
 	 end
 
 
-    -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
-    if unit_xp_max ~= 0 and unit_xp_max ~= XPToNextLevel(pc.level) then
-    	local _, build_version = _G.GetBuildInfo()
-    	self.db.global.cache.XPToNextLevel[build_version][pc.level] = unit_xp_max
-    end
+	 -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
+	 if unit_xp_max ~= 0 and unit_xp_max ~= XPToNextLevel(pc.level) then
+		local _, build_version = _G.GetBuildInfo()
+		self.db.global.cache.XPToNextLevel[build_version][pc.level] = unit_xp_max
+	 end
 
-    --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.global.data[self.faction][self.realm][self.pc].zone_text)
+	 --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.global.data[self.faction][self.realm][self.pc].zone_text)
 
-    -- Make sure that coin is not nil
-    pc.coin = _G.GetMoney() or 0
+	 -- Make sure that coin is not nil
+	 pc.coin = _G.GetMoney() or 0
 
 	 -- PvPstuff
 	 self:SaveVarHonor()
@@ -1360,10 +1367,23 @@ end
 
 --[[ Methods used for the option menu ]]--
 
+-- Options that are be deprecated
+local deprecated_options = {
+	show_valor_points				= true,
+	show_valor_total				= true,
+	show_justice_points			= true,
+	show_justice_total			= true,
+	show_arena_points				= true,
+	show_conquest_points			= true,
+	show_honor_points				= true,
+	show_honor_kills				= true,
+	show_pvp_totals				= true,
+}
+
+
 -- Get the option value
 function AllPlayed:GetOption( option, ... )
 	--self:Debug(format("AllPlayed:GetOption(%s) = %s", option or 'nil', tostring(self.db.profile.options[option] or 'nil')))
-
 
 	-- is_ignored has multiple parameters
 	if option == 'is_ignored' then
@@ -1390,6 +1410,14 @@ function AllPlayed:GetOption( option, ... )
 
 	elseif option == 'show_minimap_icon' then
 		return not self.db.profile.options.ldbicon.hide
+	elseif option == 'show_deprecated' then
+		-- global option
+		return self.db.global.options.show_deprecated
+	end
+
+	-- Disable all the currencies except gold
+	if not self.db.global.options.show_deprecated and deprecated_options[option] then
+		return false
 	end
 
 	return self.db.profile.options[option]
@@ -1434,7 +1462,7 @@ function AllPlayed:SetOption( option, value, ... )
 		self:CancelTimer(self.timer,true)
 		self.timer = self:ScheduleRepeatingTimer("MyUpdate", self:GetOption('refresh_rate'))
 
-   -- Set activate or disactivate the PLAYER_MONEY event
+	-- Set activate or disactivate the PLAYER_MONEY event
 	--elseif option == 'show_coins' then
 	--	if value then
 	--		self:RegisterEvent("PLAYER_MONEY", "EventHandler")
@@ -1460,13 +1488,13 @@ function AllPlayed:SetOption( option, value, ... )
 
 	-- Ajust the sort type with the direction
 	elseif option == 'sort_type' then
-	    if self:GetOption('reverse_sort') then
-	    	self.db.profile.options.sort_type = "rev-" .. value
-	    else
-	    	self.db.profile.options.sort_type = value
-	    end
+		 if self:GetOption('reverse_sort') then
+			self.db.profile.options.sort_type = "rev-" .. value
+		 else
+			self.db.profile.options.sort_type = value
+		 end
 
-	    already_set = true
+		 already_set = true
 
 	-- Modify the direction of the sort
 	elseif option == 'reverse_sort' then
@@ -1497,6 +1525,15 @@ function AllPlayed:SetOption( option, value, ... )
 		ldbicon:Refresh("AllPlayed", self.db.profile.options.ldbicon)
 
 		already_set = true
+	elseif option == 'show_deprecated' then
+		-- global option
+		if value then
+			self.db.global.options.show_deprecated = true
+		else
+			self.db.global.options.show_deprecated = false
+		end
+
+		already_set = true
 	end
 
 	-- Set the value
@@ -1514,17 +1551,17 @@ end
 
 -- Those are used to get a last update on the time played before going away
 function AllPlayed:Logout()
-    --self:Debug("Logout()")
+	 --self:Debug("Logout()")
 
-    self:RequestTimePlayed()
-    --return self.hooks.Logout()
+	 self:RequestTimePlayed()
+	 --return self.hooks.Logout()
 end
 
 function AllPlayed:Quit()
-    --self:Debug("Quit()")
+	 --self:Debug("Quit()")
 
-    self:RequestTimePlayed()
-    --return self.hooks.Quit()
+	 self:RequestTimePlayed()
+	 --return self.hooks.Quit()
 end
 
 --[[ ================================================================= ]]--
@@ -1534,41 +1571,41 @@ end
 -- This function estimate (calculate) the real time played
 -- Only the current player is still playing.
 function AllPlayed:EstimateTimePlayed( pc, realm, time_played, last_update )
-    if pc == self.pc and realm == self.realm then
-        return time_played + time() - last_update
-    else
-        return time_played
-    end
+	 if pc == self.pc and realm == self.realm then
+		  return time_played + time() - last_update
+	 else
+		  return time_played
+	 end
 end
 
 -- This function tries to estimate the total rested XP for a character based
 -- on the last time the data were updated and whether or not the character
 -- was in an Inn
 function AllPlayed:EstimateRestedXP( pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting, curent_xp )
-    --self:Debug("AllPlayed:EstimateRestedXP: %s, %s, %s, %s, %s, %s, %s",pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting)
-    -- I need to find out at what level a character starts to gain rested XP
+	 --self:Debug("AllPlayed:EstimateRestedXP: %s, %s, %s, %s, %s, %s, %s",pc, realm, level, rested_xp, max_rested_xp, last_update, is_resting)
+	 -- I need to find out at what level a character starts to gain rested XP
 
-    -- If the character is the current player and he is not in an Inn, he gains no rest
-    if pc == AllPlayed.pc and realm == self.realm and not is_resting then
-        return rested_xp
-    end
-    
-    -- It takes 10 days to for a character to be fully rested if he is in an Inn,
-    -- otherwise it takes 40 days.
-    local estimated_rested_xp
-    if is_resting then
-        estimated_rested_xp = min( rested_xp + floor( ( time()-last_update ) * ( max_rested_xp/TEN_DAYS ) ), max_rested_xp )
-    else
-        estimated_rested_xp = min( rested_xp + floor( ( time()-last_update ) * ( max_rested_xp/(4 * TEN_DAYS) ) ), max_rested_xp )
-    end
+	 -- If the character is the current player and he is not in an Inn, he gains no rest
+	 if pc == AllPlayed.pc and realm == self.realm and not is_resting then
+		  return rested_xp
+	 end
+	 
+	 -- It takes 10 days to for a character to be fully rested if he is in an Inn,
+	 -- otherwise it takes 40 days.
+	 local estimated_rested_xp
+	 if is_resting then
+		  estimated_rested_xp = min( rested_xp + floor( ( time()-last_update ) * ( max_rested_xp/TEN_DAYS ) ), max_rested_xp )
+	 else
+		  estimated_rested_xp = min( rested_xp + floor( ( time()-last_update ) * ( max_rested_xp/(4 * TEN_DAYS) ) ), max_rested_xp )
+	 end
 
-    -- If the character is at the last level before max level, he cannot have more rest
-    -- then what remains to level
-    if level == self.max_pc_level - 1 then
-    	estimated_rested_xp = min( estimated_rested_xp, XPToNextLevelCache[self.max_pc_level - 1] - curent_xp )
-    end
+	 -- If the character is at the last level before max level, he cannot have more rest
+	 -- then what remains to level
+	 if level == self.max_pc_level - 1 then
+		estimated_rested_xp = min( estimated_rested_xp, XPToNextLevelCache[self.max_pc_level - 1] - curent_xp )
+	 end
 
-    return estimated_rested_xp
+	 return estimated_rested_xp
 end
 
 
@@ -1599,26 +1636,26 @@ do -- Time Played functions closure
 end -- Time Played functions closure
 
 function AllPlayed:FormatTime(seconds)
-    return A:FormatDurationFull( seconds, false, not self:GetOption('show_seconds') )
+	 return A:FormatDurationFull( seconds, false, not self:GetOption('show_seconds') )
 end
 
 -- Function that format the XP based on the value
 -- The result is a string with XP, K XP or M XP depending on the size of the XP to display
 function FormatXP(xp)
-   local display_xp = ""
+	local display_xp = ""
 
-   if xp > 1000000 then
-      -- Millions of XP
-      display_xp = (L["%.1f M XP"]):format( xp / 1000000 )
-   elseif xp > 1000 then
-      -- Thousands of XP
-      display_xp = (L["%.1f K XP"]):format( xp / 1000 )
-   else
-      -- Very few XP
-      display_xp = (L["%d XP"]):format( xp )
-   end
+	if xp > 1000000 then
+		-- Millions of XP
+		display_xp = (L["%.1f M XP"]):format( xp / 1000000 )
+	elseif xp > 1000 then
+		-- Thousands of XP
+		display_xp = (L["%.1f K XP"]):format( xp / 1000 )
+	else
+		-- Very few XP
+		display_xp = (L["%d XP"]):format( xp )
+	end
 
-   return display_xp
+	return display_xp
 end
 
 -- Fonction that format the money string
@@ -1734,31 +1771,31 @@ end
 
 -- This function colorize the text based on the faction
 function FactionColour( faction, string )
-    if faction == "Horde" then
-        return C:Red(string)
-    elseif faction == "Alliance" then
-        -- Blue
-        return C:Colorize( "007fff", string )
-    else
-    	  -- Neutral (for Panda that have not left the Wandering Isle)
-    	  return C:White(string)
-    end
+	 if faction == "Horde" then
+		  return C:Red(string)
+	 elseif faction == "Alliance" then
+		  -- Blue
+		  return C:Colorize( "007fff", string )
+	 else
+		  -- Neutral (for Panda that have not left the Wandering Isle)
+		  return C:White(string)
+	 end
 end
 
 -- This function colorize the text based on the percent value
 -- percent must be a value in the range 0-1, not 0-100
 function PercentColour( percent, string )
-    return C:Colorize( C:GetThresholdHexColor( percent, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1 ), string )
+	 return C:Colorize( C:GetThresholdHexColor( percent, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1 ), string )
 end
 
 -- This function colorize the text based on the class
 -- If no class is defined, the text is colorized by faction
 function ClassColour( class, faction, string )
-    if class == "" or not AllPlayed:GetOption('colorize_class') then
-        return FactionColour( faction, string )
-    else
-        return C:Colorize( CLASS_COLOURS[class], string )
-    end
+	 if class == "" or not AllPlayed:GetOption('colorize_class') then
+		  return FactionColour( faction, string )
+	 else
+		  return C:Colorize( CLASS_COLOURS[class], string )
+	 end
 end
 
 -- This function format and colorize the Character name and level
@@ -2254,11 +2291,11 @@ local XPToLevelCache  = {}
 XPToLevelCache[0]     = 0
 XPToLevelCache[1]     = 0
 function XPToLevel( level )
-    if XPToLevelCache[level] == nil then
-        XPToLevelCache[level] = XPToNextLevel( level - 1 ) + XPToLevel( level - 1 )
-    end
+	 if XPToLevelCache[level] == nil then
+		  XPToLevelCache[level] = XPToNextLevel( level - 1 ) + XPToLevel( level - 1 )
+	 end
 
-    return XPToLevelCache[level]
+	 return XPToLevelCache[level]
 end
 
 -- This function caculate the number of XP that you need at a particular level to reach
@@ -2276,87 +2313,104 @@ function InitXPToLevelCache( game_version, build_version )
 		date, toc_number = select(3, _G.GetBuildInfo())
 	end
 
-	-- Values for the 5.4.7 patches
-	XPToNextLevelCache[10]    = 6700
-	XPToNextLevelCache[11]    = 7000
-	XPToNextLevelCache[12]    = 7700
-	XPToNextLevelCache[13]    = 8700
-	XPToNextLevelCache[14]    = 9700
-	XPToNextLevelCache[15]    = 10800
-	XPToNextLevelCache[16]    = 11900
-	XPToNextLevelCache[17]    = 13100
-	XPToNextLevelCache[18]    = 14200
-	XPToNextLevelCache[19]    = 15400
-	XPToNextLevelCache[20]    = 16600
-	XPToNextLevelCache[21]    = 17900
-	XPToNextLevelCache[22]    = 19200
-	XPToNextLevelCache[23]    = 20400
-	XPToNextLevelCache[24]    = 21800
-	XPToNextLevelCache[25]    = 23100
-	XPToNextLevelCache[26]    = 24400
-	XPToNextLevelCache[27]    = 25800
-	XPToNextLevelCache[28]    = 27100
-	XPToNextLevelCache[29]    = 29000
-	XPToNextLevelCache[30]    = 31000
-	XPToNextLevelCache[31]    = 33300
-	XPToNextLevelCache[32]    = 35700
-	XPToNextLevelCache[33]    = 38400
-	XPToNextLevelCache[34]    = 41100
-	XPToNextLevelCache[35]    = 44000
-	XPToNextLevelCache[36]    = 47000
-	XPToNextLevelCache[37]    = 49900
-	XPToNextLevelCache[38]    = 53000
-	XPToNextLevelCache[39]    = 56200
-	XPToNextLevelCache[40]    = 74300
-	XPToNextLevelCache[41]    = 78500
-	XPToNextLevelCache[42]    = 82800
-	XPToNextLevelCache[43]    = 87100
-	XPToNextLevelCache[44]    = 91600
-	XPToNextLevelCache[45]    = 96300
-	XPToNextLevelCache[46]    = 101000
-	XPToNextLevelCache[47]    = 105800
-	XPToNextLevelCache[48]    = 110700
-	XPToNextLevelCache[49]    = 115700
-	XPToNextLevelCache[50]    = 120900
-	XPToNextLevelCache[51]    = 126100
-	XPToNextLevelCache[52]    = 131500
-	XPToNextLevelCache[53]    = 137000
-	XPToNextLevelCache[54]    = 142500
-	XPToNextLevelCache[55]    = 148200
-	XPToNextLevelCache[56]    = 154000
-	XPToNextLevelCache[57]    = 159900
-	XPToNextLevelCache[58]    = 165800
-	XPToNextLevelCache[59]    = 172000
-	XPToNextLevelCache[60]	  = 290000
-	XPToNextLevelCache[61]	  = 317000
-	XPToNextLevelCache[62]	  = 349000
-	XPToNextLevelCache[63]	  = 386000
-	XPToNextLevelCache[64]	  = 428000
-	XPToNextLevelCache[65]	  = 475000
-	XPToNextLevelCache[66]	  = 527000
-	XPToNextLevelCache[67]	  = 585000
-	XPToNextLevelCache[68]	  = 648000
-	XPToNextLevelCache[69]	  = 717000
-	XPToNextLevelCache[70] 	  = 813000
-	XPToNextLevelCache[71] 	  = 821000
-	XPToNextLevelCache[72] 	  = 830000
-	XPToNextLevelCache[73] 	  = 838000
-	XPToNextLevelCache[74] 	  = 847000
-	XPToNextLevelCache[75] 	  = 855000
-	XPToNextLevelCache[76] 	  = 865000
-	XPToNextLevelCache[77] 	  = 873000
-	XPToNextLevelCache[78] 	  = 882000
-	XPToNextLevelCache[79] 	  = 891000
-	XPToNextLevelCache[80] 	  = 1686300
-	XPToNextLevelCache[81] 	  = 2121500
-	XPToNextLevelCache[82] 	  = 2669000
-	XPToNextLevelCache[83] 	  = 3469000
-	XPToNextLevelCache[84] 	  = 4583000
-	XPToNextLevelCache[85] 	  = 8670000
-	XPToNextLevelCache[86] 	  = 10050000
-	XPToNextLevelCache[87] 	  = 12650000
-	XPToNextLevelCache[88] 	  = 15250000
-	XPToNextLevelCache[89] 	  = 18370000
+	-- Values for the 6.2.0 patch
+	XPToNextLevelCache[10]	= 6700
+	XPToNextLevelCache[11]	= 7000
+	XPToNextLevelCache[12]	= 7700
+	XPToNextLevelCache[13]	= 8700
+	XPToNextLevelCache[14]	= 9700
+	XPToNextLevelCache[15]	= 10800
+	XPToNextLevelCache[16]	= 11900
+	XPToNextLevelCache[17]	= 13100
+	XPToNextLevelCache[18]	= 14200
+	XPToNextLevelCache[19]	= 15400
+	XPToNextLevelCache[20]	= 16600
+	XPToNextLevelCache[21]	= 17900
+	XPToNextLevelCache[22]	= 19200
+	XPToNextLevelCache[23]	= 20400
+	XPToNextLevelCache[24]	= 21800
+	XPToNextLevelCache[25]	= 23100
+	XPToNextLevelCache[26]	= 24400
+	XPToNextLevelCache[27]	= 25800
+	XPToNextLevelCache[28]	= 27100
+	XPToNextLevelCache[29]	= 29000
+	XPToNextLevelCache[30]	= 31000
+	XPToNextLevelCache[31]	= 33300
+	XPToNextLevelCache[32]	= 35700
+	XPToNextLevelCache[33]	= 38400
+	XPToNextLevelCache[34]	= 41100
+	XPToNextLevelCache[35]	= 44000
+	XPToNextLevelCache[36]	= 47000
+	XPToNextLevelCache[37]	= 49900
+	XPToNextLevelCache[38]	= 53000
+	XPToNextLevelCache[39]	= 56200
+	XPToNextLevelCache[40]	= 74300
+	XPToNextLevelCache[41]	= 78500
+	XPToNextLevelCache[42]	= 82800
+	XPToNextLevelCache[43]	= 87100
+	XPToNextLevelCache[44]	= 91600
+	XPToNextLevelCache[45]	= 96300
+	XPToNextLevelCache[46]	= 101000
+	XPToNextLevelCache[47]	= 105800
+	XPToNextLevelCache[48]	= 110700
+	XPToNextLevelCache[49]	= 115700
+	XPToNextLevelCache[50]	= 120900
+	XPToNextLevelCache[51]	= 126100
+	XPToNextLevelCache[52]	= 131500
+	XPToNextLevelCache[53]	= 137000
+	XPToNextLevelCache[54]	= 142500
+	XPToNextLevelCache[55]	= 148200
+	XPToNextLevelCache[56]	= 154000
+	XPToNextLevelCache[57]	= 159900
+	XPToNextLevelCache[58]	= 165800
+	XPToNextLevelCache[59]	= 172000
+	XPToNextLevelCache[60]	= 254000
+	XPToNextLevelCache[61]	= 275000
+	XPToNextLevelCache[62]	= 301000
+	XPToNextLevelCache[63]	= 328000
+	XPToNextLevelCache[64]	= 359000
+	XPToNextLevelCache[65]	= 367000
+	XPToNextLevelCache[66]	= 374000
+	XPToNextLevelCache[67]	= 381000
+	XPToNextLevelCache[68]	= 388000
+	XPToNextLevelCache[69]	= 395000
+	XPToNextLevelCache[70]	= 405000
+	XPToNextLevelCache[71]	= 415000
+	XPToNextLevelCache[72]	= 422000
+	XPToNextLevelCache[73]	= 427000
+	XPToNextLevelCache[74]	= 432000
+	XPToNextLevelCache[74]	= 847000
+	XPToNextLevelCache[75]	= 438000
+	XPToNextLevelCache[75]	= 855000
+	XPToNextLevelCache[76]	= 445000
+	XPToNextLevelCache[76]	= 865000
+	XPToNextLevelCache[77]	= 455000
+	XPToNextLevelCache[77]	= 873000
+	XPToNextLevelCache[78]	= 462000
+	XPToNextLevelCache[78]	= 882000
+	XPToNextLevelCache[79]	= 474000
+	XPToNextLevelCache[79]	= 891000
+	XPToNextLevelCache[80]	= 482000
+	XPToNextLevelCache[81]	= 487000
+	XPToNextLevelCache[82]	= 492000
+	XPToNextLevelCache[83]	= 497000
+	XPToNextLevelCache[84]	= 506000
+	XPToNextLevelCache[85]	= 517000
+	XPToNextLevelCache[86]	= 545000
+	XPToNextLevelCache[87]	= 550000
+	XPToNextLevelCache[88]	= 556000
+	XPToNextLevelCache[89]	= 562000
+	XPToNextLevelCache[90]	= 774800
+	XPToNextLevelCache[91]	= 783900
+	XPToNextLevelCache[92]	= 790400
+	XPToNextLevelCache[93]	= 798200
+	XPToNextLevelCache[94]	= 807300
+	XPToNextLevelCache[95]	= 815100
+	XPToNextLevelCache[96]	= 821600
+	XPToNextLevelCache[97]	= 830700
+	XPToNextLevelCache[98]	= 838500
+	XPToNextLevelCache[99]	= 846300
+	XPToNextLevelCache[100]	= 854100
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]
@@ -2377,24 +2431,24 @@ function InitXPToLevelCache( game_version, build_version )
 end
 --[[
 function XPToNextLevel( level )
-    if XPToNextLevelCache[level] == nil then
-        XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * XPDiff(level) + 360 * level
-    end
+	 if XPToNextLevelCache[level] == nil then
+		  XPToNextLevelCache[level] = 40 * level^2 + (5 * level + 45) * XPDiff(level) + 360 * level
+	 end
 
-    return XPToNextLevelCache[level]
+	 return XPToNextLevelCache[level]
 end
 
 
 -- This is a special function that is used to had difficulty (more XP) requirement after
 -- level 28
 function XPDiff( level )
-   local x = max( level - 28, 0 )
+	local x = max( level - 28, 0 )
 
-   if ( x < 4 ) then
-      return ( x * (x + 1) ) / 2
-   else
-      return 5 * (x - 2)
-   end
+	if ( x < 4 ) then
+		return ( x * (x + 1) ) / 2
+	else
+		return 5 * (x - 2)
+	end
 end
 ]]--
 
