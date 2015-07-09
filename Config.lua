@@ -6,15 +6,15 @@ local AP_display_name, AP = ...
 -- Localize some lua globals
 local _G = getfenv(0)
 
-local assert = _G.assert
-local geterrorhandler = _G.geterrorhandler
-local next = _G.next
-local pairs = _G.pairs
-local pairs = _G.pairs
-local select = _G.select
-local time = _G.time
-local tonumber = _G.tonumber
-local tostringall = _G.tostringall
+local assert				= _G.assert
+local geterrorhandler	= _G.geterrorhandler
+local next					= _G.next
+local pairs					= _G.pairs
+local pairs					= _G.pairs
+local select				= _G.select
+local time					= _G.time
+local tonumber				= _G.tonumber
+local tostringall			= _G.tostringall
 
 local function err(msg,...) geterrorhandler()(msg:format(tostringall(...)) .. " - " .. time()) end
 local LibStub = _G.LibStub
@@ -34,14 +34,14 @@ local DisplayConfigMenu
 local InitConfig
 
 -- Icons
-local valor_icon = "\124TInterface\\Icons\\pvecurrency-valor:0:0:2:0:64:64\124t"
-local justice_icon = "\124TInterface\\Icons\\pvecurrency-justice:0:0:2:0:64:64\124t"
-local honor_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0:0:2:0:64:64\124t'
-local honor_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t'
-local conquest_alliance_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Alliance:0:0:2:0:64:64\124t'
-local conquest_horde_icon = '\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t'
-local kill_icon = '\124TInterface\\Icons\\Spell_Holy_BlessingOfStrength:0:0:2:0:64:64\124t'
-local ap_icon = '\124TInterface\\Icons\\INV_Misc_PocketWatch_02:0:0\124t'
+local valor_icon					= "\124TInterface\\Icons\\pvecurrency-valor:0:0:2:0:64:64\124t"
+local justice_icon				= "\124TInterface\\Icons\\pvecurrency-justice:0:0:2:0:64:64\124t"
+local honor_alliance_icon		= '\124TInterface\\Icons\\PVPCurrency-Honor-Alliance:0:0:2:0:64:64\124t'
+local honor_horde_icon			= '\124TInterface\\Icons\\PVPCurrency-Honor-Horde:0:0:2:0:64:64\124t'
+local conquest_alliance_icon	= '\124TInterface\\Icons\\PVPCurrency-Conquest-Alliance:0:0:2:0:64:64\124t'
+local conquest_horde_icon		= '\124TInterface\\Icons\\PVPCurrency-Conquest-Horde:0:0:2:0:64:64\124t'
+local kill_icon					= '\124TInterface\\Icons\\Spell_Holy_BlessingOfStrength:0:0:2:0:64:64\124t'
+local ap_icon						= '\124TInterface\\Icons\\INV_Misc_PocketWatch_02:0:0\124t'
 
 -- Version iditification management
 do
@@ -371,6 +371,20 @@ local function ReturnConfigMenu()
 	-- Set version for display
 	config_menu[2].text = GetVersionString()
 
+	-- Deal with the deprecated values
+	if not AllPlayed:GetOption('show_deprecated') then
+		config_menu[4].menuList[10] = config_menu[4].menuList[12]
+		config_menu[4].menuList[11] = config_menu[4].menuList[14]
+		config_menu[4].menuList[12] = config_menu[4].menuList[15]
+		config_menu[4].menuList[13] = config_menu[4].menuList[16]
+		config_menu[4].menuList[14] = config_menu[4].menuList[16]
+		config_menu[4].menuList[15] = config_menu[4].menuList[17]
+		config_menu[4].menuList[16] = config_menu[4].menuList[18]
+		config_menu[4].menuList[17] = config_menu[4].menuList[19]
+		config_menu[4].menuList[18] = nil
+		config_menu[4].menuList[19] = nil
+	end
+	
 	-- All the checkbox options need to have their menu with the menu button
 	-- and a pair of function to get and set the options
 	local function AddCheckboxOption(menu)
@@ -378,39 +392,40 @@ local function ReturnConfigMenu()
 		local foundCheck = false
 
 		for i=1,#menu do
-			menu[i].isNotRadio = true
-			if not menu[i].checked and not menu[i].list then
-				menu[i].notCheckable = true
-			end
-
-			if menu[i].checked then
-				menu[i].tooltipOnButton = 1
-				menu[i].keepShownOnClick = 1
-				menu[i].value = menu[i].checked
-				menu[i].checked = function() return AllPlayed:GetOption(menu[i].value) end
-				menu[i].func = function(dropdownmenu, arg1, arg2, checked)
-					AllPlayed:SetOption(dropdownmenu.value, not AllPlayed:GetOption(dropdownmenu.value))
+			if menu[i] then
+				menu[i].isNotRadio = true
+				if not menu[i].checked and not menu[i].list then
+					menu[i].notCheckable = true
 				end
-				foundCheck = true
-			end
 
-			-- For options where you choose one choice from a list of set arguments
-			-- arg1 contains the choice
-			if menu[i].list then
-				menu[i].isNotRadio = nil
-				menu[i].tooltipOnButton = 1
-				menu[i].value = menu[i].list
-				menu[i].checked = function() return AllPlayed:GetOption(menu[i].value) == menu[i].arg1 end
-				menu[i].func = function(dropdownmenu, arg1, arg2, checked)
-					AllPlayed:SetOption(dropdownmenu.value, arg1)
+				if menu[i].checked then
+					menu[i].tooltipOnButton = 1
+					menu[i].keepShownOnClick = 1
+					menu[i].value = menu[i].checked
+					menu[i].checked = function() return AllPlayed:GetOption(menu[i].value) end
+					menu[i].func = function(dropdownmenu, arg1, arg2, checked)
+						AllPlayed:SetOption(dropdownmenu.value, not AllPlayed:GetOption(dropdownmenu.value))
+					end
+					foundCheck = true
 				end
-				menu[i].list = nil
-				foundCheck = true
+
+				-- For options where you choose one choice from a list of set arguments
+				-- arg1 contains the choice
+				if menu[i].list then
+					menu[i].isNotRadio = nil
+					menu[i].tooltipOnButton = 1
+					menu[i].value = menu[i].list
+					menu[i].checked = function() return AllPlayed:GetOption(menu[i].value) == menu[i].arg1 end
+					menu[i].func = function(dropdownmenu, arg1, arg2, checked)
+						AllPlayed:SetOption(dropdownmenu.value, arg1)
+					end
+					menu[i].list = nil
+					foundCheck = true
+				end
+
+				-- Submenus
+				if menu[i].menuList then AddCheckboxOption(menu[i].menuList) end
 			end
-
-			-- Submenus
-			if menu[i].menuList then AddCheckboxOption(menu[i].menuList) end
-
 		end
 
 	end
@@ -442,7 +457,7 @@ local function ReturnConfigMenu()
 			end
 		end
 	end
-	
+
 	return config_menu
 end
 
@@ -855,6 +870,23 @@ local function GetOptions()
 			},
 		},
 	}
+
+	-- Remove deprecated options
+	-- Deal with the deprecated values
+	if not AllPlayed:GetOption('show_deprecated') then
+		options.args.display.args.valor						= nil
+		options.args.display.args.show_valor_points		= nil
+		options.args.display.args.show_valor_total		= nil
+		options.args.display.args.justice					= nil
+		options.args.display.args.show_justice_points	= nil
+		options.args.display.args.show_justice_total		= nil
+		options.args.display.args.pvp							= nil
+		options.args.display.args.show_honor_kills		= nil
+		options.args.display.args.show_honor_points		= nil
+		options.args.display.args.show_conquest_points	= nil
+		options.args.display.args.show_pvp_totals			= nil
+	end
+
 
 	-- Ignore section
 	local faction_order = 1

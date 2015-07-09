@@ -227,6 +227,9 @@ local default_options = {
 				['*'] = {}
 			}
 		},
+		options = {
+			show_deprecated				= false,
+		},
 	},
 	profile = {
 		options = {
@@ -247,15 +250,6 @@ local default_options = {
 			show_location              = "none",
 			show_guild						= false,
 			show_xp_total              = true,
-			show_valor_points				= false,
-			show_valor_total				= false,
-			show_justice_points			= false,
-			show_justice_total			= false,
-			show_arena_points				= false,
-			show_conquest_points			= false,
-			show_honor_points				= false,
-			show_honor_kills				= false,
-			show_pvp_totals				= false,
 			show_lvl_totals				= false,
 			tooltip_scale					= 1,
 			opacity							= .9,
@@ -273,6 +267,18 @@ local default_options = {
 			ldbicon = {
 			  hide = nil,
 			},
+
+			-- Deprecated values that will be removed
+			show_valor_points				= false,
+			show_valor_total				= false,
+			show_justice_points			= false,
+			show_justice_total			= false,
+			show_arena_points				= false,
+			show_conquest_points			= false,
+			show_honor_points				= false,
+			show_honor_kills				= false,
+			show_pvp_totals				= false,
+
 		},
 	},
 }
@@ -1360,10 +1366,23 @@ end
 
 --[[ Methods used for the option menu ]]--
 
+-- Options that are be deprecated
+local deprecated_options = {
+	show_valor_points				= true,
+	show_valor_total				= true,
+	show_justice_points			= true,
+	show_justice_total			= true,
+	show_arena_points				= true,
+	show_conquest_points			= true,
+	show_honor_points				= true,
+	show_honor_kills				= true,
+	show_pvp_totals				= true,
+}
+
+
 -- Get the option value
 function AllPlayed:GetOption( option, ... )
 	--self:Debug(format("AllPlayed:GetOption(%s) = %s", option or 'nil', tostring(self.db.profile.options[option] or 'nil')))
-
 
 	-- is_ignored has multiple parameters
 	if option == 'is_ignored' then
@@ -1390,6 +1409,14 @@ function AllPlayed:GetOption( option, ... )
 
 	elseif option == 'show_minimap_icon' then
 		return not self.db.profile.options.ldbicon.hide
+	elseif option == 'show_deprecated' then
+		-- global option
+		return self.db.global.options.show_deprecated
+	end
+
+	-- Disable all the currencies except gold
+	if not self.db.global.options.show_deprecated and deprecated_options[option] then
+		return false
 	end
 
 	return self.db.profile.options[option]
@@ -1495,6 +1522,15 @@ function AllPlayed:SetOption( option, value, ... )
 		end
 
 		ldbicon:Refresh("AllPlayed", self.db.profile.options.ldbicon)
+
+		already_set = true
+	elseif option == 'show_deprecated' then
+		-- global option
+		if value then
+			self.db.global.options.show_deprecated = true
+		else
+			self.db.global.options.show_deprecated = false
+		end
 
 		already_set = true
 	end
