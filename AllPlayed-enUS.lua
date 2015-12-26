@@ -214,3 +214,8 @@ L["Show the total levels for all characters"]							= true
 
 L["Show Guild Name"]																= true
 L["Show the character guild name"]											= true
+
+-- New stuff for 60200-1
+L["Logged in"]																		= true
+L["Seen"]																			= true
+L["ago"]																				= true

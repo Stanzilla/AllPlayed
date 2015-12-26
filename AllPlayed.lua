@@ -28,6 +28,9 @@ local tremove				= _G.tremove
 local type					= _G.type
 local wipe					= _G.wipe
 
+-- Debuging helper function
+local function err(msg,...) _G.geterrorhandler()(msg:format(_G.tostringall(...)) .. " - " .. _G.time()) end
+
 -- Non Blizzard globals that need to be localized
 local LibStub = _G.LibStub
 
@@ -238,6 +241,7 @@ local default_options = {
 			all_realms                 = true,
 			show_coins						= true,
 			show_played_time				= true,
+			show_last_login				= true,
 			show_seconds               = false,
 			show_progress              = true,
 			show_rested_xp             = false,
@@ -793,6 +797,10 @@ function AllPlayed:DrawTooltip(anchor)
 	local need_ilevel = self:GetOption('show_ilevel')
 	if need_ilevel then nb_columns = nb_columns + 1 end
 
+	-- Do we need to display the last login
+	local need_last_login = self:GetOption('show_last_login')
+	if need_last_login then nb_columns = nb_columns + 1 end
+
 	-- De we need to display the Valor Points
 	local need_vp =	self:GetOption('show_valor_points')
 	if need_vp then nb_columns = nb_columns + 1 end
@@ -924,6 +932,9 @@ function AllPlayed:DrawTooltip(anchor)
 															  pc_data.seconds_played_last_update
 														  )
 
+if type(pc_data.last_update) ~= "number" then
+	err("realm = %s, pc = %s, pc_data.last_update = %s", realm, pc, pc_data.last_update)
+end
 							col_text[col_no] = FormatCharacterName(
 															pc,
 															pc_data.level,
@@ -931,7 +942,8 @@ function AllPlayed:DrawTooltip(anchor)
 															seconds_played,
 															pc_data.class,
 															pc_data.class_loc,
-															faction
+															faction,
+															pc_data.last_update
 													 )
 							col_align[col_no] = 'LEFT'
 
@@ -1019,6 +1031,21 @@ function AllPlayed:DrawTooltip(anchor)
 
 							if self:GetOption('show_conquest_points') then
 								col_text[col_no] = FormatHonor(faction, nil, nil, nil, pc_data.conquest_points)
+								col_align[col_no] = 'CENTER'
+								col_no = col_no + 1
+								col_text[col_no] = ''
+							end
+
+							if need_last_login then
+								if pc == AllPlayed.pc then
+									-- The PC is loged in
+									col_text[col_no] = C:Yellow(L["Logged in"])
+								else
+									col_text[col_no] = pc_data.last_update and 
+															 pc_data.last_update ~= 0 and 
+															 ("%s %s %s"):format(C:Cyan(L["Seen"]), C:White(AllPlayed:FormatTime(time() - pc_data.last_update)), C:Cyan(L["ago"])) 
+															 or ""
+								end
 								col_align[col_no] = 'CENTER'
 								col_no = col_no + 1
 								col_text[col_no] = ''
@@ -1800,7 +1827,7 @@ end
 
 -- This function format and colorize the Character name and level
 -- based on the options selected by the user
-function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, faction )
+function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, faction, last_update )
 	--AllPlayed:Debug("FormatCharacterName: %s, %s, %s, %s, %s, %s, %s",pc, level, xp, seconds_played, class, class_loc, faction)
 
 	local result_string     = ""
@@ -1834,6 +1861,16 @@ function FormatCharacterName( pc, level, xp, seconds_played, class, class_loc, f
 	if AllPlayed:GetOption('show_played_time') then
 		result_string = result_string .. FactionColour(faction, " : %s"):format(AllPlayed:FormatTime(seconds_played))
 	end
+
+	-- if AllPlayed:GetOption('show_last_login') then
+	-- 	if pc == AllPlayed.pc then
+	-- 		-- The PC is loged in
+	-- 		result_string = result_string .. FactionColour(faction, " : *** %s ***"):format(L["Logged In"])
+
+	-- 	else
+	-- 		result_string = result_string .. FactionColour(faction, " : Seen %s ago"):format(AllPlayed:FormatTime(time() - last_update))
+	-- 	end
+	-- end
 
 	-- Do we need to show the total XP
 	if AllPlayed:GetOption('show_xp_total') and xp ~= -1 then
