@@ -32,7 +32,7 @@ L["All factions will be displayed"]                      			= true
 L["All Realms"]                                          			= true
 L["All realms will de displayed"]                        			= true
 L["Show Played Time"]															= true
-L["Display the played time and the total time played"]				= true
+L["Display the total time played per character"]						= true
 L["Show Seconds"]                                        			= true
 L["Display the seconds in the time strings"]             			= true
 L["Show Gold"]                                    						= true
@@ -215,7 +215,9 @@ L["Show the total levels for all characters"]							= true
 L["Show Guild Name"]																= true
 L["Show the character guild name"]											= true
 
--- New stuff for 60200-1
+-- New stuff for 60200-2
 L["Logged in"]																		= true
-L["Seen"]																			= true
-L["ago"]																				= true
+L["|cff00ffffSeen |cffffffff%s |cff00ffffago|r"]						= true
+L["Show Last Loggin"]															= true
+L["Display the elapse time since the character was last logged in"]
+																						= true

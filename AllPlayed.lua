@@ -241,7 +241,7 @@ local default_options = {
 			all_realms                 = true,
 			show_coins						= true,
 			show_played_time				= true,
-			show_last_login				= true,
+			show_last_login				= false,
 			show_seconds               = false,
 			show_progress              = true,
 			show_rested_xp             = false,
@@ -1043,7 +1043,7 @@ end
 								else
 									col_text[col_no] = pc_data.last_update and 
 															 pc_data.last_update ~= 0 and 
-															 ("%s %s %s"):format(C:Cyan(L["Seen"]), C:White(AllPlayed:FormatTime(time() - pc_data.last_update)), C:Cyan(L["ago"])) 
+															 (L["|cff00ffffSeen |cffffffff%s |cff00ffffago|r"]):format(AllPlayed:FormatTime(time() - pc_data.last_update)) 
 															 or ""
 								end
 								col_align[col_no] = 'CENTER'

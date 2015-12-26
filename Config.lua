@@ -102,35 +102,40 @@ local function ReturnConfigMenu()
 				},
 				[3] = {
 					text = L["Show Played Time"];
-					tooltipText = L["Display the played time and the total time played"];
+					tooltipText = L["Display the total time played per character"];
 					checked = 'show_played_time';
 				},
 				[4] = {
+					text = L["Show Last Loggin"];
+					tooltipText = L["Display the elapse time since the character was last logged in"];
+					checked = 'show_last_login';
+				},
+				[5] = {
 					text = L["Show Seconds"];
 					tooltipText = L["Display the seconds in the time strings"];
 					checked = 'show_seconds';
 				},
-				[5] = {
+				[6] = {
 					text = L["Show Gold"];
 					tooltipText = L["Display the gold each character pocess"];
 					checked = 'show_coins';
 				},
-				[6] = {
+				[7] = {
 					text = L["Show XP Progress"];
 					tooltipText = L["Display XP progress as a decimal value appended to the level"];
 					checked = 'show_progress';
 				},
-				[7] = {
+				[8] = {
 					text = L["Show XP total"];
 					tooltipText = L["Show the total XP for all characters"];
 					checked = 'show_xp_total';
 				},
-				[8] = {
+				[9] = {
 					text = L["Show level total"];
 					tooltipText = L["Show the total levels for all characters"];
 					checked = 'show_lvl_totals';
 				},
-				[9] = {
+				[10] = {
 					text = L["Show Location"];
 					tooltipText = L["Show the character location"];
 					hasArrow = true;
@@ -157,7 +162,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[10] = {
+				[11] = {
 					text = (L["%s (%s)"]):format(L["Valor Points"],valor_icon);
 					hasArrow = true;
 					menuList = {
@@ -173,7 +178,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[11] = {
+				[12] = {
 					text = (L["%s (%s)"]):format(L["Justice Points"],justice_icon);
 					hasArrow = true;
 					menuList = {
@@ -189,7 +194,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[12] = {
+				[13] = {
 					text = L["Rested XP"];
 					tooltipText = L["Set the rested XP options"];
 					hasArrow = true;
@@ -228,7 +233,7 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[13] = {
+				[14] = {
 					text = L["PVP"];
 					tooltipText = L["Set the PVP options"];
 					hasArrow = true;
@@ -258,32 +263,32 @@ local function ReturnConfigMenu()
 						},
 					},
 				},
-				[14] = {
+				[15] = {
 					text = L["Show Class Name"];
 					tooltipText = L["Show the character class beside the level"];
 					checked = 'show_class_name';
 				},
-				[15] = {
+				[16] = {
 					text = L["Colorize Class"];
 					tooltipText = L["Colorize the character name based on class"];
 					checked = 'colorize_class';
 				},
-				[16] = {
+				[17] = {
 					text = L["Show Item Level"];
 					tooltipText = L["Show the character item level (iLevel)"];
 					checked = 'show_ilevel';
 				},
-				[17] = {
+				[18] = {
 					text = L["Show Guild Name"];
 					tooltipText = L["Show the character guild name"];
 					checked = 'show_guild';
 				},
-				[18] = {
+				[19] = {
 					text = L["Use Icons"];
 					tooltipText = L["Use graphics for coin and PvP currencies"];
 					checked = 'use_icons';
 				},
-				[19] = {
+				[20] = {
 					text = L["Use Old Shaman Colour"];
 					tooltipText = L["Use the pre-210 patch colour for the Shaman class"];
 					checked = 'use_pre_210_shaman_colour';
@@ -373,16 +378,16 @@ local function ReturnConfigMenu()
 
 	-- Deal with the deprecated values
 	if not AllPlayed:GetOption('show_deprecated') then
-		config_menu[4].menuList[10] = config_menu[4].menuList[12]
-		config_menu[4].menuList[11] = config_menu[4].menuList[14]
+		config_menu[4].menuList[11] = config_menu[4].menuList[13]
 		config_menu[4].menuList[12] = config_menu[4].menuList[15]
 		config_menu[4].menuList[13] = config_menu[4].menuList[16]
 		config_menu[4].menuList[14] = config_menu[4].menuList[16]
 		config_menu[4].menuList[15] = config_menu[4].menuList[17]
 		config_menu[4].menuList[16] = config_menu[4].menuList[18]
 		config_menu[4].menuList[17] = config_menu[4].menuList[19]
-		config_menu[4].menuList[18] = nil
+		config_menu[4].menuList[18] = config_menu[4].menuList[20]
 		config_menu[4].menuList[19] = nil
+		config_menu[4].menuList[20] = nil
 	end
 	
 	-- All the checkbox options need to have their menu with the menu button
@@ -629,21 +634,29 @@ local function GetOptions()
 						name = L["Time Played"],
 						order     = 3,
 					},
-					 show_played_time = {
+					show_played_time = {
 						  name      = L["Show Played Time"],
-						  desc      = L["Display the played time and the total time played"],
+						  desc      = L["Display the total time played per character"],
 						  type      = 'toggle',
 						  get       = function() return AllPlayed:GetOption('show_played_time') end,
 						  set       = function(info, v) AllPlayed:SetOption('show_played_time',v) end,
 						  order     = 3.1,
-					 },
-					 show_seconds = {
+					},
+					show_last_login = {
+					 	  name      = L["Show Last Loggin"],
+					 	  desc      = L["Display the elapse time since the character was last logged in"],
+					 	  type      = 'toggle',
+					 	  get       = function() return AllPlayed:GetOption('show_last_login') end,
+					 	  set       = function(info, v) AllPlayed:SetOption('show_last_login',v) end,
+					 	  order     = 3.2,
+					},
+					show_seconds = {
 						  name      = L["Show Seconds"],
 						  desc      = L["Display the seconds in the time strings"],
 						  type      = 'toggle',
 						  get       = function() return AllPlayed:GetOption('show_seconds') end,
 						  set       = function(info, v) AllPlayed:SetOption('show_seconds',v) end,
-						  order     = 3.2,
+						  order     = 3.3,
 					 },
 					xp = {
 						type = 'header',
