@@ -107,7 +107,7 @@ local function ReturnConfigMenu()
 				},
 				[4] = {
 					text = L["Show Last Loggin"];
-					tooltipText = L["Display the elapse time since the character was last logged in"];
+					tooltipText = L["Display the elapsed time since the character was last logged in"];
 					checked = 'show_last_login';
 				},
 				[5] = {
@@ -644,7 +644,7 @@ local function GetOptions()
 					},
 					show_last_login = {
 					 	  name      = L["Show Last Loggin"],
-					 	  desc      = L["Display the elapse time since the character was last logged in"],
+					 	  desc      = L["Display the elapsed time since the character was last logged in"],
 					 	  type      = 'toggle',
 					 	  get       = function() return AllPlayed:GetOption('show_last_login') end,
 					 	  set       = function(info, v) AllPlayed:SetOption('show_last_login',v) end,
