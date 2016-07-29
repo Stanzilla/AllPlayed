@@ -23,7 +23,6 @@
 ## X-Date: $Date$
 
 ## $Id$
-
 ## DefaultState: enabled
 
 ## OptionalDeps: Ace3, LibAbacus-3.0, LibCrayon-3.0, !ClassColors, LibQTip-1.0, LibDBIcon-1.0
