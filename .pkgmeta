@@ -42,5 +42,6 @@ externals:
         tag: latest
 tools-used: 
     - libdatabroker-1-1
+    - FindGlobals
     
     
