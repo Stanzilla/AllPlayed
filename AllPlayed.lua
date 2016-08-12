@@ -395,6 +395,7 @@ function AllPlayed:OnEnable()
 
 	 -- Class colours
 	 CLASS_COLOURS['DEATHKNIGHT']	= AllPlayed.GetClassHexColour("DEATHKNIGHT")
+	 CLASS_COLOURS['DEMONHUNTER']	= AllPlayed.GetClassHexColour("DEMONHUNTER")
 	 CLASS_COLOURS['DRUID']      	= AllPlayed.GetClassHexColour("DRUID")
 	 CLASS_COLOURS['HUNTER']     	= AllPlayed.GetClassHexColour("HUNTER")
 	 CLASS_COLOURS['MAGE']       	= AllPlayed.GetClassHexColour("MAGE")
