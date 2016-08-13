@@ -394,26 +394,15 @@ function AllPlayed:OnEnable()
 	 -- Initial update of values
 
 	 -- Class colours
-	 CLASS_COLOURS['DEATHKNIGHT']	= AllPlayed.GetClassHexColour("DEATHKNIGHT")
-	 CLASS_COLOURS['DEMONHUNTER']	= AllPlayed.GetClassHexColour("DEMONHUNTER")
-	 CLASS_COLOURS['DRUID']      	= AllPlayed.GetClassHexColour("DRUID")
-	 CLASS_COLOURS['HUNTER']     	= AllPlayed.GetClassHexColour("HUNTER")
-	 CLASS_COLOURS['MAGE']       	= AllPlayed.GetClassHexColour("MAGE")
-	 CLASS_COLOURS['MONK']       	= AllPlayed.GetClassHexColour("MONK")
-	 CLASS_COLOURS['PALADIN']    	= AllPlayed.GetClassHexColour("PALADIN")
-	 CLASS_COLOURS['PRIEST']     	= AllPlayed.GetClassHexColour("PRIEST")
-	 CLASS_COLOURS['ROGUE']      	= AllPlayed.GetClassHexColour("ROGUE")
-	 CLASS_COLOURS['WARLOCK']    	= AllPlayed.GetClassHexColour("WARLOCK")
-	 CLASS_COLOURS['WARRIOR']    	= AllPlayed.GetClassHexColour("WARRIOR")
+	 for classname in pairs(_G.RAID_CLASS_COLORS) do
+	 	CLASS_COLOURS[classname]	= AllPlayed.GetClassHexColour(classname)
+	 end
 
 	 CLASS_COLOURS['PRE-210-SHAMAN'] = "00dbba"
-
 
 	 -- What colour should be used for Shaman?
 	 if(self:GetOption('use_pre_210_shaman_colour')) then
 		CLASS_COLOURS['SHAMAN'] = CLASS_COLOURS['PRE-210-SHAMAN']
-	 else
-		CLASS_COLOURS['SHAMAN'] = AllPlayed.GetClassHexColour("SHAMAN")
 	 end
 
 	 -- Get the values for the current character
