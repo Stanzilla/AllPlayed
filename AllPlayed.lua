@@ -38,7 +38,7 @@ local LibStub = _G.LibStub
 if not _G.AllPlayed_revision then _G.AllPlayed_revision = {} end
 local AllPlayed_revision = _G.AllPlayed_revision
 AllPlayed_revision.main	= ("$Revision$"):match("(%d+)")
-AllPlayed_revision.toc  = _G.GetAddOnMetadata("AllPlayed", "Version"):match("%$Revision:%s(%d+)")
+AllPlayed_revision.toc  = _G.GetAddOnMetadata(AP_display_name, "Version"):match("%$Revision:%s(%d+)")
 
 -- Backward and forward compatilility when playing Cataclysm
 local GetHonorCurrency		= _G.GetHonorCurrency or function() return select(2,_G.GetCurrencyInfo(392)) or 0 end
@@ -79,13 +79,22 @@ local AllPlayed = LibStub("AceAddon-3.0"):NewAddon("AllPlayed", "AceEvent-3.0", 
 _G[AP_display_name] = AllPlayed
 
 -- Print function
+local myfullname = _G.GetAddOnMetadata(AP_display_name, "Title")
 local default_channel = nil
 local function setDefaultChanelForPrint()
 	default_channel = nil
 	for i=1, _G.NUM_CHAT_WINDOWS do
-		local name = _G.GetChatWindowInfo(i)
-		if name and name:lower() == 'output' then
+		local name, _, _, _, _, shown = _G.GetChatWindowInfo(i)
+		if not default_channel and name and shown and (name:lower() == AP_display_name:lower() or name:lower() == myfullname:lower()) then
 			default_channel = i
+		end
+	end
+	if not default_channel then
+		for i=1, _G.NUM_CHAT_WINDOWS do
+			local name, _, _, _, _, shown = _G.GetChatWindowInfo(i)
+			if not default_channel and name and shown and name:lower() == 'output' then
+				default_channel = i
+			end
 		end
 	end
 end
