@@ -34,6 +34,11 @@ libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 embeds.xml
 
+# Libraries that replace the trainted UIDropDownMenu
+libs\DropDown-1.2\UIDropDownMenuTemplates.xml
+libs\DropDown-1.2\UIDropDownMenu.lua
+libs\DropDown-1.2\EasyMenu.lua
+
 AllPlayed-enUS.lua
 AllPlayed-deDE.lua
 AllPlayed-esES.lua

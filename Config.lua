@@ -467,7 +467,7 @@ local function ReturnConfigMenu()
 end
 
 do
-	local dropdownFrame = _G.CreateFrame("Frame", "AllPlayedDropdownMenu", nil, "UIDropDownMenuTemplate")
+	local dropdownFrame = _G.CreateFrame("Frame", "AllPlayedDropdownMenu", nil, "Lib_UIDropDownMenuTemplate")
 
 	function DisplayConfigMenu(anchorFrame)
 		local anchor
@@ -477,7 +477,7 @@ do
 			anchor = "cursor"
 		end
 
-		_G.EasyMenu(AP.config_menu, dropdownFrame, anchor, nil, nil, "MENU")
+		_G.Lib_EasyMenu(AP.config_menu, dropdownFrame, anchor, nil, nil, "MENU")
 	end
 end -- do
 
