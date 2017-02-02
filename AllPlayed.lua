@@ -2349,7 +2349,7 @@ function InitXPToLevelCache( game_version, build_version )
 		date, toc_number = select(3, _G.GetBuildInfo())
 	end
 
-	-- Values for the 6.2.0 patch
+	-- Values for the 7.1.0 patch
 	XPToNextLevelCache[10]	= 6700
 	XPToNextLevelCache[11]	= 7000
 	XPToNextLevelCache[12]	= 7700
@@ -2415,17 +2415,11 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[72]	= 422000
 	XPToNextLevelCache[73]	= 427000
 	XPToNextLevelCache[74]	= 432000
-	XPToNextLevelCache[74]	= 847000
 	XPToNextLevelCache[75]	= 438000
-	XPToNextLevelCache[75]	= 855000
 	XPToNextLevelCache[76]	= 445000
-	XPToNextLevelCache[76]	= 865000
 	XPToNextLevelCache[77]	= 455000
-	XPToNextLevelCache[77]	= 873000
 	XPToNextLevelCache[78]	= 462000
-	XPToNextLevelCache[78]	= 882000
 	XPToNextLevelCache[79]	= 474000
-	XPToNextLevelCache[79]	= 891000
 	XPToNextLevelCache[80]	= 482000
 	XPToNextLevelCache[81]	= 487000
 	XPToNextLevelCache[82]	= 492000
@@ -2444,9 +2438,19 @@ function InitXPToLevelCache( game_version, build_version )
 	XPToNextLevelCache[95]	= 815100
 	XPToNextLevelCache[96]	= 821600
 	XPToNextLevelCache[97]	= 830700
-	XPToNextLevelCache[98]	= 838500
-	XPToNextLevelCache[99]	= 846300
-	XPToNextLevelCache[100]	= 854100
+	XPToNextLevelCache[98]  = 645000
+	XPToNextLevelCache[99]  = 651000
+	XPToNextLevelCache[100] = 657000
+	XPToNextLevelCache[101] = 663000
+	XPToNextLevelCache[102] = 669000
+	XPToNextLevelCache[103] = 675000
+	XPToNextLevelCache[104] = 681000
+	XPToNextLevelCache[105] = 687000
+	XPToNextLevelCache[106] = 693000
+	XPToNextLevelCache[107] = 699000
+	XPToNextLevelCache[108] = 705000
+	XPToNextLevelCache[109] = 711000
+	XPToNextLevelCache[110] = 717000
 
 	-- Initialize the exceptions that were found by AllPlayed
 	--	XPToNextLevelCache = self.db.global.cache.XPToNextLevel[build_version]
