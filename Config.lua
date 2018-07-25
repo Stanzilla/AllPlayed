@@ -10,7 +10,6 @@ local assert				= _G.assert
 local geterrorhandler	= _G.geterrorhandler
 local next					= _G.next
 local pairs					= _G.pairs
-local pairs					= _G.pairs
 local select				= _G.select
 local time					= _G.time
 local tonumber				= _G.tonumber
@@ -29,9 +28,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("AllPlayed")
 
 -- Local functions
 local GetVersionString
-local ReturnConfigMenu
 local DisplayConfigMenu
-local InitConfig
 
 -- Icons
 local valor_icon					= "\124TInterface\\Icons\\pvecurrency-valor:0:0:2:0:64:64\124t"
@@ -53,7 +50,7 @@ do
 			local revision = 0
 			if _G.AllPlayed_revision then
 				for _, rev in pairs(_G.AllPlayed_revision) do
-					local rev = tonumber(rev)
+					rev = tonumber(rev)
 					if rev and rev > revision then revision = rev end
 				end
 			else
