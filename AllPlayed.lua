@@ -383,17 +383,12 @@ function AllPlayed:OnEnable()
 	 self:RegisterEvent("PLAYER_XP_UPDATE",      		"EventHandlerWithSort")
 	 self:RegisterEvent("ZONE_CHANGED_NEW_AREA", 		"EventHandler")
 	 self:RegisterEvent("ZONE_CHANGED",          		"EventHandler")
-	 self:RegisterEvent("MINIMAP_ZONE_CHANGED",  		"EventHandler")
 	 self:RegisterEvent("PLAYER_MONEY",      				"EventHandler")
 	 self:RegisterEvent("CURRENCY_DISPLAY_UPDATE",     "EventHandler")
 	 self:RegisterEvent("PLAYER_GUILD_UPDATE",			"EventHandler")
 	 self:RegisterEvent("PLAYER_UPDATE_RESTING",			"EventHandler")
 	 self:RegisterEvent("CHAT_MSG_COMBAT_HONOR_GAIN",  "EventHandlerHonorGain")
 	 self:RegisterEvent("BAG_UPDATE",     					"EventHandlerOnlySort")
-
-	 -- Hook the functions that need hooking
-	 self:Hook("Logout", true)
-	 self:Hook("Quit",   true)
 
 	 -- Initialize values that don't change between reloads
 	 self.faction, self.loc_faction	= _G.UnitFactionGroup("player")
@@ -404,7 +399,7 @@ function AllPlayed:OnEnable()
 
 	 -- Class colours
 	 for classname in pairs(_G.RAID_CLASS_COLORS) do
-	 	CLASS_COLOURS[classname]	= AllPlayed.GetClassHexColour(classname)
+	    CLASS_COLOURS[classname]	= AllPlayed.GetClassHexColour(classname)
 	 end
 
 	 CLASS_COLOURS['PRE-210-SHAMAN'] = "00dbba"
@@ -416,10 +411,10 @@ function AllPlayed:OnEnable()
 
 	 -- Get the values for the current character
 	 self:SaveVar()
-	 
+
 	 -- Detect faction change
 	 self:DetectFactionChange()
-	 
+
 	 -- Compute Honor at least once (it will be computed only if it change afterward
 	 self:ComputeTotalHonor()
 
