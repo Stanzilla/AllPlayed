@@ -1,4 +1,4 @@
-## Interface: 70100
+## Interface: 80000
 ## Author: LaoTseu
 ## Title: AllPlayed
 ## Notes: Track time played, rested XP and money for all characters
@@ -14,14 +14,11 @@
 
 ## X-Credits: Thanks to Riboflavin for creating Titan_AllPlayed that inspired this addon. Thanks to next96, chkid and maknea for the koKR, kuja and AngudBeef1 for deDE, RoyalHawk, Mars1491 and wowuicn for zhCN, s8095324 and Mars1491 for zhTW and Orbital Digital, oXid_FoX and Beltza for frFR localizations.
 ## X-Website: http://www.wowace.com/projects/all-played-laotseu/
-## X-AceForum: http://www.wowace.com/forums/index.php?topic=2042.0
 ## X-RelSite-UI.WoW: 3485
 ## X-RelSite-WoWI: 6158
 ## X-RelSite-Curse: 4814
 ## X-Category: Interface Enhancements
-## X-Date: $Date$
 
-## $Id$
 ## DefaultState: enabled
 
 ## OptionalDeps: Ace3, LibAbacus-3.0, LibCrayon-3.0, !ClassColors, LibQTip-1.0, LibDBIcon-1.0
@@ -33,11 +30,6 @@ LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 embeds.xml
-
-# Libraries that replace the trainted UIDropDownMenu
-libs\DropDownMenu-1.2\UIDropDownMenuTemplates.xml
-libs\DropDownMenu-1.2\UIDropDownMenu.lua
-libs\DropDownMenu-1.2\EasyMenu.lua
 
 AllPlayed-enUS.lua
 AllPlayed-deDE.lua
