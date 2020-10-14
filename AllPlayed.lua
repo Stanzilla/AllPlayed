@@ -372,7 +372,7 @@ function AllPlayed:OnInitialize()
     self.sort_tables_done = false
 
     -- Find the max level
-    self.max_pc_level = _G.MAX_PLAYER_LEVEL_TABLE[min(_G.GetExpansionLevel(), _G.GetAccountExpansionLevel())]
+    self.max_pc_level = GetMaxLevelForPlayerExpansion()
 
     -- Initialize the cache
     InitXPToLevelCache()
