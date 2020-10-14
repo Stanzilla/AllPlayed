@@ -6,54 +6,53 @@ local AP_display_name, AP = ...
 
 local _G = getfenv(0)
 
-local floor = _G.floor
-local geterrorhandler = _G.geterrorhandler
-local gettime = _G.gettime
-local ipairs = _G.ipairs
-local min = _G.min
-local mod = _G.mod
-local next = _G.next
-local pairs = _G.pairs
-local select = _G.select
-local sort = _G.sort
-local time = _G.time
-local tinsert = _G.tinsert
-local tostring = _G.tostring
-local tremove = _G.tremove
-local type = _G.type
-local wipe = _G.wipe
+local floor = floor
+local geterrorhandler = geterrorhandler
+local gettime = gettime
+local ipairs = ipairs
+local min = min
+local mod = mod
+local next = next
+local pairs = pairs
+local select = select
+local sort = sort
+local time = time
+local tinsert = tinsert
+local tostring = tostring
+local tremove = tremove
+local type = type
+local wipe = wipe
 
 -- Debuging helper function
 local function err(msg, ...)
-    _G.geterrorhandler()(msg:format(_G.tostringall(...)) .. " - " .. _G.time())
+    geterrorhandler()(msg:format(tostringall(...)) .. " - " .. time())
 end
 
 -- Non Blizzard globals that need to be localized
-local LibStub = _G.LibStub
+local LibStub = LibStub
 
 -- Revision
-if not _G.AllPlayed_revision then
-    _G.AllPlayed_revision = {}
+if not AllPlayed_revision then
+    AllPlayed_revision = {}
 end
-local AllPlayed_revision = _G.AllPlayed_revision
+local AllPlayed_revision = AllPlayed_revision
 AllPlayed_revision.main = ("$Revision$"):match("(%d+)")
-AllPlayed_revision.toc = _G.GetAddOnMetadata(AP_display_name, "Version"):match("%$Revision:%s(%d+)")
+AllPlayed_revision.toc = GetAddOnMetadata(AP_display_name, "Version"):match("%$Revision:%s(%d+)")
 
--- Backward and forward compatability when playing Cataclysm
-local GetHonorCurrency = _G.GetHonorCurrency or function()
-        return select(2, _G.GetCurrencyInfo(392)) or 0
+local GetHonorCurrency = function()
+        return select(2, C_CurrencyInfo.GetCurrencyInfo(392)) or 0
     end
 
-local GetConquestCurrency = _G.GetConquestCurrency or function()
-        return (_G.GetCurrencyInfo and select(2, _G.GetCurrencyInfo(390))) or 0
+local GetConquestCurrency = function()
+        return select(2, C_CurrencyInfo.GetCurrencyInfo(390)) or 0
     end
 
-local GetJusticeCurrency = _G.GetJusticeCurrency or function()
-        return (_G.GetCurrencyInfo and select(2, _G.GetCurrencyInfo(395))) or 0
+local GetJusticeCurrency = function()
+        return select(2, C_CurrencyInfo.GetCurrencyInfo(395)) or 0
     end
 
-local GetValorCurrency = _G.GetValorCurrency or function()
-        return (_G.GetCurrencyInfo and select(2, _G.GetCurrencyInfo(396))) or 0
+local GetValorCurrency = function()
+        return select(2, C_CurrencyInfo.GetCurrencyInfo(396)) or 0
     end
 
 -- Define static values for the addon
@@ -89,22 +88,22 @@ local AllPlayed = LibStub("AceAddon-3.0"):NewAddon("AllPlayed", "AceEvent-3.0", 
 _G[AP_display_name] = AllPlayed
 
 -- Print function
-local myfullname = _G.GetAddOnMetadata(AP_display_name, "Title")
+local addonFullName = GetAddOnMetadata(AP_display_name, "Title")
 local default_channel = nil
 local function setDefaultChanelForPrint()
     default_channel = nil
-    for i = 1, _G.NUM_CHAT_WINDOWS do
-        local name, _, _, _, _, shown = _G.GetChatWindowInfo(i)
+    for i = 1, NUM_CHAT_WINDOWS do
+        local name, _, _, _, _, shown = GetChatWindowInfo(i)
         if
             not default_channel and name and shown and
-                (name:lower() == AP_display_name:lower() or name:lower() == myfullname:lower())
+                (name:lower() == AP_display_name:lower() or name:lower() == addonFullName:lower())
          then
             default_channel = i
         end
     end
     if not default_channel then
-        for i = 1, _G.NUM_CHAT_WINDOWS do
-            local name, _, _, _, _, shown = _G.GetChatWindowInfo(i)
+        for i = 1, NUM_CHAT_WINDOWS do
+            local name, _, _, _, _, shown = GetChatWindowInfo(i)
             if not default_channel and name and shown and name:lower() == "output" then
                 default_channel = i
             end
@@ -118,7 +117,7 @@ function AllPlayed:Print(message, ...)
             ("|cff00dbba" .. AP_display_name .. "|r: " .. message):format(...)
         )
     else
-        _G.SELECTED_CHAT_FRAME:AddMessage(("|cff00dbba" .. AP_display_name .. "|r: " .. message):format(...))
+        SELECTED_CHAT_FRAME:AddMessage(("|cff00dbba" .. AP_display_name .. "|r: " .. message):format(...))
     end
 end
 
@@ -320,15 +319,15 @@ function AllPlayed:OnInitialize()
     --self:SetDebugging(true) -- to have debugging through your whole app.
 
     -- Initialize the SaveVariables table if it's the first time that AllPlayed is loaded
-    _G.AllPlayedDB = _G.AllPlayedDB or {}
-    local AllPlayedDB = _G.AllPlayedDB
+    AllPlayedDB = AllPlayedDB or {}
+    local AllPlayedDB = AllPlayedDB
 
     -- Register the command line
     -- /ap and /allplayed will open the blizzard interface panel
-    _G.SLASH_ALLPLAYED_CONFIG1 = L["/ap"]
-    _G.SLASH_ALLPLAYED_CONFIG2 = L["/allplayed"]
-    _G.SlashCmdList["ALLPLAYED_CONFIG"] = function()
-        _G.InterfaceOptionsFrame_OpenToCategory(AP_display_name)
+    SLASH_ALLPLAYED_CONFIG1 = L["/ap"]
+    SLASH_ALLPLAYED_CONFIG2 = L["/allplayed"]
+    SlashCmdList["ALLPLAYED_CONFIG"] = function()
+        InterfaceOptionsFrame_OpenToCategory(AP_display_name)
     end
 
     -- Conversion of old data
@@ -405,14 +404,14 @@ function AllPlayed:OnEnable()
     self:RegisterEvent("BAG_UPDATE", "EventHandlerOnlySort")
 
     -- Initialize values that don't change between reloads
-    self.faction, self.loc_faction = _G.UnitFactionGroup("player")
-    self.realm = _G.GetRealmName()
-    self.pc = _G.UnitName("player")
+    self.faction, self.loc_faction = UnitFactionGroup("player")
+    self.realm = GetRealmName()
+    self.pc = UnitName("player")
 
     -- Initial update of values
 
     -- Class colours
-    for classname in pairs(_G.RAID_CLASS_COLORS) do
+    for classname in pairs(RAID_CLASS_COLORS) do
         CLASS_COLOURS[classname] = AllPlayed.GetClassHexColour(classname)
     end
 
@@ -442,10 +441,10 @@ function AllPlayed:OnEnable()
     self:ScheduleTimer("RequestTimePlayed", 10)
 
     -- Set the callback for !ClassColor if present
-    if _G.CUSTOM_CLASS_COLORS then
-        _G.CUSTOM_CLASS_COLORS:RegisterCallback(
+    if CUSTOM_CLASS_COLORS then
+        CUSTOM_CLASS_COLORS:RegisterCallback(
             function()
-                for class in pairs(_G.CUSTOM_CLASS_COLORS) do
+                for class in pairs(CUSTOM_CLASS_COLORS) do
                     CLASS_COLOURS[class] = AllPlayed.GetClassHexColour(class)
                 end
 
@@ -465,7 +464,7 @@ function AllPlayed:OnEnable()
     self.timer = self:ScheduleRepeatingTimer("MyUpdate", self:GetOption("refresh_rate"))
 
     -- Create a frame with an OnUpdate event to deal with the disposal of the tooltip created for LDB
-    self.OnUpdate_frame = _G.CreateFrame("frame")
+    self.OnUpdate_frame = CreateFrame("frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate")
     self.OnUpdate_frame:Hide() -- to prevent the OnUpdate until it is needed.
     self.elapsed = 0
     self.OnUpdate_frame:SetScript(
@@ -527,7 +526,7 @@ function AllPlayed:OnDataUpdate()
     --self:Debug("AllPlayed:OnDataUpdate()")
 
     -- Update the data that may have changed but are not tracked by an event
-    self.db.global.data[self.faction][self.realm][self.pc].is_resting = _G.IsResting()
+    self.db.global.data[self.faction][self.realm][self.pc].is_resting = IsResting()
 
     -- Recompute the totals
     self:ComputeTotal()
@@ -1334,7 +1333,7 @@ end
 -- Detect faction change and remove old character entry
 function AllPlayed:DetectFactionChange()
     for faction in pairs(self.db.global.data) do
-        self.faction = _G.UnitFactionGroup("player")
+        self.faction = UnitFactionGroup("player")
 
         if
             faction ~= self.faction and self.db.global.data[faction] and self.db.global.data[faction][self.realm] and
@@ -1365,28 +1364,28 @@ end
 -- is not called very often, I don't see the needs to do more special cases
 function AllPlayed:SaveVar()
     --self:Debug("AllPlayed:SaveVar()")
-    local unit_xp_max = _G.UnitXPMax("player")
+    local unit_xp_max = UnitXPMax("player")
 
     -- Fill some of the SaveVariables
     local pc = self.db.global.data[self.faction][self.realm][self.pc]
     -- Make sure that rested_xp is not nil
-    pc.rested_xp = _G.GetXPExhaustion() or 0
-    pc.class_loc, pc.class = _G.UnitClass("player")
-    pc.race_loc, pc.race = _G.UnitRace("player")
-    pc.level = _G.UnitLevel("player")
-    pc.xp = _G.UnitXP("player")
-    pc.guild = _G.GetGuildInfo("player")
+    pc.rested_xp = GetXPExhaustion() or 0
+    pc.class_loc, pc.class = UnitClass("player")
+    pc.race_loc, pc.race = UnitRace("player")
+    pc.level = UnitLevel("player")
+    pc.xp = UnitXP("player")
+    pc.guild = GetGuildInfo("player")
     -- Inner Peace, the Pandaren racial passive, allow for twice the normal amount of rested XP
-    pc.max_rested_xp = unit_xp_max * 1.5 * (1 + (_G.IsSpellKnown(107074) and 1 or 0))
+    pc.max_rested_xp = unit_xp_max * 1.5 * (1 + (IsSpellKnown(107074) and 1 or 0))
     pc.last_update = time()
-    pc.is_resting = _G.IsResting()
-    pc.zone_text = _G.GetZoneText()
-    pc.subzone_text = _G.GetSubZoneText()
-    pc.ilevel = _G.GetAverageItemLevel()
+    pc.is_resting = IsResting()
+    pc.zone_text = GetZoneText()
+    pc.subzone_text = GetSubZoneText()
+    pc.ilevel = GetAverageItemLevel()
     pc.conquest_points = GetConquestCurrency()
     pc.justice_points = GetJusticeCurrency()
     pc.valor_points = GetValorCurrency()
-    pc.period_valor_points, pc.max_period_valor_points = select(7, _G.GetLFGDungeonRewardCapBarInfo(301))
+    pc.period_valor_points, pc.max_period_valor_points = select(7, GetLFGDungeonRewardCapBarInfo(301))
 
     -- To fix a bug in 5.4.7 where the rested XP is bigger then the remaining XP needed to level to 90
     if pc.level == self.max_pc_level - 1 then
@@ -1395,14 +1394,14 @@ function AllPlayed:SaveVar()
 
     -- Verify that the XPToNextLevel return the proper value and store the value if it is not the case
     if unit_xp_max ~= 0 and unit_xp_max ~= XPToNextLevel(pc.level) then
-        local _, build_version = _G.GetBuildInfo()
+        local _, build_version = GetBuildInfo()
         self.db.global.cache.XPToNextLevel[build_version][pc.level] = unit_xp_max
     end
 
     --self:Print("AllPlayed:SaveVar() Zone: ->%s<- ->%s<-", GetZoneText(), self.db.global.data[self.faction][self.realm][self.pc].zone_text)
 
     -- Make sure that coin is not nil
-    pc.coin = _G.GetMoney() or 0
+    pc.coin = GetMoney() or 0
 
     -- PvP Stuff
     self:SaveVarHonor()
@@ -1416,7 +1415,7 @@ function AllPlayed:SaveVarHonor()
     local pc = self.db.global.data[self.faction][self.realm][self.pc]
 
     pc.honor_points = GetHonorCurrency()
-    pc.honor_kills, pc.highest_rank = _G.GetPVPLifetimeStats()
+    pc.honor_kills, pc.highest_rank = GetPVPLifetimeStats()
 end
 
 -- Set the value seconds_played that will be saved in the save variables
@@ -1666,8 +1665,8 @@ do -- Time Played functions closure
 
     -- Time Played display function that is hooked to prevent chat spam from AllPlayed
     -- Thanks to Phanx for the code
-    local o = _G.ChatFrame_DisplayTimePlayed
-    _G.ChatFrame_DisplayTimePlayed = function(...)
+    local o = ChatFrame_DisplayTimePlayed
+    ChatFrame_DisplayTimePlayed = function(...)
         if requesting then
             requesting = false
             return
@@ -1680,7 +1679,7 @@ do -- Time Played functions closure
         -- We only send the event if the message has not been seen for 10 seconds
         if time() - self.db.global.data[self.faction][self.realm][self.pc].seconds_played_last_update > 10 then
             requesting = true
-            _G.RequestTimePlayed()
+            RequestTimePlayed()
         end
     end
 end -- Time Played functions closure
@@ -1712,18 +1711,18 @@ end
 -- The result is a string with embedded coin icons
 function FormatMoney(money)
     local goldString, silverString, copperString
-    local gold = floor(money / (_G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD))
-    local silver = floor((money - (gold * _G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD)) / _G.COPPER_PER_SILVER)
-    local copper = mod(money, _G.COPPER_PER_SILVER)
+    local gold = floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD))
+    local silver = floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
+    local copper = mod(money, COPPER_PER_SILVER)
 
     if not AllPlayed:GetOption("use_icons") then
-        goldString = gold .. C:Gold(_G.GOLD_AMOUNT_SYMBOL)
-        silverString = silver .. C:Silver(_G.SILVER_AMOUNT_SYMBOL)
-        copperString = copper .. C:Copper(_G.COPPER_AMOUNT_SYMBOL)
+        goldString = gold .. C:Gold(GOLD_AMOUNT_SYMBOL)
+        silverString = silver .. C:Silver(SILVER_AMOUNT_SYMBOL)
+        copperString = copper .. C:Copper(COPPER_AMOUNT_SYMBOL)
     else
-        goldString = _G.GOLD_AMOUNT_TEXTURE:format(gold, 0, 0)
-        silverString = _G.SILVER_AMOUNT_TEXTURE:format(silver, 0, 0)
-        copperString = _G.COPPER_AMOUNT_TEXTURE:format(copper, 0, 0)
+        goldString = GOLD_AMOUNT_TEXTURE:format(gold, 0, 0)
+        silverString = SILVER_AMOUNT_TEXTURE:format(silver, 0, 0)
+        copperString = COPPER_AMOUNT_TEXTURE:format(copper, 0, 0)
     end
 
     local moneyString = ""
@@ -2357,11 +2356,11 @@ function InitXPToLevelCache(game_version, build_version)
     local date, toc_number
 
     if game_version == nil then
-        game_version, build_version, date, toc_number = _G.GetBuildInfo()
+        game_version, build_version, date, toc_number = GetBuildInfo()
     elseif build_version == nil then
-        build_version, date, toc_number = select(2, _G.GetBuildInfo())
+        build_version, date, toc_number = select(2, GetBuildInfo())
     else
-        date, toc_number = select(3, _G.GetBuildInfo())
+        date, toc_number = select(3, GetBuildInfo())
     end
 
     -- Values for the 7.1.0 patch
@@ -2582,17 +2581,17 @@ end
 -- #################################################################################
 
 function AllPlayed.GetClassHexColour(class)
-    if (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class]) then
+    if (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class]) then
         return ("%02x%02x%02x"):format(
-            _G.CUSTOM_CLASS_COLORS[class].r * 255,
-            _G.CUSTOM_CLASS_COLORS[class].g * 255,
-            _G.CUSTOM_CLASS_COLORS[class].b * 255
+            CUSTOM_CLASS_COLORS[class].r * 255,
+            CUSTOM_CLASS_COLORS[class].g * 255,
+            CUSTOM_CLASS_COLORS[class].b * 255
         )
-    elseif (_G.RAID_CLASS_COLORS and _G.RAID_CLASS_COLORS[class]) then
+    elseif (RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]) then
         return ("%02x%02x%02x"):format(
-            _G.RAID_CLASS_COLORS[class].r * 255,
-            _G.RAID_CLASS_COLORS[class].g * 255,
-            _G.RAID_CLASS_COLORS[class].b * 255
+            RAID_CLASS_COLORS[class].r * 255,
+            RAID_CLASS_COLORS[class].g * 255,
+            RAID_CLASS_COLORS[class].b * 255
         )
     else
         return "a1a1a1"
